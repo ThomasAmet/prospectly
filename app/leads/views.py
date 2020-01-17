@@ -5,7 +5,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 from datetime import datetime
-from flask import render_template, redirect, url_for, flash, request, session
+from flask import render_template, redirect, url_for, flash, request, session, make_response
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 from app.auth.views import admin_login_required
@@ -99,7 +99,16 @@ def query():
 @leads.route('/telechargement')
 @login_required
 def download():
-	return render_template('/')
+	# Transform session value into dataframe and reorder the columns
+	df = pd.DataFrame(session['todays_output'])
+	df = df[['company_name', 'company_activity_field', 'company_address', 'company_postal_code', 'company_city', 'company_email', 'company_email_bcc', 'company_phone', 'owner_firstname', 'owner_lastname']]
+	# Make the response to return a csv
+	output = make_response(df.to_csv(index=False, encoding='utf-8'))
+	output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+	output.headers["Content-Type"] = "text/csv"
+	# Drop the session variable
+	session.pop('todays_output', None)
+	return output
 
 
 

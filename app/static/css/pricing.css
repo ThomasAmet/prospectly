@@ -1,0 +1,122 @@
+.hide{ display: none;}
+/* keep hover effect inside the card item*/
+.card-item{padding: 40px 30px; position: relative; border-radius: 7px; overflow: hidden; z-index: 9;}
+/* card style */
+.card-item.style-4{	border-radius: 50% 70% 90% 50%;	overflow: hidden; padding: 70px 70px 70px 50px; z-index: 9;}
+/* first card background style */
+.card-item.style-4.look-1, .card-item.style-4.look-1 .title .fa{background: linear-gradient(-45deg,#f403d1,#64b5f6);}
+/*.card-item.style-4.look-1, .card-item.style-4.look-1 .title .fa{background: linear-gradient(-45deg,#ffec61,#f321d7);}*/
+/* second card background style */
+/*.card-item.style-4.look-2, .card-item.style-4.look-2 .title .fa{background: linear-gradient(-45deg,#24ff72,#9a4eff);}*/
+.card-item.style-4.look-2, .card-item.style-4.look-2 .title .fa{background: linear-gradient(-45deg,#9a4eff,#64b5f6);}
+/* card logo style */
+.card-item .title .fa{font-size: 60px; color:#fff; width: 100px; height: 100px; border-radius:  50%;text-align: center;
+  line-height: 100px; -webkit-box-shadow: 0 10px 10px rgba(0,0,0,.1) ; box-shadow: 0 10px 10px rgba(0,0,0,.1);}
+/* card title style */
+.card-item .title h2{ position: relative; margin: 10px 0 0; padding: 0; color:rgba(28, 29, 62, 0.9);font-size: 30px;
+ z-index: -1;}
+.card-item .price, .option{position: relative; z-index: -1;}
+.card-item .price h4{margin: 0; padding: 25px 0 30px 0; color:rgba(28, 29, 62, 0.9); font-size: 60px;}
+
+.card-item .option ul{margin: 0; padding: 0;}
+
+/* style for the plan options description	*/
+.card-item  .option ul li{margin:0 0 10px; padding: 0; list-style: none; color: #1c1d3e; opacity: .8; font-size: 16px;}
+
+.card-item a{position: relative; z-index: 2; background: #fff; opacity: .8;  color: black; width: 150px; height: 40px;
+  line-height: 40px; border-radius: 15px; display: block; text-align: center; margin: 20px auto 0 ; font-size: 16px;
+  cursor: pointer; -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .1);box-shadow: 0 5px 10px rgba(0, 0, 0, .1);}
+
+/* turn font bold when hover for links*/
+.card-item:hover a{text-decoration: none;  font-weight: 500; opacity: 1;}
+/* turn font-color white when hover*/
+.card-item:hover .title h2,.card-item:hover .option ul li, .card-item:hover .option ul li i, 
+.card-item:hover .price h4{color: #ffffff; opacity: 1;}
+
+/* background image when hover*/
+.card-item:after{content: ""; display: block; height: 100%; left: 0; position: absolute; top: 0; opacity:0; 
+	width: 100%; z-index: -1; background: url(static/images/pattern/04.png) no-repeat 0 0; background-size: cover;}
+/* opacity of the background when hover*/
+.card-item:hover:after{	opacity: 0.2;}
+  /* style for the transparent layer on top of the background*/
+.card-item::before{position:absolute; transform: scale(0); border-radius: 100%; background: rgba(255, 255, 255, .1);
+	content: ""; height: 40%; width: 100%; bottom: 0; left: 0; z-index: 1; -webkit-transform: skewY(-5deg) scale(1.5);
+    transform: skewY(-5deg) scale(1.5);}
+/* transform the transparent background when hover to scale*/
+.card-item:hover::before{transform: scale(2);}
+
+/* ======================================*/
+/* 			Pricing Switch Toggler		 */
+/* ======================================*/
+
+.toggler, .toggle {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 10px;
+}
+/* toggler is the class of the text in between the button*/
+.toggler {
+  font-size: 16px;	
+  /*color:  rgb(95, 95, 95);*/
+  transition: 1s;
+  font-weight: 400;
+  opacity: .4;
+}
+
+.toggler--is-active {
+  font-size: 18px;	
+  font-weight: 400;
+  opacity: 1;
+}
+
+/*toggle represents the frame of the button*/
+.toggle {
+  position: relative;
+  width: 70px;
+  height: 35px;
+  border-radius: 100px;
+  background-color: rgb(118, 148, 250);
+  overflow: hidden;
+  box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.05);
+}
+
+/* style for the actual checkbox that is behind*/
+.check {
+  position: absolute;
+  display: block;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 6;
+}
+/* style for the class 'switch' (white part of the toggle button) when the checkbox is unchecked*/
+.switch {
+  top: 2px;
+  bottom: 2px;
+  position: absolute;
+  left: 2px;
+  right: 55%;
+  background-color: #fff;
+  border-radius: 100px;
+  z-index: 1;
+  transition: 0.4s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+  transition-property: left, right;
+  transition-delay: 0s, .08s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+/* style for the class 'switch' (white part of the toggle button) when the checkbox is checked*/
+.check:checked~ .switch {
+  right: 2px;
+  /*left is the part of*/
+  left: 55%;
+  transition: 0.4s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+  transition-property: left, right;
+  transition-delay: .08s, 0s;
+}
+
+
+
+

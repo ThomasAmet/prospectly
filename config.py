@@ -1,0 +1,149 @@
+
+import os
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+# There are three different ways to store the data in the application.
+# You can choose 'datastore', 'cloudsql', or 'mongodb'. Be sure to
+# configure the respective settings for the one you choose below.
+# You do not have to configure the other data backends. If unsure, choose
+# 'datastore' as it does not require any additional configuration.
+DATA_BACKEND = 'cloudsql'
+
+# Google Cloud Project ID. This can be found on the 'Overview' page at
+# https://console.developers.google.com
+PROJECT_ID = 'prospectly-app'
+
+# Set this value to the Cloud SQL connection name, e.g.
+#   "project:region:cloudsql-instance".
+# You must also update the value in app.yaml.
+CLOUDSQL_CONNECTION_NAME = 'prospectly-app:europe-west1:mysql-instance'
+
+
+
+class BaseConfig():
+    SECRET_KEY = os.environ.get('SECRET_KEY') 
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAX_CONTENT_LENGTH = 0.2 * 1024 * 1024 # limit size of uploaded file to 200kb
+    UPLOAD_FOLDER = 'csv/uploads/'
+    CSP = {
+    # Fonts from fonts.google.com
+    'font-src': '\'self\' themes.googleusercontent.com *.gstatic.com',
+    # <iframe> based embedding for Maps and Youtube.
+    'frame-src': '\'self\' www.google.com www.youtube.com',
+    # Assorted Google-hosted Libraries/APIs.
+    'script-src': ['\'self\' ajax.googleapis.com *.googleanalytics.com '
+                  '*.google-analytics.com stackpath.bootstrapcdn.com'],
+    # Used by generated code from http://www.google.com/fonts
+    'style-src': '\'self\' ajax.googleapis.com fonts.googleapis.com '
+                 '*.gstatic.com stackpath.bootstrapcdn.com',
+    'default-src': '\'self\' *.gstatic.com',
+	}
+    # MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
+	# MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
+	# MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in 'true', 'on', '1']
+    # MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    # MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    # FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
+    # FLASKY_MAIL_SENDER = 'Flasky Admin <flasky@example.com>'
+    # FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
+
+
+class TestConfig(BaseConfig):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test-config.db')
+
+
+class DevelopmentConfig(BaseConfig):
+	DEBUG = True
+	CLOUDSQL_USER = 'thomas_admin'
+	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD')
+	
+	# CloudSQL & SQLAlchemy configuration
+	CLOUDSQL_DATABASE = 'prospectly_development_database'
+	# To start the proxy, use:
+	#
+	#	$ cloud_sql_proxy -instances=your-connection-name=tcp:3306
+	#
+	LOCAL_SQLALCHEMY_DATABASE_URI = (
+		'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}').format(
+		user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD, database=CLOUDSQL_DATABASE
+		)
+	# When running on App Engine a unix socket is used to connect to the cloudsql instance.
+	LIVE_SQLALCHEMY_DATABASE_URI = (
+		'mysql+pymysql://{user}:{password}@localhost/{database}'
+		'?unix_socket=/cloudsql/{connection_name}').format(
+		user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD,
+		database=CLOUDSQL_DATABASE, connection_name=CLOUDSQL_CONNECTION_NAME)
+
+	if os.environ.get('GAE_INSTANCE'):
+		SQLALCHEMY_DATABASE_URI = LIVE_SQLALCHEMY_DATABASE_URI
+	else:
+		SQLALCHEMY_DATABASE_URI = LOCAL_SQLALCHEMY_DATABASE_URI
+		
+# class DevelopmentConfig(BaseConfig):
+# 	DEBUG = True
+
+# 	# CloudSQL & SQLAlchemy configuration
+# 	# Replace the following values the respective values of your Cloud SQL
+# 	# instance.
+# 	CLOUDSQL_DATABASE = 'prospectly_development_database'
+# 	# The CloudSQL proxy is used locally to connect to the cloudsql instance.
+# 	# To start the proxy, use:
+# 	#
+# 	#   $ cloud_sql_proxy -instances=your-connection-name=tcp:3306
+# 	#
+# 	# Port 3306 is the standard MySQL port. If you need to use a different port,
+# 	# change the 3306 to a different port number.
+# 	# Alternatively, you could use a local MySQL instance for testing.
+
+# 	LOCAL_SQLALCHEMY_DATABASE_URI = ('mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}').format(
+# 		'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}').format()
+# 	# When running on App Engine a unix socket is used to connect to the cloudsql
+# 	# instance.
+# 	LIVE_SQLALCHEMY_DATABASE_URI = ('mysql+pymysql://{user}:{password}@localhost/{database}'
+# 		'?unix_socket=/cloudsql/{connection_name}').format(
+# 		user=gcp_config['CLOUDSQL_USER'], password=gcp_config['CLOUDSQL_PASSWORD'],
+# 		database=gcp_config['CLOUDSQL_DATABASE'], connection_name=CLOUDSQL_CONNECTION_NAME)
+
+# 	if os.environ.get('GAE_INSTANCE'):
+# 		SQLALCHEMY_DATABASE_URI = LIVE_SQLALCHEMY_DATABASE_URI
+# 	else:
+# 		SQLALCHEMY_DATABASE_URI = LOCAL_SQLALCHEMY_DATABASE_URI
+
+# class ProductionConfig(BaseConfig):
+#     # CloudSQL & SQLAlchemy configuration
+# 	# Replace the following values the respective values of your Cloud SQL
+# 	# instance.
+
+# 	CLOUDSQL_USER ='thomas_admin',
+# 	CLOUDSQL_PASSWORD = 'difficult-password-to-guess',
+# 	CLOUDSQL_DATABASE = 'prospectly_database'
+
+
+#     # The CloudSQL proxy is used locally to connect to the cloudsql instance.
+# 	# To start the proxy, use:
+# 	#
+# 	#   $ cloud_sql_proxy -instances=your-connection-name=tcp:3306
+# 	#
+# 	# Port 3306 is the standard MySQL port. If you need to use a different port,
+# 	# change the 3306 to a different port number.
+
+# 	# Alternatively, you could use a local MySQL instance for testing.
+# 	LOCAL_SQLALCHEMY_DATABASE_URI = (
+# 	    'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}').format(
+# 	        user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD,
+# 	        database=CLOUDSQL_DATABASE)
+
+#     # When running on App Engine a unix socket is used to connect to the cloudsql
+# 	# instance.
+# 	LIVE_SQLALCHEMY_DATABASE_URI = (
+# 	    'mysql+pymysql://{user}:{password}@localhost/{database}'
+# 	    '?unix_socket=/cloudsql/{connection_name}').format(
+# 	        user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD,
+# 	        database=CLOUDSQL_DATABASE, connection_name=CLOUDSQL_CONNECTION_NAME)
+
+#     if os.environ.get('GAE_INSTANCE'):
+#         SQLALCHEMY_DATABASE_URI = LIVE_SQLALCHEMY_DATABASE_URI
+#     else:
+#         SQLALCHEMY_DATABASE_URI = LOCAL_SQLALCHEMY_DATABASE_URI

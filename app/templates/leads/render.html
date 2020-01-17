@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+</head>
+<body>
+	{% for message in get_flashed_messages() %}
+		<div class="alert alert-warning">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			{{ message }}
+		</div>
+	{% endfor %}
+	<form action="{{ url_for('leads.import_csv') }}" method="post">
+		<input type="submit" id="import-btn" name='btn' value="Retour"/>
+		<input type="submit" id="import-btn" name='btn' value="Annuler"/>	
+	</form>
+	<table>
+		<thead>
+		    <tr>
+	        {% for col in column_names %}
+	        <th>{{ col }}</th>
+	        {% endfor %}
+	    	</tr>
+		</thead>
+		<tbody>
+			
+		</tbody>
+	    {% for row in row_data %}
+	    	<tr>
+	    		{% for elt in row %}
+	    		<td>{{ elt }}</td>
+	    		{% endfor %}
+	    	</tr>
+	    {% endfor %}
+	    <!-- <tr>
+	    {% for key, value in zip(column_names, row) %}
+        {% if col == 'company_name' %}
+        <td>
+            <button type="submit" value={{ row_ }} name="person_id" form="patient_form" class="patient_button">
+                {{ row_ }}
+            </button>
+        </td>
+        {% else %}
+        <td>{{row_}}</td>
+        {% endif %}
+        {% endfor %}
+	    </tr> -->
+	</table>
+
+
+</body>
+
+</html>

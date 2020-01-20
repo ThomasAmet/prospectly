@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
-
+# from db import Column, String, Integer, Boolean, DateTime, ForeignKey, relationship, backref
 
 
 # A function called by the flask-login extension when it needs to load a user based on its id
@@ -14,7 +14,9 @@ def load_user(user_id):
 
 
 def from_sql(row):
-    """Translates a SQLAlchemy model instance into a dictionary"""
+    """
+    	Translates a SQLAlchemy model instance into a dictionary
+    """
     data = row.__dict__.copy()
     data['id'] = row.id
     data.pop('_sa_instance_state')
@@ -42,7 +44,7 @@ def distinct_activities_field():
 class Subscription(db.Model):
 	__tablename__ = 'subscriptions'
 	plan_id = db.Column(db.Integer, db.ForeignKey('plans.id'), primary_key=True)# one side
-	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)# onde side
+	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)# one side
 	yearly = db.Column(db.Boolean, default=False)
 	subscription_date = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -62,9 +64,9 @@ class Subscription(db.Model):
 
 class LeadRequest(db.Model):
 	__tablename__ = 'lead_requests'
-	lead_id = db.Column(db.Integer, db.ForeignKey('leads.id'), primary_key=True)# one side
+	lead_id = db.Column(db.Integer, db.ForeignKey('leads.id'), primary_key=True)# one-to-many (one side)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)# one side
-	query_date = db.Column(db.DateTime, default=datetime.utcnow())
+	query_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def exists(self):
 		request = LeadRequest.query.filter(LeadRequest.lead_id==self.lead_id, LeadRequest.user_id==self.user_id).first()
@@ -90,8 +92,11 @@ class User(db.Model, UserMixin):
 	admin = db.Column(db.Boolean, default=False)
 	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
 	leads_requested = db.relationship('LeadRequest', foreign_keys=[LeadRequest.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
-	customers = db.relationship('Customer', backref='user', lazy='dynamic')# many side 
-	
+	contacts = db.relationship('Contact', backref='user', lazy='dynamic')# one-to-many (many side)
+	opportunities = db.relationship('Opportunity', backref='user', lazy='dynamic')# one-to-many (many-side)
+	commercial_stages = db.relationship('CommercialStage', backref='user', lazy='dynamic')# one-to-many (many-side)
+	tasks =  db.relationship('Task', backref='user', lazy='dynamic')# many-to-one with Task (many-side)
+
 	@validates(first_name, last_name)
 	def capitalize(self, key, value):
 		return value.capitalize()
@@ -131,10 +136,11 @@ class Plan(db.Model):
 		return "<{}>".format(self.plan_name)
 
 
+
 class Lead(db.Model):
 	__tablename__ = 'leads'
 	id = db.Column(db.Integer, primary_key=True)
-	creation_date = db.Column(db.DateTime, default=datetime.utcnow())
+	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	company_name = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	company_address = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	company_postal_code = db.Column(db.String(30), index=False, unique=False, nullable=True)
@@ -158,10 +164,21 @@ class Lead(db.Model):
 
 
 
-class Customer(db.Model):
-	__tablename__ = 'customers'
+class CommercialStageStep(db.Model):
+	__tablename__ = 'commercial_stage_steps'	
+	opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunities.id'), primary_key=True)# pk
+	commercial_stage_id = db.Column(db.Integer, db.ForeignKey('commercial_stages.id'), primary_key=True)# pk
+	status_id = db.Column(db.Integer, db.ForeignKey('status.id'), primary_key=True)# many-to-one (one side)
+	note_id = db.Column(db.Integer, db.ForeignKey('notes.id'))
+	task_id = db.Column(db.Integer, db.ForeignKey('tasks.id')) # task activated only when status == 'a faire'
+	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+
+class Contact(db.Model):
+	__tablename__ = 'contacts'
 	id = db.Column(db.Integer, primary_key=True)
-	creation_date = db.Column(db.DateTime, default=datetime.utcnow())
+	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	company_name = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	company_address = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	company_postal_code = db.Column(db.String(30), index=False, unique=False, nullable=True)
@@ -172,10 +189,63 @@ class Customer(db.Model):
 	company_activity_field = db.Column(db.String(60), index=True, unique=False, nullable=False)
 	owner_firstname	= db.Column(db.String(60), index=True, unique=False, nullable=True)
 	owner_lastname = db.Column(db.String(60), index=True, unique=False, nullable=True)
+	user_id = db.Column(db.Integer, db.ForeignKey('users.id')) # one-side of a many-to-one with User 
+	opportunities = db.relationship('Opportunity', backref='contact', lazy='dynamic') # one-to-many (many side)
+
+
+
+class Opportunity(db.Model):
+	__tablename__ = 'opportunities'
+	id = db.Column(db.Integer, primary_key=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
-
-
-# class CustomerStatus(db.Model):
+	contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'))
+	name = db.Column(db.String(120), nullable=False)
+	euro_value = db.Column(db.Numeric(6,2))
+	commercial_stages = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.opportunity_id], backref=db.backref('opportunity', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with CommercialStage (many side of a many-to-one with CommercialStageStep)
+	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
+	deal_closed = db.Column(db.Boolean, default=False)
+	closing_date = db.Column(db.DateTime)
 	
+
+
+class CommercialStage(db.Model):
+	__tablename__ = 'commercial_stages'
+	id = db.Column(db.Integer, primary_key=True)
+	stage_steps = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.commercial_stage_id], backref=db.backref('commercial_stage', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with Opportunity (many side of a many-to-one with CommercialStageStep)
+	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True) # one-side
+	name = db.Column(db.String(60))
+	closing_perc = db.Column(db.Numeric(2,2))
+	private = db.Column(db.Boolean(), default=True)
+
+
+
+class Task(db.Model):
+	__tablename__ = 'tasks'
+	id = db.Column(db.Integer, primary_key=True)
+	user_id = db.Column(db.Integer, db.ForeignKey('users.id')) # many-to-one with User (one side)
+	stage_step = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.task_id], backref=db.backref('task', uselist=False))# one-to-one
+	task_title = db.Column(db.String(60))
+	task_content = db.Column(db.String(240))
+	priority = db.Column(db.String(30))
+	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
+	due_date = db.Column(db.DateTime)
+	last_update = db.Column(db.DateTime)
+
+
+
+class Note(db.Model):
+	__tablename__ = 'notes'
+	id = db.Column(db.Integer, primary_key=True)
+	stage_step = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.note_id], backref=db.backref('note', uselist=False))# one-to-one  
+	note_title = db.Column(db.String(60))
+	note_content = db.Column(db.String(240))
+	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
+	last_update = db.Column(db.DateTime)
+
+
+
+class Status(db.Model):
+	__tablename__ = 'status'
+	id = db.Column(db.Integer, primary_key=True)
+	title = db.Column(db.String(30), unique=True)	
 

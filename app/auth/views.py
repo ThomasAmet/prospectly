@@ -69,9 +69,10 @@ def logout():
 	flash('You have been logged out.')
 	return redirect(url_for('main.home'))
 
-
-
 class AdminMyIndexView(AdminIndexView):
+	""" 
+		Create a CustomAdminIndeView based on AdminIndexView in order to be accessible only by user who are admin 
+	"""
 	def is_accessible(self):
 		return current_user.is_authenticated and current_user.is_admin()
 
@@ -81,3 +82,5 @@ class AdminHomeView(BaseView):
 	@expose('/')
 	def index(self):
 		return self.render('main/home.html')
+
+

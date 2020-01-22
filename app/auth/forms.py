@@ -12,24 +12,23 @@ csrf = CSRFProtect()
 
 class LoginForm(FlaskForm):
 	email = StringField('Email:',
-						validators=[DataRequired(message='You must provide an email'),
+						validators=[DataRequired(message="Il faut un email pour se connecter."),
 									Email(message='Oups... Cet email est invalide.')])
 	password = PasswordField('Mot de passe:', validators=[DataRequired()])
 	remember_me = BooleanField('Se souvenir de moi')
-	submit = SubmitField('Se connecter')
 
 
 
 class RegistrationForm(FlaskForm):
-	first_name = StringField('Prenom', validators=[DataRequired(), Regexp('^[A-Za-z][A-Za-z]*$', 0,
-		'Usernames must have only letters')])
-	last_name = StringField('Nom', validators=[DataRequired(), Regexp('^[A-Za-z][A-Za-z]*$', 0,
-    	'Usernames must have only letters')])
-	email = StringField('Email', validators=[DataRequired(), Email(message='This is not an email format')])
-	password = PasswordField('Password', validators=[DataRequired()])
-	password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match.')])
-	submit = SubmitField('Register')
-
+	first_name = StringField('Prenom', validators=[DataRequired(message="Merci de remplir votre preom"), Regexp('^[A-Za-z][A-Za-z]*$', 0,
+		'Les prenoms peuvent seulement contenir des lettres')])
+	last_name = StringField('Nom', validators=[DataRequired(message="Merci de remplir votre nom"), Regexp('^[A-Za-z][A-Za-z]*$', 0,
+    	'Les noms peuvent seulement contenir des lettres')])
+	email = StringField('Email', validators=[DataRequired("Il faut un email pour s'inscrire."), Email(message='Oups... Cet email est invalide.')])
+	password = PasswordField('Password', validators=[DataRequired("Aucun mot de passe detecte.")])
+	password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password', message='Les mots de passse ne correspondent pas.')])
+	mobile = StringField('Telephone Mobile (06 ou 07)', validators=[DataRequired(message='Merci de remplir votre numero mobile.'), Regexp('^((06)|(07))[0-9]{8}$', 0, message='Oups ce numero est invalide')])
+	
 	# When a form has a method with prefix 'validate', the method is invoked along with regular validators of the field the validate function is applied on 
 	def validate_first_name(self, first_name):
 		'''
@@ -39,7 +38,7 @@ class RegistrationForm(FlaskForm):
 		username = str(first_name.data).capitalize() + '_' + str(self.last_name.data).capitalize()
 		user = User.query.filter_by(username=username).first()
 		if user is not None:
-			raise ValidationError('Please use a different name.')
+			raise ValidationError("Ce nom d'utilisateur est deja pris.")
 
 	def validate_last_name(self, last_name):
 		'''
@@ -48,7 +47,7 @@ class RegistrationForm(FlaskForm):
 		username = str(self.first_name.data).capitalize() + '_' + str(last_name.data).capitalize()
 		user = User.query.filter_by(username=username).first()
 		if user is not None:
-			raise ValidationError('Please use a different name.')
+			raise ValidationError("Merci de changer le prenom ou le nom.")
 
 	def validate_email(self, email):
 		'''
@@ -56,4 +55,4 @@ class RegistrationForm(FlaskForm):
 		'''
 		user = User.query.filter_by(email=email.data).first()
 		if user is not None:
-			raise ValidationError('Please use a different email address.')
+			raise ValidationError()#'Please use a different email address.'

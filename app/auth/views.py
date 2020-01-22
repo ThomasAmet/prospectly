@@ -27,7 +27,7 @@ def signup():
 	if current_user.is_authenticated:
 		return redirect(url_for('main.home'))
 	form = RegistrationForm()
-	if form.validate_on_submit():
+	if 'register' in request.form:
 		try:
 			user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(), 
 			email=form.email.data.lower())
@@ -36,10 +36,11 @@ def signup():
 			db.session.add(user)
 			db.session.commit()
 			flash('Vous pouvez vous connecter.')
+			return redirect(url_for('auth.login', form=form))
 		except:
 			db.session.rollback()
-		return redirect(url_for('auth.login'))
-	return render_template('auth/signup.html', form=form)
+		
+	return render_template('auth/register.html', form=form)
 
 
 

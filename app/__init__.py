@@ -9,7 +9,7 @@ from flask_talisman import Talisman, ALLOW_FROM
 from config import DevelopmentConfig, TestConfig
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder = './static')
 app.config.from_object(DevelopmentConfig)
 
 talisman = Talisman(app, content_security_policy=app.config['CSP'])
@@ -25,8 +25,8 @@ login_manager.login_message = 'Vous devez etre connectes pour voir cette page'
 
 from .models import *
 
-from .main import main as main_blueprint
-app.register_blueprint(main_blueprint)
+from .landing import landing as landing_blueprint
+app.register_blueprint(landing_blueprint)
 from .auth import auth as auth_blueprint
 app.register_blueprint(auth_blueprint, url_prefix='/auth')
 from .leads import leads as leads_blueprint

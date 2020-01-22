@@ -32,8 +32,8 @@ class BaseConfig():
     # <iframe> based embedding for Maps and Youtube.
     'frame-src': '\'self\' www.google.com www.youtube.com',
     # Assorted Google-hosted Libraries/APIs.
-    'script-src': ['\'self\' ajax.googleapis.com *.googleanalytics.com '
-                  '*.google-analytics.com stackpath.bootstrapcdn.com'],
+    'script-src': ['\'self\' ajax.googleapis.com *.googleanalytics.com ' 'static/switch-toggle-pricing.js'
+                  '*.google-analytics.com stackpath.bootstrapcdn.com' 'cdnjs.cloudflare.com/*'],
     # Used by generated code from http://www.google.com/fonts
     'style-src': '\'self\' ajax.googleapis.com fonts.googleapis.com '
                  '*.gstatic.com stackpath.bootstrapcdn.com',

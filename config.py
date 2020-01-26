@@ -32,7 +32,7 @@ class BaseConfig():
     # <iframe> based embedding for Maps and Youtube.
     'frame-src': '\'self\' www.google.com www.youtube.com',
     # Assorted Google-hosted Libraries/APIs.
-    'script-src': ['\'self\' ajax.googleapis.com *.googleanalytics.com ' 'static/switch-toggle-pricing.js'
+    'script-src': ['\'self\' ajax.googleapis.com *.googleanalytics.com ' 'static/switch-toggle-pricing.js' 'static/prospectly-scripts.js'
                   '*.google-analytics.com stackpath.bootstrapcdn.com' 'cdnjs.cloudflare.com/*'],
     # Used by generated code from http://www.google.com/fonts
     'style-src': '\'self\' ajax.googleapis.com fonts.googleapis.com '
@@ -59,7 +59,7 @@ class TestConfig(BaseConfig):
 class DevelopmentConfig(BaseConfig):
 	DEBUG = True
 	CLOUDSQL_USER = 'thomas_admin'
-	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD')
+	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD') or 'difficult-password-to-guess'
 	
 	# CloudSQL & SQLAlchemy configuration
 	CLOUDSQL_DATABASE = 'prospectly_development_database'

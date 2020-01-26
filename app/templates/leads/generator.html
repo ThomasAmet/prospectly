@@ -10,7 +10,7 @@
 			{{ message }}
 		</div>
 	{% endfor %}
-	<form action={{ url_for('leads.query') }} method="post">
+	<form action="{{ url_for('leads.query') }}" method="post">
 		{{ form.csrf_token }}
 		<p>
 			{{ form.activity_field.label }}{{ form.activity_field() }}
@@ -24,11 +24,11 @@
 		</p>
 	</form>
 	{% if request_output %}
-		<form action={{ url_for('leads.query') }} method="post">
+		<form action="{{ url_for('leads.query') }}" method="post">
 			<input type="submit" id="download-btn" name="btn" value="Telecharger"/>
 		</form>
 	{% endif %}
-	{% if request_output %}
+ 	{% if request_output %}
 
 	<table class='leads-table'>
 	<thead>

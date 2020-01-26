@@ -25,7 +25,7 @@ def admin_login_required(func):
 @auth.route('/inscription', methods=['GET', 'POST'])
 def signup():
 	if current_user.is_authenticated:
-		return redirect(url_for('main.home'))
+		return redirect(url_for('landing.home'))
 	form = RegistrationForm()
 	if 'register' in request.form:
 		try:
@@ -40,14 +40,14 @@ def signup():
 		except:
 			db.session.rollback()
 		
-	return render_template('auth/register.html', form=form)
+	return render_template('register.html', form=form)
 
 
 
 @auth.route('/connexion', methods=['GET', 'POST'])
 def login():
 	if current_user.is_authenticated:
-		redirect( url_for('main.home'))
+		redirect( url_for('landing.home'))
 	form = LoginForm()
 	if form.validate_on_submit():
 		user = User.query.filter_by(email=form.email.data.lower()).first()
@@ -55,11 +55,11 @@ def login():
 			login_user(user, form.remember_me.data)
 			next = request.args.get('next')
 			if next is None or not next.startswith('/'):
-				next = url_for('main.home')
+				next = url_for('landing.home')
 			return redirect(next)
 		else:
 			flash('Email ou mot de passe invalide.')
-	return render_template('auth/login.html', form=form)
+	return render_template('login.html', form=form)
 
 
 
@@ -68,7 +68,7 @@ def login():
 def logout():
 	logout_user()
 	flash('You have been logged out.')
-	return redirect(url_for('main.home'))
+	return redirect(url_for('landing.home'))
 
 class AdminMyIndexView(AdminIndexView):
 	""" 
@@ -82,6 +82,6 @@ class AdminMyIndexView(AdminIndexView):
 class AdminHomeView(BaseView):
 	@expose('/')
 	def index(self):
-		return self.render('main/home.html')
+		return self.render(url_for('landing.home'))
 
 

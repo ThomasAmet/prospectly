@@ -22,12 +22,36 @@ def from_sql(row):
     data.pop('_sa_instance_state')
     return data
 
+def distinct_priority_values():
+	return {'haute':'Haute', 'moyenne':'Moyenne', 'basse':'Basse'}
 
-
-def distinct_activities_field():
+def distinct_stages_values():
 	'''
-		Exctract discting field_actvity from Lead table.
-	 	Return a dict with activity paired with a label for the form fiel
+		Exctract distinct names from Status table.
+	 	Return a dict with each value paired with a label that will be displayed on the form field
+	 '''
+	distinct_stages = db.session.query(CommercialStage.name).distinct().all()
+	list_distinct_stages = [elt[0] for elt in distinct_stages]
+	form_field_labels = [str(elt[0]).capitalize().replace('_',' ') for elt in distinct_stages]
+	dict_distinct_stages = zip(list_distinct_stages, form_field_labels)
+	return dict_distinct_stages
+
+
+def disting_status_values():
+	'''
+		Exctract distinct status title's from Status table.
+	 	Return a dict with each value paired with a label that will be displayed on the form field
+	 '''
+	distinct_status = db.session.query(Status.title).distinct().all()
+	list_distinct_status = [elt[0] for elt in distinct_status]
+	form_field_labels = [str(elt[0]).capitalize().replace('_',' ') for elt in distinct_status]
+	dict_distinct_status = zip(list_distinct_status, form_field_labels)
+	return dict_distinct_status
+
+def distinct_activity_values():
+	'''
+		Exctract distinct field_actvity from Lead table.
+	 	Return a dict with each value paired with a label that will be displayed on the form field
 	 '''
 	try:
 		distinct_activities = db.session.query(Lead.company_activity_field).distinct().all()
@@ -89,6 +113,7 @@ class User(db.Model, UserMixin):
 	email = db.Column(db.String(120), index=True, unique=True)
 	password_hash = db.Column(db.String(120))
 	registration_date = db.Column(db.DateTime, default=datetime.utcnow)
+	# avatar = db.Column(db.String(120))
 	admin = db.Column(db.Boolean, default=False)
 	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
 	leads_requested = db.relationship('LeadRequest', foreign_keys=[LeadRequest.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
@@ -104,6 +129,10 @@ class User(db.Model, UserMixin):
 	def set_username(self):
 		self.username = str(self.first_name).capitalize() + '_' + str(self.last_name).capitalize()
 
+	def set_avatar(self):
+		digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+		self.avatar = 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, 400)
+
 	def set_password(self, password_entry):
 		self.password_hash = generate_password_hash(password_entry)
 
@@ -116,6 +145,7 @@ class User(db.Model, UserMixin):
 	def __init__(self, **kwargs):
 		super(User, self).__init__(**kwargs)
 		self.set_username()
+		self.set_avatar()
 
 	def __repr__(self):
 		return "<{}>".format(self.username)
@@ -169,8 +199,8 @@ class CommercialStageStep(db.Model):
 	opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunities.id'), primary_key=True)# pk
 	commercial_stage_id = db.Column(db.Integer, db.ForeignKey('commercial_stages.id'), primary_key=True)# pk
 	status_id = db.Column(db.Integer, db.ForeignKey('status.id'), primary_key=True)# many-to-one (one side)
-	note_id = db.Column(db.Integer, db.ForeignKey('notes.id'))
-	task_id = db.Column(db.Integer, db.ForeignKey('tasks.id')) # task activated only when status == 'a faire'
+	note_id = db.Column(db.Integer, db.ForeignKey('notes.id'), nullable=True)
+	task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=True) # task activated only when status == 'a faire'
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -237,7 +267,6 @@ class Note(db.Model):
 	__tablename__ = 'notes'
 	id = db.Column(db.Integer, primary_key=True)
 	stage_step = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.note_id], backref=db.backref('note', uselist=False))# one-to-one  
-	note_title = db.Column(db.String(60))
 	note_content = db.Column(db.String(240))
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	last_update = db.Column(db.DateTime)

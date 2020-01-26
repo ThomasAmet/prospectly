@@ -1,0 +1,31 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Dashboard {% endblock title %}
+
+{% block stylesheets %}
+  {{ super() }}
+{% endblock stylesheets %}
+
+{% block content %}
+  
+  {% block top_navigation %}
+    {% include "layouts/top-navigation.html" %}
+  {% endblock top_navigation %}
+
+  {% block header %}
+  	{% include "layouts/blank-header.html" %}
+  {% endblock header %}
+
+
+	{% block main_content %}
+	{% endblock main_content %}
+
+	{% include "layouts/footer.html" %}
+
+  </div>
+
+{% endblock content %}
+
+{% block javascripts %}
+  {{ super()}}
+{% endblock javascripts %}

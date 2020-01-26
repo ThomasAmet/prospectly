@@ -28,9 +28,11 @@ from .models import *
 from .landing import landing as landing_blueprint
 app.register_blueprint(landing_blueprint)
 from .auth import auth as auth_blueprint
-app.register_blueprint(auth_blueprint, url_prefix='/auth')
+app.register_blueprint(auth_blueprint)
 from .leads import leads as leads_blueprint
 app.register_blueprint(leads_blueprint)
+from .crm import crm as crm_blueprint
+app.register_blueprint(crm_blueprint)
 
 from .auth.views import *
 

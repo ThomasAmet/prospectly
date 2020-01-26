@@ -38,7 +38,7 @@ def query():
 
 	if not user_subscription or not user_subscription.is_valid:
 		flash('Vous devez souscrire a un abonnement pour beneficier de ce service')
-		return redirect(url_for('main.pricing'))
+		return redirect(url_for('landing.pricing'))
 
 	output_max_len = user_subscription.plan.limit_daily_query
 	output_max_len = 5
@@ -46,6 +46,7 @@ def query():
 	# Check if the current user already requested some leads today and store the result in cookies
 	if not 'todays_output' in session:
 		session['todays_output'] = list(map(from_sql, [record.lead for record in cu.leads_requested.all() if datetime.strftime(record.query_date, '%Y-%m-%d')==datetime.strftime(datetime.utcnow(), '%Y-%m-%d')]))
+	
 	# Click Download Button
 	if request.method=='POST' and request.form['btn']=='Telecharger':
 		return redirect(url_for('leads.download'))
@@ -87,7 +88,7 @@ def query():
 				# We store the new query results + existing results for the day in session for later download. We ONLY do it AFTER storing lead requests in the table to avoid duplicating value in user session
 				session['todays_output'].extend(new_query_output)
 				
-				# flash('todays_output after extend:{}'.format(session['todays_output']))
+				flash('todays_output after extend:{}'.format(session['todays_output']))
 		return redirect(url_for('leads.query', form=form, request_output=session['todays_output']))
 		
 		# except:
@@ -95,7 +96,7 @@ def query():
 		# 	db.session.rollback()
 		# 	return redirect(url_for('auth.login'))# change redirect to error page 505
 	# flash('left to query: {}'.format(output_max_len-len(session['todays_output'])))
-	# flash(session['todays_output'])
+	flash(session['todays_output'])
 	return render_template('leads/generator.html', form=form, request_output=session['todays_output'])
 
 

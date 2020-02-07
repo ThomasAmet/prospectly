@@ -1,0 +1,196 @@
+  {% extends 'index.html' %}
+
+  {% block stylesheets %}
+    {{ super() }}
+  {% endblock stylesheets %}
+
+  {% block header %}
+      {{ super() }}
+  {% endblock header %}
+
+  {% block main_content %}
+
+    <div class="container-fluid mt--8">
+    
+      <!-- Beginning Card Header -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card shadow">
+            <div class='card-body'>
+              <div class='row'>
+                <div class='col-lg-7 col-sm-4'>
+                  <div class='row justify-content-start my-auto'>
+                    <div clas='col-8 ml-2'>
+                      <h3 class='mb-1 pt-2'>Liste des Prospects</h3>
+                    </div>
+                  </div>
+                </div>
+                <div class='col-lg-5 col-sm-2'>
+                  <div class='row justify-content-end'>
+                    <div clas='col-3'>
+                      <button class="btn btn-icon btn-3 btn-primary" type="button" data-toggle="modal" data-target="#addProspectModal">
+                        <span class="btn-inner--icon"><i class="ni ni-atom"></i></span>
+                        <span class="btn-inner--text">Importer csv</span>
+                      </button>
+                    </div>
+                    <div class='col-2 mr-2'>
+                      <!-- Trigger/Open the AddOpportunityModal -->
+                      <button class="btn btn-icon btn-3  btn-outline-primary" type="button" id='addProspectBtn' data-toggle="modal" data-target="#addProspectModal">
+                        <span class="btn-inner--icon"><i class="fa fa-plus"></i></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End Card Header -->
+
+      <!-- Card Table -->
+      <div class='row'>
+        <div class='col'>
+          <div class='card shadow'>
+            <div class='card-body border-0'>
+            <!-- Table -->
+            <div class="table-responsive table-hover">
+              <table class="table align-items-center table-flush">
+                <!-- Table Head -->
+                <thead class="thead-light">
+                  <tr>
+                    <th>
+                      <span class="custom-checkbox">
+                        <input type="checkbox" id="selectAll">
+                        <label for="selectAll"></label>
+                      </span>
+                    </th>
+                    <th scope="col">Nom d'entreprise</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Telephone</th>
+                    <th scope="col">Adresse</th>
+                    <th scope="col">Ville</th>
+                    <th scope="col">Code postal</th>
+                    <th scope="col">Date de création</th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <!-- End Table Head -->
+                <!-- Table Body -->
+                <tbody>
+                {% for prospect in prospects %}
+                <!-- value is a list of type [opportunitéty, latest_step associate]  -->
+                  <tr>
+                    <td class='clickable-row' data-href="">
+                      <span class="custom-checkbox">
+                        <input type="checkbox" id="checkbox1" name="options[]" value="1">
+                        <label for="checkbox1"></label>
+                      </span>
+                    </td>
+                    <td class='clickable-row' data-href="">
+                      <div class="media align-items-center">
+                        <div class="media-body">
+                          <span class="mb-0 text-sm">{{prospect.company_name}}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td class='clickable-row' data-href="">
+                      {{prospect.company_email}}
+                    </td>
+                    <td class='clickable-row' data-href="">
+                      {{prospect.company_phone}}
+                    </td>
+                    <td class='clickable-row' data-href="">
+                      {{prospect.company_address}}
+                    </td>
+                    <td class='clickable-row' data-href="">
+                      {{prospect.company_city}}
+                    </td>
+                    <td class='clickable-row' data-href="">
+                      {{prospect.company_postal_code}}
+                    </td>
+                    <td class='clickable-row' data-href="">
+                      {{prospect.creation_date}}
+                    </td>
+                    <td class="text-right">
+                      <div class="dropdown">
+                          <a class="btn btn-sm btn-icon-only text-light" href="" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                          </a>
+                          <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                            <a class="dropdown-item" href="">Ajouter une opportunité</a>
+                          </div>
+                      </div>                     
+                    </td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div class="card-footer py-4">
+              <nav aria-label="...">
+                <ul class="pagination justify-content-end mb-0">
+                  {% if previous_page_token is not none %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page_token={{previous_page_token}}" tabindex="-1">
+                        <i class="fas fa-angle-left"></i>
+                        <span class="sr-only">Page precedente</span>
+                      </a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <a class="page-link" href="#" tabindex="-1">
+                        <i class="fas fa-angle-left"></i>
+                        <span class="sr-only">Page precedente(desactivee)</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                  <!-- <li class="page-item active">
+                    <a class="page-link" href="#">1</a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="#">2<span class="sr-only">(current)</span></a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="#">3</a>
+                  </li> -->
+                  {% if next_page_token is not none %}                  
+                  <li class="page-item">
+                    <a class="page-link" href="?page_token={{next_page_token}}">
+                      <i class="fas fa-angle-right"></i>
+                      <span class="sr-only">Page suivante</span>
+                    </a>
+                  </li>
+                  {% else %}
+                  <li class="page-item disabled">
+                    <a class="page-link" href="">
+                      <i class="fas fa-angle-right"></i>
+                      <span class="sr-only">Page suivante</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End Table -->
+    </div>      
+
+    <!--  Modal addContact -->
+    {% include 'modals/add-prospect.html' %}
+    <!-- End Modal addContact -->
+
+    <!--  Modal editOpportunity -->
+    <!-- {#% include 'modals/edit-opportunity.html' %#} -->
+    <!-- End Modal editOpportunity -->
+    
+  {% endblock main_content %}
+
+
+
+  {% block javascripts %}
+  {{ super() }}
+  <script type="text/javascript" src="{{url_for('static', filename='js/prospectly.js')}}"></script>
+  {% endblock javascripts%}

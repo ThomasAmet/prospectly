@@ -1,0 +1,80 @@
+                <!-- #start 2nd block# -->
+                <hr class="my-3" />
+                <h6 class="heading-small text-muted mb-4">Tâches & Notes</h6>
+                <div class="pl-lg-2">  
+
+                  <!-- Display note if status is not 'to-do' -->
+                  <!-- start 1st row -->
+                  <div class='row note-form-group'>
+                    <!-- Note description -->
+                    <div class='col'>
+                    <div class="form-group">
+                      <label>Note</label>
+                      <!-- <textarea rows="4" class="form-control form-control-alternative">Une petite note concernant l'etape commerciale en cours ...</textarea> -->
+                      {{form.note_content(class="form-control form-control-alternative", placeholder='Ici, on note tout ce qui peut etre necessaire...')}}
+                    </div>
+                    </div>
+                  </div>
+                  <!-- end 1st row -->
+                  <!-- Display task if status is 'to-do' -->
+                  <!-- start 1st row -->
+                  <div class="row justify-between task-form-group">
+                    <!-- Task title -->
+                    <div class="col-lg-4">
+                    <div class="form-group">
+                      <label class="form-control-label">Tâches</label>
+                      <!-- <input type="text" id="input-task-title" class="form-control form-control-alternative" placeholder="Nom de la tache" value=""> -->
+                      {{form.task_title(class="form-control form-control-alternative", placeholder="Nom de la tache")}}
+                    </div>
+                    </div>
+                    <!-- Task priority -->
+                    <div class="col-lg-4">
+                    <div class="form-group" >
+                        <label class="form-control-label" for="input-city">Priorité</label>
+                        <!-- <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="Importance" value="Haute"> -->
+                        {{form.task_priority(class="form-control form-control-alternative", placeholder="Niveau de priorite")}}
+                    </div>
+                    </div>
+                    <!-- Due date -->
+                    <div class="col-lg-4">
+                    <div class="form-group" >
+                      <label class="form-control-label" for="input-country">Date limite</label>
+                      <div class="input-group input-group-alternative">
+                          <div class="input-group-prepend">
+                              <span class="input-group-text"><i class="ni ni-calendar-grid-58"></i></span>
+                          </div>
+                          <input class="datepicker form-control" id='due-date-datepicker' placeholder="Determinez une date" value="{{session['task_due_date']}}" name='due-date-value'>
+                      </div>
+                    </div>
+                    </div>
+                  </div>
+                  <!-- end 1st row -->
+                  <!-- start 2nd row -->
+                  <div class='row task-form-group'>
+                    <!-- Task description -->
+                    <div class='col'>
+                    <div class="form-group">
+                      <label>Descriptif</label>
+                      <!-- <textarea rows="4" class="form-control form-control-alternative">Descriptif de la tache a effectuer...</textarea>    -->             
+                      {{form.task_content(class="form-control form-control-alternative task-form-group", placeholder='Descriptif de la tache a effectuer...')}}
+                    </div>
+                    </div>
+                  </div>
+                  <!-- end 2nd row -->
+                  <!-- start 3rd row -->
+                  <div class='row task-form-group'>
+                    <!-- Task done ? -->
+                    <div class='col'>
+                      <div class="custom-control custom-checkbox mb-3">
+                      {% if session.get('task_done') %}
+                        <input class="custom-control-input" id="customCheck1" name='task-done-value' type="checkbox" value=True checked >
+                        <label class="custom-control-label" for="customCheck1">Bravo! Mission accoomplie.</label>
+                      {% else %}
+                        <input class="custom-control-input" id="customCheck1" name='task-done-value' type="checkbox" value=False>
+                        <label class="custom-control-label" for="customCheck1">Avez-vous termine la tache?</label>
+                      {% endif %}
+                      </div>                  
+                    </div>
+                  </div>
+                </div>
+                <!-- #end 2nd block# -->

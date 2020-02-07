@@ -1,10 +1,11 @@
-	let monthlyChoice = document.getElementById("monthly-choice");
-  let yearlyChoice = document.getElementById("yearly-choice");
-  let switcher = document.getElementById("switcher");
-  // div monthly
-  let monthlySubs = document.getElementById("monthly-subscriptions");
-  // div hourly
-  let yearlySubs = document.getElementById("yearly-subscriptions");
+// JS for Toggle Pricing
+let monthlyChoice = document.getElementById("monthly-choice");
+let yearlyChoice = document.getElementById("yearly-choice");
+let switcher = document.getElementById("switcher");
+// div monthly
+let monthlySubs = document.getElementById("monthly-subscriptions");
+// div hourly
+let yearlySubs = document.getElementById("yearly-subscriptions");
 
 monthlyChoice.addEventListener("click", function(){
   switcher.checked = false;
@@ -28,3 +29,4 @@ switcher.addEventListener("click", function(){
   monthlySubs.classList.toggle("hide");
   yearlySubs.classList.toggle("hide");
 })
+

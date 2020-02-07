@@ -6,11 +6,11 @@ from flask_login import LoginManager
 from flask_admin import Admin # Initial solution but at the end, required to built own admin view
 from flask_admin.contrib.sqla import ModelView
 from flask_talisman import Talisman, ALLOW_FROM
-from config import DevelopmentConfig, TestConfig
+from config import DevelopmentConfig, TestConfig, ProductionConfig
 
 
 app = Flask(__name__, static_folder = './static')
-app.config.from_object(DevelopmentConfig)
+app.config.from_object(ProductionConfig)
 
 talisman = Talisman(app, content_security_policy=app.config['CSP'])
 db = SQLAlchemy(app)
@@ -48,3 +48,6 @@ admin.add_view(ModelView(Opportunity, db.session))
 admin.add_view(ModelView(CommercialStage, db.session))
 admin.add_view(ModelView(Status, db.session))
 admin.add_view(ModelView(CommercialStageStep, db.session))
+admin.add_view(ModelView(Task, db.session))
+admin.add_view(ModelView(Note, db.session))
+

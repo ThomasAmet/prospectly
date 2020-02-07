@@ -1,0 +1,25 @@
+<div class="container-fluid mt--8">
+	<div class='row'>
+		<div class='col-8'>
+			<div class='form-group'>
+				<form action="{{ form_action }}" method="POST" autocomplete="">
+					{{ form.csrf_token }}
+					<div class="input-group">
+		        		{{ form.contact(class="form-control") }}
+	                	<span class="input-group-append">
+	                    	<button id="searchBtn" type='' class='btn btn-outline-primary' disabled="">
+	                      	<span class='fas fa-search'></span>
+	                    	</button>
+	                  	</span>
+		        		<ul>
+		            	{% for error in form.contact.errors %}
+		            		<li style="color:red;">{{ error }}</li>
+		            	{% endfor %}
+		        		</ul>
+	        		</div>
+	        		<input type="submit">
+        		</form>
+        	</div>
+        </div>
+    </div>
+</div>

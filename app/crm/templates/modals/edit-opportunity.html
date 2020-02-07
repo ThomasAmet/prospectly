@@ -17,11 +17,12 @@
                     </div>
                     <div class="card-body">
                         <form>
+                            {{ form.csrf_token }}
                             <div class="pl-3">
                             <div class="row">
                                 <h6 class="heading-small text-muted mb-2" style="position: relative; top:50%;
-                                transform: translateY(-50%);">Informations a propos du contact</h6>
-                                <a class='ml-2' style='position: relative; top:50%; transform: translateY(-50%);' href="#">
+                                ">Informations a propos du contact</h6>
+                                <a class='ml-2' style='position: relative; top:50%;' href="#">
                                     <i class='fas fa-pencil-alt'></i>
                                 </a>
                             </div>
@@ -31,7 +32,7 @@
                                 <div class="col-lg-4">
                                 <div class="form-group">
                                     <label class="form-control-label" for="input-comapny-name">Entreprise</label>
-                                    <input type="text" id="input-comapny-name" class="form-control form-control-alternative" placeholder="Nom de l'entreprise" value="{{ current_user.username }}" disabled>
+                                    <input type="text" id="input-comapny-name" class="form-control form-control-alternative" placeholder="Nom de l'entreprise" value="" disabled>
                                 </div>
                                 </div>
                                 <div class="col-lg-4">
@@ -45,7 +46,7 @@
                                 <div class="form-group">
                                     <label class="form-control-label" for="input-company-phone">Telephone</label>
                                     <input type="text" id="input-company-phone" class="form-control form-control-alternative" 
-                                           placeholder="Telephone" value="{{ current_user.email }}" disabled>
+                                           placeholder="Telephone" value="{{ current_user.phone }}" disabled>
                                 </div>
                                 </div>
                             </div>
@@ -72,33 +73,41 @@
                                 <div class="col-lg-8">
                                     <div class="form-group">
                                         <label class="form-control-label" for="input-opportunity-name">Nom</label>
-                                        <input id="input-opp-name" class="form-control form-control-alternative" placeholder="Ex: 'Nom de l'entreprise - type de contrat'" value="Ex: 'Nom de l'entreprise - type de contrat'" type="text">
+                                        <input id="input-opp-name" class="form-control form-control-alternative" placeholder="Ex: 'Nom de l'entreprise - type de contrat'" value="Ex: 'Nom de l'entreprise - type de contrat'" type="text" disabled="">
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
                                 <div class="form-group">
                                     <label class="form-control-label" for="input-country">Montant</label>
-                                    <input type="number" id="input-postal-code" class="form-control form-control-alternative" placeholder="Postal code">
+                                    <input type="text" id="input-postal-code" class="form-control form-control-alternative" placeholder="1000€" disabled="">
                                 </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="input-city">City</label>
-                                    <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="City" value="New York">
+                                <div class="col-lg-6">
+                                <div class='row'>
+                                    <div class="col-lg-9">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="input-city">Etape Commerciale</label>
+                                        <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="City" value="New York">
+                                    </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="input-country">Pourcentage</label>
+                                        <input type="text" id="input-country" class="form-control form-control-alternative" placeholder="Country" value="United States" disabled="">
+                                    </div>
+                                    </div>
                                 </div>
                                 </div>
-                                <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="input-country">Country</label>
-                                    <input type="text" id="input-country" class="form-control form-control-alternative" placeholder="Country" value="United States">
-                                </div>
-                                </div>
-                                <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="input-country">Postal code</label>
-                                    <input type="number" id="input-postal-code" class="form-control form-control-alternative" placeholder="Postal code">
+                                <div class="col-lg-6">
+                                <div class="row justify-content-center">
+                                    <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="input-country">Status</label>
+                                        <input type="number" id="input-postal-code" class="form-control form-control-alternative" placeholder="Postal code">
+                                    </div>
+                                    </div>
                                 </div>
                                 </div>
                             </div>
@@ -121,12 +130,18 @@
                                     </div>
                                     <div class="col-lg-4">
                                     <div class="form-group">
+                                        <label class="form-control-label" for="input-city">Importance</label>
+                                        <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="City" value="New York">
+                                    </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                    <div class="form-group">
                                         <label class="form-control-label" for="input-country">Date limite</label>
                                         <div class="input-group input-group-alternative">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="ni ni-calendar-grid-58"></i></span>
                                             </div>
-                                            <input class="form-control datepicker" placeholder="Select date" type="text" value="06/20/2019">
+                                            <input class="form-control datepicker" placeholder="Select date" type="text" value="" format>
                                         </div>
                                     </div>
                                     </div>
@@ -147,86 +162,6 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-lg-8">
-        <div class="form-group">
-            <label class="form-control-label" for="input-opportunity-name">Nom</label>
-            <input id="input-opp-name" class="form-control form-control-alternative" placeholder="Ex: 'Nom de l'entreprise - type de contrat'" value="Ex: 'Nom de l'entreprise - type de contrat'" type="text">
-        </div>
-    </div>
-</div>
-<div class="row">
-<div class="col-lg-4">
-<div class="form-group">
-<label class="form-control-label" for="input-opportunity-amount">Montant</label>
-<input id="input-opportunity-amount" class="form-control form-control-alternative" placeholder="Montant" value="" type="text">
-</div>
-</div>
-</div>
-</div>
 
-
-
-
-
-<!-- Test 1 -->
-<div class="modal fade" tabindex="-1" role="dialog" id="editOpportunityModalKeep">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <!-- Modal Header  -->
-      <div class="modal-header">
-        <h2 class="modal-title">Modal title</h2>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <!-- End Header  -->
-      <div class="modal-body">
-        <p>Modal body text goes here.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="button" class="btn btn-primary">Sauvegarder</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Test 2 -->
-<div class="modal fade" id="editOpportunityModalKeep2" role='dialog'>
-    <div class="modal-dialog modal-lg" role="document" >
-        <div class="modal-content">
-            <!-- Modal Header  -->
-            <div class="modal-header">
-                <h2 class="modal-title">Editer l'etape</h2>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-             </div>
-         <!-- Modal Content  -->
-         <div class="modal-body">
-            <form class="border-light">
-                <h4>Name of the opportunity</h4>
-                <input type="text" id="defaultContactFormName" class="form-control mb-4" placeholder="Name">
-                <input type="text" id="defaultContactFormEmail" class="form-control mb-4" placeholder="E-mail">
-                <label for="defaultSelect">Subject</label>
-                <select id="defaultSelect" class="browser-default custom-select mb-4">
-                    <option value="" disabled="">Choose option</option>
-                    <option value="1" selected="">Feedback</option>
-                    <option value="2">Report a bug</option>
-                    <option value="3">Feature request</option>
-                    <option value="4">Feature request</option>
-                </select>
-                <textarea class="form-control rounded-0" id="exampleFormControlTextarea2" rows="3" placeholder="Message"></textarea>
-            </form>
-        </div>
-        <!-- Modal Footer  -->
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-            <button type="button" class="btn btn-primary">Sauvegarder</button>
-        </div>
-    </div>
-  </div>
-</div>
 
 

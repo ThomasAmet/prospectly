@@ -1,4 +1,3 @@
-
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -22,22 +21,22 @@ CLOUDSQL_CONNECTION_NAME = 'prospectly-app:europe-west1:mysql-instance'
 
 
 class BaseConfig():
-    SECRET_KEY = os.environ.get('SECRET_KEY') 
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'this-is-a-temp-key'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_CONTENT_LENGTH = 0.2 * 1024 * 1024 # limit size of uploaded file to 200kb
     UPLOAD_FOLDER = 'csv/uploads/'
     CSP = {
     # Fonts from fonts.google.com
-    'font-src': '\'self\' themes.googleusercontent.com *.gstatic.com',
+    'font-src': '\'self\' themes.googleusercontent.com *.gstatic.com static/fonts/',
     # <iframe> based embedding for Maps and Youtube.
-    'frame-src': '\'self\' www.google.com www.youtube.com',
+    'frame-src': '\'self\' www.google.com www.youtube.com js.stripe.com',
     # Assorted Google-hosted Libraries/APIs.
-    'script-src': ['\'self\' ajax.googleapis.com *.googleanalytics.com ' 'static/switch-toggle-pricing.js' 'static/prospectly-scripts.js'
-                  '*.google-analytics.com stackpath.bootstrapcdn.com' 'cdnjs.cloudflare.com/*'],
+    'script-src': ['\'self\' ajax.googleapis.com *.googleanalytics.com static/js/*'
+                  '*.google-analytics.com stackpath.bootstrapcdn.com cdnjs.cloudflare.com js.stripe.com'],
     # Used by generated code from http://www.google.com/fonts
-    'style-src': '\'self\' ajax.googleapis.com fonts.googleapis.com '
-                 '*.gstatic.com stackpath.bootstrapcdn.com',
-    'default-src': '\'self\' *.gstatic.com',
+    'style-src': ['\'self\'', 'ajax.googleapis.com', 'fonts.googleapis.com', '\'unsafe-inline\'',
+                 '*.gstatic.com stackpath.bootstrapcdn.com'],
+    'default-src': '\'self\' *.gstatic.com'
 	}
 	
 
@@ -59,10 +58,39 @@ class TestConfig(BaseConfig):
 class DevelopmentConfig(BaseConfig):
 	DEBUG = True
 	CLOUDSQL_USER = 'thomas_admin'
-	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD') or 'difficult-password-to-guess'
+	CLOUDSQL_PASSWORD = 'difficult-password-to-guess' or os.environ.get('CLOUDSQL_PASSWORD')
 	
 	# CloudSQL & SQLAlchemy configuration
 	CLOUDSQL_DATABASE = 'prospectly_development_database'
+	# To start the proxy, use:
+	#
+	#	$ cloud_sql_proxy -instances=your-connection-name=tcp:3306
+	#
+	LOCAL_SQLALCHEMY_DATABASE_URI = (
+		'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}').format(
+		user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD, database=CLOUDSQL_DATABASE
+		)
+	# When running on App Engine a unix socket is used to connect to the cloudsql instance.
+	LIVE_SQLALCHEMY_DATABASE_URI = (
+		'mysql+pymysql://{user}:{password}@localhost/{database}'
+		'?unix_socket=/cloudsql/{connection_name}').format(
+		user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD,
+		database=CLOUDSQL_DATABASE, connection_name=CLOUDSQL_CONNECTION_NAME)
+
+	if os.environ.get('GAE_INSTANCE'):
+		SQLALCHEMY_DATABASE_URI = LIVE_SQLALCHEMY_DATABASE_URI
+	else:
+		SQLALCHEMY_DATABASE_URI = LOCAL_SQLALCHEMY_DATABASE_URI
+
+
+
+class ProductionConfig(BaseConfig):
+	DEBUG = False
+	CLOUDSQL_USER = 'thomas_admin'
+	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD') or 'difficult-password-to-guess'
+	
+	# CloudSQL & SQLAlchemy configuration
+	CLOUDSQL_DATABASE = 'prospectly_production_database'
 	# To start the proxy, use:
 	#
 	#	$ cloud_sql_proxy -instances=your-connection-name=tcp:3306

@@ -3,66 +3,8 @@ from flask_login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
+from datetime import datetime
 # from db import Column, String, Integer, Boolean, DateTime, ForeignKey, relationship, backref
-
-
-# A function called by the flask-login extension when it needs to load a user based on its id
-@login_manager.user_loader
-def load_user(user_id):
-	return User.query.get(user_id)
-
-
-
-def from_sql(row):
-    """
-    	Translates a SQLAlchemy model instance into a dictionary
-    """
-    data = row.__dict__.copy()
-    data['id'] = row.id
-    data.pop('_sa_instance_state')
-    return data
-
-def distinct_priority_values():
-	return {'haute':'Haute', 'moyenne':'Moyenne', 'basse':'Basse'}
-
-def distinct_stages_values():
-	'''
-		Exctract distinct names from Status table.
-	 	Return a dict with each value paired with a label that will be displayed on the form field
-	 '''
-	distinct_stages = db.session.query(CommercialStage.name).distinct().all()
-	list_distinct_stages = [elt[0] for elt in distinct_stages]
-	form_field_labels = [str(elt[0]).capitalize().replace('_',' ') for elt in distinct_stages]
-	dict_distinct_stages = zip(list_distinct_stages, form_field_labels)
-	return dict_distinct_stages
-
-
-def disting_status_values():
-	'''
-		Exctract distinct status title's from Status table.
-	 	Return a dict with each value paired with a label that will be displayed on the form field
-	 '''
-	distinct_status = db.session.query(Status.title).distinct().all()
-	list_distinct_status = [elt[0] for elt in distinct_status]
-	form_field_labels = [str(elt[0]).capitalize().replace('_',' ') for elt in distinct_status]
-	dict_distinct_status = zip(list_distinct_status, form_field_labels)
-	return dict_distinct_status
-
-def distinct_activity_values():
-	'''
-		Exctract distinct field_actvity from Lead table.
-	 	Return a dict with each value paired with a label that will be displayed on the form field
-	 '''
-	try:
-		distinct_activities = db.session.query(Lead.company_activity_field).distinct().all()
-	except:
-		distinct_activities = [('fitness',)]
-	list_distinct_activities = [elt[0] for elt in distinct_activities]
-	form_field_labels = [str(elt[0]).capitalize() for elt in distinct_activities]
-	dict_labels_activities = list(zip(list_distinct_activities, form_field_labels))
-	dict_labels_activities = [("", "-")] + dict_labels_activities
-	return dict_labels_activities
-
 
 
 class Subscription(db.Model):
@@ -129,9 +71,9 @@ class User(db.Model, UserMixin):
 	def set_username(self):
 		self.username = str(self.first_name).capitalize() + '_' + str(self.last_name).capitalize()
 
-	def set_avatar(self):
-		digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-		self.avatar = 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, 400)
+	# def set_avatar(self):
+	# 	digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+	# 	self.avatar = 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, 400)
 
 	def set_password(self, password_entry):
 		self.password_hash = generate_password_hash(password_entry)
@@ -145,7 +87,7 @@ class User(db.Model, UserMixin):
 	def __init__(self, **kwargs):
 		super(User, self).__init__(**kwargs)
 		self.set_username()
-		self.set_avatar()
+		# self.set_avatar()
 
 	def __repr__(self):
 		return "<{}>".format(self.username)
@@ -190,7 +132,7 @@ class Lead(db.Model):
 		return True
 
 	def __repr__(self):
-		return "<{} located at {}>".format(self.company_name, self.company_postal_code)
+		return "<{} situe a {}>".format(self.company_name, self.company_city)
 
 
 
@@ -202,7 +144,10 @@ class CommercialStageStep(db.Model):
 	note_id = db.Column(db.Integer, db.ForeignKey('notes.id'), nullable=True)
 	task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=True) # task activated only when status == 'a faire'
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
+	last_update = db.Column(db.DateTime, default=datetime.utcnow)
 
+	def __repr__(self):
+		return "<Opp. {} on stage {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stage.name, self.status.title, self.creation_date)
 
 
 class Contact(db.Model):
@@ -219,9 +164,15 @@ class Contact(db.Model):
 	company_activity_field = db.Column(db.String(60), index=True, unique=False, nullable=False)
 	owner_firstname	= db.Column(db.String(60), index=True, unique=False, nullable=True)
 	owner_lastname = db.Column(db.String(60), index=True, unique=False, nullable=True)
+	website = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	facebook = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	instagram = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	linkedin = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id')) # one-side of a many-to-one with User 
 	opportunities = db.relationship('Opportunity', backref='contact', lazy='dynamic') # one-to-many (many side)
 
+	def __repr__(self):
+		return  "<{} situé à {}>".format(self.company_name, self.company_city)
 
 
 class Opportunity(db.Model):
@@ -230,22 +181,14 @@ class Opportunity(db.Model):
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 	contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'))
 	name = db.Column(db.String(120), nullable=False)
-	euro_value = db.Column(db.Numeric(6,2))
+	euros_value = db.Column(db.Numeric(8,2))
 	commercial_stages = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.opportunity_id], backref=db.backref('opportunity', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with CommercialStage (many side of a many-to-one with CommercialStageStep)
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	deal_closed = db.Column(db.Boolean, default=False)
-	closing_date = db.Column(db.DateTime)
-	
+	last_update = db.Column(db.DateTime, default=datetime.utcnow)
 
-
-class CommercialStage(db.Model):
-	__tablename__ = 'commercial_stages'
-	id = db.Column(db.Integer, primary_key=True)
-	stage_steps = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.commercial_stage_id], backref=db.backref('commercial_stage', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with Opportunity (many side of a many-to-one with CommercialStageStep)
-	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True) # one-side
-	name = db.Column(db.String(60))
-	closing_perc = db.Column(db.Numeric(2,2))
-	private = db.Column(db.Boolean(), default=True)
+	def __repr__(self):
+		return "<{}>".format(self.name)
 
 
 
@@ -259,7 +202,10 @@ class Task(db.Model):
 	priority = db.Column(db.String(30))
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	due_date = db.Column(db.DateTime)
-	last_update = db.Column(db.DateTime)
+	done = db.Column(db.Boolean, default=False)
+
+	def __repr__(self):
+		return "<Task: {}. Stage: {}>".format(self.task_title, self.stage_step)
 
 
 
@@ -267,14 +213,128 @@ class Note(db.Model):
 	__tablename__ = 'notes'
 	id = db.Column(db.Integer, primary_key=True)
 	stage_step = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.note_id], backref=db.backref('note', uselist=False))# one-to-one  
-	note_content = db.Column(db.String(240))
+	note_content = db.Column(db.String(240), default='')
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
-	last_update = db.Column(db.DateTime)
+
+
+class CommercialStage(db.Model):
+	__tablename__ = 'commercial_stages'
+	id = db.Column(db.Integer, primary_key=True)
+	stage_steps = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.commercial_stage_id], backref=db.backref('commercial_stage', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with Opportunity (many side of a many-to-one with CommercialStageStep)
+	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True) # one-side (necessary when user wants to creata a custom Stage)
+	name = db.Column(db.String(60))
+	closing_perc = db.Column(db.Numeric(2,2))
+	private = db.Column(db.Boolean(), default=True)
+
+	def __repr__(self):
+		return "<{}>".format(self.name)
 
 
 
 class Status(db.Model):
 	__tablename__ = 'status'
 	id = db.Column(db.Integer, primary_key=True)
-	title = db.Column(db.String(30), unique=True)	
+	title = db.Column(db.String(30), unique=True)
+	stage_steps = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.status_id],  backref=db.backref('status', lazy='joined'))	
+
+	def __repr__(self):
+		return "<{}>".format(self.title)
+
+
+
+# A function called by the flask-login extension when it needs to load a user based on its id
+@login_manager.user_loader
+def load_user(user_id):
+	return User.query.get(user_id)
+
+
+
+def from_sql(row):
+    """	Translates a SQLAlchemy model instance into a dictionary """
+    data = row.__dict__.copy()
+    data['id'] = row.id
+    data.pop('_sa_instance_state')
+    return data
+
+
+
+def distinct_priority_values():
+	values = ["",'Haute', 'Moyenne', 'Basse']
+	labels = ["---",'Haute', 'Moyenne', 'Basse']
+	return zip(values, labels)
+
+
+
+def distinct_stages_values():
+	'''	Exctract distinct names from Status table.
+		Return a dict with each value paired with a label that will be displayed on the form field '''
+	try:
+		distinct_stages = db.session.query(CommercialStage.name).distinct().all()
+	except:
+		distinct_stages = [('',)]
+	list_distinct_stages = [elt[0] for elt in distinct_stages]
+	form_field_labels = [str(elt[0]).replace(' ','_').capitalize().replace('_',' ') for elt in distinct_stages]
+	dict_distinct_stages = zip(list_distinct_stages, form_field_labels)
+	return dict_distinct_stages
+
+
+
+def distinct_status_values():
+	''' Exctract distinct status title's from Status table.
+		Return a dict with each value paired with a label that will be displayed on the form field '''
+	try:
+		distinct_status = db.session.query(Status.title).distinct().all()
+	except:
+		distinct_status = [('',)]
+	list_distinct_status = [elt[0] for elt in distinct_status]
+	form_field_labels = [str(elt[0]).capitalize().replace('_',' ') for elt in distinct_status]
+	dict_distinct_status = zip(list_distinct_status, form_field_labels)
+	return dict_distinct_status
+
+
+
+def distinct_activity_values():
+	''' Exctract distinct field_actvity from Lead table.
+	 	Return a dict with each value paired with a label that will be displayed on the form field '''
+	try:
+		distinct_activities = db.session.query(Lead.company_activity_field).distinct().all()
+	except:
+		distinct_activities = [('fitness',)]
+	list_distinct_activities = [elt[0] for elt in distinct_activities]
+	form_field_labels = [str(elt[0]).capitalize() for elt in distinct_activities]
+	dict_labels_activities = list(zip(list_distinct_activities, form_field_labels))
+	dict_labels_activities = [("", "-")] + dict_labels_activities
+	return dict_labels_activities
+
+
+def get_list_prospects(user_id, limit, cursor):
+	user_id = int(user_id)
+	cursor = int(cursor) if cursor else 0
+	query = (Contact.query
+			.filter(Contact.user_id==user_id)
+			.order_by(Contact.company_name, Contact.creation_date.desc())
+			.offset(cursor)
+			.limit(limit+1) ) # limit + 1 to check whether there is a need for a 'next_page' btn
+	prospects = list(map(from_sql, query.all()))
+	# propsects =  query.all()# return a sqlalchemy obj
+	next_page = cursor + limit if len(prospects)>limit else None 
+	previous_page = cursor - limit if cursor > 0 else None
+	return (prospects[:limit], next_page, previous_page)
+
+
+def get_list_opportunities(user_id, limit, cursor):
+	user_id = int(user_id)
+	cursor = int(cursor) if cursor else 0
+	query = (Opportunity.query
+			.filter_by(user_id=user_id)
+			.outerjoin(Contact)
+			.order_by(Contact.company_name, Opportunity.creation_date.desc())
+			.offset(cursor)
+			.limit(limit+1) ) # limit + 1 to check whether there is a need for a 'next_page' btn
+	# opportunities = list(map(from_sql, query.all()))
+	opportunities =  query.all()# return a sqlalchemy obj
+	next_page = cursor + limit if len(opportunities)>limit else None 
+	previous_page = cursor - limit if cursor > 0 else None
+	return (opportunities[:limit], next_page, previous_page)
+
 

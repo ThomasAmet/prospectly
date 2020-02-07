@@ -60,6 +60,8 @@
   {% block javascripts %}
     <!-- Core -->
     <script src="{{ url_for('static', filename='js/plugins/jquery/dist/jquery.min.js') }}"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
+
     <!-- Boostrap 4.3.1 -->
     <script src="{{ url_for('static', filename='js/plugins/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
 
@@ -67,8 +69,6 @@
     <script src="{{ url_for('static', filename='js/plugins/chart.js/dist/Chart.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/plugins/chart.js/dist/Chart.extension.js') }}"></script>
     <script src="{{ url_for('static', filename='js/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
-
-    
     <!-- Argon JS -->
     <script src="{{ url_for('static', filename='js/argon-dashboard.min.js') }}"></script>
   {% endblock javascripts %}

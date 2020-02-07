@@ -21,11 +21,12 @@ def admin_login_required(func):
 	return decorated_view
 
 
-
 @auth.route('/inscription', methods=['GET', 'POST'])
+@login_required
+@admin_login_required
 def signup():
-	if current_user.is_authenticated:
-		return redirect(url_for('landing.home'))
+	# if current_user.is_authenticated:
+	# 	return redirect(url_for('landing.home'))
 	form = RegistrationForm()
 	if 'register' in request.form:
 		try:
@@ -46,16 +47,16 @@ def signup():
 
 @auth.route('/connexion', methods=['GET', 'POST'])
 def login():
-	if current_user.is_authenticated:
-		redirect( url_for('landing.home'))
+	# if current_user.is_authenticated:
+	# 	redirect( url_for('landing.home'))
 	form = LoginForm()
 	if form.validate_on_submit():
 		user = User.query.filter_by(email=form.email.data.lower()).first()
 		if user is not None and user.verify_password(form.password.data):
-			login_user(user, form.remember_me.data)
+			login_user(user, request.form.get('remember-me'))
 			next = request.args.get('next')
 			if next is None or not next.startswith('/'):
-				next = url_for('landing.home')
+				next = url_for('crm.home')
 			return redirect(next)
 		else:
 			flash('Email ou mot de passe invalide.')
@@ -69,6 +70,20 @@ def logout():
 	logout_user()
 	flash('You have been logged out.')
 	return redirect(url_for('landing.home'))
+
+
+@auth.route('/profile')
+@login_required
+def profile():
+	return render_template('profile.html')
+
+
+
+@auth.route('/test')
+@login_required
+def test():
+	form = RegistrationForm()
+	return render_template('register.html', form=form)
 
 class AdminMyIndexView(AdminIndexView):
 	""" 

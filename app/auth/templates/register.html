@@ -5,18 +5,7 @@
 
 <!--navbar start-->
 {% block navbar %}
-  <li class="nav-item">
-    <a class="nav-link active" href="{{ url_for('landing.home') }}">ACCEUIL</a> 
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('landing.pricing') }}">OFFRE</a> 
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="#blanc">FAQ</a> 
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="#blanc">OTHER</a> 
-  </li>
+{{ super() }}
 {% endblock navbar %}
 
 
@@ -88,8 +77,12 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                    {{ form.first_name(placeholder="Nom",class="form-control") }}
-                  <div class="help-block with-errors"></div>
+                    {{ form.last_name(placeholder="Nom",class="form-control") }}
+                  <div class="help-block with-errors">
+                    {% for error in form.last_name.errors %}
+                    {{error}}                    
+                    {% endfor %}
+                  </div>
                 </div>
               </div>
             </div>
@@ -102,7 +95,7 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <input id="form_phone" type="tel" name="phone" class="form-control" placeholder="Phone" required="required" data-error="Phone is required">
+                  <input id="form_phone" type="tel" name="phone" class="form-control" placeholder="Mobile" required="required" data-error="Phone is required">
                   <div class="help-block with-errors"></div>
                 </div>
               </div>
@@ -116,7 +109,7 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <input id="form_password1" type="password" name="password" class="form-control" placeholder="Confirm Password" required="required" data-error="Conform Password is required.">
+                  <input id="form_password1" type="password" name="password" class="form-control" placeholder="Confirm Password" required="required" data-error="Vous devez confirmez le mot de passe.">
                   <div class="help-block with-errors"></div>
                 </div>
               </div>

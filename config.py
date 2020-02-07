@@ -85,7 +85,7 @@ class DevelopmentConfig(BaseConfig):
 
 
 class ProductionConfig(BaseConfig):
-	DEBUG = False
+	
 	CLOUDSQL_USER = 'thomas_admin'
 	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD') or 'difficult-password-to-guess'
 	
@@ -108,8 +108,10 @@ class ProductionConfig(BaseConfig):
 
 	if os.environ.get('GAE_INSTANCE'):
 		SQLALCHEMY_DATABASE_URI = LIVE_SQLALCHEMY_DATABASE_URI
+		DEBUG = False
 	else:
 		SQLALCHEMY_DATABASE_URI = LOCAL_SQLALCHEMY_DATABASE_URI
+		DEBUG = True
 		
 # class DevelopmentConfig(BaseConfig):
 # 	DEBUG = True

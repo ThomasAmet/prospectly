@@ -37,7 +37,7 @@ def signup():
 			db.session.add(user)
 			db.session.commit()
 			flash('Vous pouvez vous connecter.')
-			return redirect(url_for('auth.login', form=form))
+			return redirect(url_for('auth.signup'))
 		except:
 			db.session.rollback()
 		

@@ -16,12 +16,11 @@
   <li class="nav-item">
     <a class="nav-link active" href="{{ url_for('landing.pricing') }}">OFFRES</a> 
   </li>
+  {% if not current_user.is_authenticated %}
   <li class="nav-item">
-    <a class="nav-link" href="#blanc">FAQ</a> 
+    <a class="nav-link" href="{{url_for('auth.login')}}">CONNEXION</a> 
   </li>
-  <li class="nav-item">
-    <a class="nav-link" href="#blanc">OTHER</a> 
-  </li>
+  {% endif %}
 {% endblock navbar %}
 
 
@@ -99,7 +98,7 @@
             </div>
             <div class="option">
               <ul>
-              <li> <i class="fa fa-check" aria-hidden="true"></i> 200 Contacts </li>
+              <!-- <li> <i class="fa fa-check" aria-hidden="true"></i> 200 Contacts </li> -->
               <li> <i class="fa fa-check" aria-hidden="true"></i> Pipelines et étapes personnalisés </li>
               <li> <i class="fa fa-check" aria-hidden="true"></i> Fixation d'objectifs par opportunités </li>
               <li> <i class="fa fa-check" aria-hidden="true"></i> Vue des activités et du calendrier </li>
@@ -134,7 +133,7 @@
             </div>
             <div class="option">
               <ul>
-              <li> <i class="fa fa-check" aria-hidden="true"></i> Contacts illimités </li>
+              <!-- <li> <i class="fa fa-check" aria-hidden="true"></i> Contacts illimités </li> -->
               <li> <i class="fa fa-check" aria-hidden="true"></i> Pipelines et étapes personnalisés </li>
               <li> <i class="fa fa-check" aria-hidden="true"></i> Fixation d'objectifs par opportunités </li>
               <li> <i class="fa fa-check" aria-hidden="true"></i> Vue des activités et du calendrier </li>
@@ -170,7 +169,7 @@
             </div>
             <div class="option">
               <ul>
-              <li> <i class="fa fa-check" aria-hidden="true"></i> 200 Contacts </li>
+              <!-- <li> <i class="fa fa-check" aria-hidden="true"></i> 200 Contacts </li> -->
               <li> <i class="fa fa-check" aria-hidden="true"></i> Pipelines et étapes personnalisés </li>
               <li> <i class="fa fa-check" aria-hidden="true"></i> Fixation d'objectifs par opportunités </li>
               <li> <i class="fa fa-check" aria-hidden="true"></i> Vue des activités et du calendrier </li>
@@ -204,7 +203,7 @@
             </div>
             <div class="option">
               <ul>
-              <li> <i class="fa fa-check" aria-hidden="true"></i> Contacts illimités </li>
+              <!-- <li> <i class="fa fa-check" aria-hidden="true"></i> Contacts illimités </li> -->
               <li> <i class="fa fa-check" aria-hidden="true"></i> Pipelines et étapes personnalisés </li>
               <li> <i class="fa fa-check" aria-hidden="true"></i> Fixation d'objectifs par opportunités </li>
               <li> <i class="fa fa-check" aria-hidden="true"></i> Vue des activités et du calendrier </li>

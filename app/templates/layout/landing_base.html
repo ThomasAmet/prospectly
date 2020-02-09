@@ -100,12 +100,11 @@
                   <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('landing.pricing') }}">OFFRES</a> 
                   </li>
+                  {% if not current_user.is_authenticated %}
                   <li class="nav-item">
-                    <a class="nav-link" href="#blanc">FAQ</a> 
+                    <a class="nav-link" href="{{url_for('auth.login')}}">CONNEXION</a> 
                   </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#blanc">OTHER</a> 
-                  </li>
+                  {% endif %}
                   {% endblock navbar %}
                 </ul>
               </div>
@@ -114,10 +113,13 @@
                 <span>D</span><span>e</span><span>c</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span>
               </a>
               {% else %}
-              <a class="btn btn-theme btn-sm" href="{{url_for('auth.login')}}" data-text="Se connecter">
+<!--               <a class="btn btn-theme btn-sm" href="" data-text="Se connecter">
                 <span>C</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span>
-              {% endif %}
+              </a> -->
+              <a class="btn btn-theme btn-sm px-4" href="{{url_for('landing.pricing')}}" data-text="Essai Gratuit">
+                <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
               </a>
+              {% endif %}
             </nav>
           </div>
         </div>
@@ -154,11 +156,11 @@
           <div class="col-lg-5 col-md-12">
             <div class="footer-social">
               <ul class="list-inline">
-                  <li class="mr-2"><a href="terms-and-conditions.html">Contactez-nous </a>|
+                  <li class="mr-2"><a href="">Contactez-nous </a>|
                   </li>
-                  <li class="mr-2"><a href="privacy-policy.html"> Politique Confidentialite </a>|
+                  <li class="mr-2"><a href=""> Politique Confidentialite </a>|
                   </li>
-                  <li class="mr-2"><a href="terms-and-conditions.html"> CGV</a>
+                  <li class="mr-2"><a href=""> CGV</a>
                   </li>
               </ul>
             </div>
@@ -166,9 +168,9 @@
           <div class="col-lg-3 col-md-12 md-mt-3">
             <div class="footer-social">
               <ul class="list-inline">
-                <li class="mr-2"><a href="#"><i class="fab fa-facebook-f"></i> Facebook</a>
+                <li class="mr-2"><a href="https://www.facebook.com/prospectly/" target="_blank"><i class="fab fa-facebook-f"></i> Facebook</a>
                 </li>
-                <li class="mr-2"><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                <li class="mr-2"><a href="https://www.linkedin.com/company/30583899/" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>
                 </li>
               </ul>
             </div>

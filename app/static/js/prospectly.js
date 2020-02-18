@@ -1,3 +1,68 @@
+// Script that works with register.html to handle stripe (v2)
+$(document).ready(function(){
+    .then(function(result) {
+      return result.json();
+    })
+    .then(function(data) {
+      checkoutSessionId = data.checkoutSessionId;
+    });
+    $("#register-submit").click(function(){        
+        $("#register-form").submit(); // Submit the form
+    });
+
+    $(document).on('submit', '#register-form', function(e){
+        e.preventDefault();
+        var formData = new FormData(this);
+        $.ajax({
+            type:'POST',
+            url: '/auth/inscription',
+            data: formData,
+            success: function(response) {
+              var stripe_session_id = result.json();
+              stripe.redirectToCheckout({
+                  sessionId: stripe_session_id
+                }).then(function (result) {
+                }); 
+            },
+            processData: false,
+            contentType: false,
+        });
+    });
+});
+
+
+
+// Script that works with register.html to handle stripe (v1)
+// $(document).ready(function(){
+  
+//     $("#register-submit").click(function(){        
+//         $("#register-form").submit(); // Submit the form
+//     });
+
+//     $(document).on('submit', '#register-form', function(e){
+//         e.preventDefault();
+//         var formData = new FormData(this);
+//         $.ajax({
+//             type:'POST',
+//             url: '/auth/inscription',
+//             data: formData,
+//             success: function(response) {
+//                 // Create a Stripe client
+//                 var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+//                 stripe.redirectToCheckout({
+//                     sessionId: $('#stripe-session-id').val()
+//                 }).then(function (result) {
+//                 }); 
+//             },
+//             processData: false,
+//             contentType: false,
+//         });
+
+        
+//     });
+// });``
+
+
 $(document).ready(function(){
 // // JQuery to change the format of element from the datepicker class
   let datepicker = $('#due-date-datepicker');

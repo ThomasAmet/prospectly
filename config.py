@@ -21,22 +21,34 @@ CLOUDSQL_CONNECTION_NAME = 'prospectly-app:europe-west1:mysql-instance'
 
 
 class BaseConfig():
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'this-is-a-temp-key'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAX_CONTENT_LENGTH = 0.2 * 1024 * 1024 # limit size of uploaded file to 200kb
-    UPLOAD_FOLDER = 'csv/uploads/'
-    CSP = {
+	MAIL_SERVER = 'smtp.gmail.com'
+	MAIL_PORT = 587
+	MAIL_USE_TLS = True
+	MAIL_USE_SSL = False
+	# MAIL_PORT = 465
+	# MAIL_USE_TLS = False
+	# MAIL_USE_SSL = True
+	MAIL_USERNAME = 'thomas@prospecly.fr'
+	MAIL_PASSWORD = 'Helloworld2020#'
+	STRIPE_SECRET_KEY = 'sk_test_jezU1v6w8mAaxIQMvWOs2JxD00Ps2BSFcQ'
+	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
+	SECRET_KEY = os.environ.get('SECRET_KEY') or 'this-is-a-temp-key'
+	SQLALCHEMY_TRACK_MODIFICATIONS = False
+	MAX_CONTENT_LENGTH = 0.2 * 1024 * 1024 # limit size of uploaded file to 200kb
+	UPLOAD_FOLDER = 'csv/uploads/'
+	CSP = {
     # Fonts from fonts.google.com
     'font-src': '\'self\' themes.googleusercontent.com *.gstatic.com static/fonts/',
     # <iframe> based embedding for Maps and Youtube.
-    'frame-src': '\'self\' www.google.com www.youtube.com js.stripe.com',
+    'frame-src': '\'self\' www.google.com www.youtube.com https://js.stripe.com https://hooks.stripe.com', 
     # Assorted Google-hosted Libraries/APIs.
     'script-src': ['\'self\' ajax.googleapis.com *.googleanalytics.com static/js/*'
-                  '*.google-analytics.com stackpath.bootstrapcdn.com cdnjs.cloudflare.com js.stripe.com'],
+                  '*.google-analytics.com stackpath.bootstrapcdn.com cdnjs.cloudflare.com https://js.stripe.com'],
     # Used by generated code from http://www.google.com/fonts
     'style-src': ['\'self\'', 'ajax.googleapis.com', 'fonts.googleapis.com', '\'unsafe-inline\'',
                  '*.gstatic.com stackpath.bootstrapcdn.com'],
-    'default-src': '\'self\' *.gstatic.com'
+    'default-src': '\'self\' *.gstatic.com https://js.stripe.com/',
+    'connect-src': 'https://api.stripe.com'
 	}
 	
 

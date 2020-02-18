@@ -10,9 +10,11 @@ from config import DevelopmentConfig, TestConfig, ProductionConfig
 
 
 app = Flask(__name__, static_folder = './static')
-app.config.from_object(ProductionConfig)
+app.config.from_object(DevelopmentConfig)
 
-talisman = Talisman(app, content_security_policy=app.config['CSP'])
+# talisman = Talisman(app, 
+# 	content_security_policy=app.config['CSP'],
+# 	content_security_policy_nonce_in=['script-src'])
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 

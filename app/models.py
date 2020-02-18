@@ -53,6 +53,8 @@ class User(db.Model, UserMixin):
 	last_name = db.Column(db.String(30))
 	username = db.Column(db.String(60), index=True, unique=True)
 	email = db.Column(db.String(120), index=True, unique=True)
+	stripe_session_id = db.Column(db.String(256), nullable=True)
+	stripe_customer_id = db.Column(db.String(256), nullable=True)
 	password_hash = db.Column(db.String(120))
 	registration_date = db.Column(db.DateTime, default=datetime.utcnow)
 	# avatar = db.Column(db.String(120))

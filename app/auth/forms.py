@@ -21,15 +21,15 @@ class LoginForm(FlaskForm):
 
 
 class RegistrationForm(FlaskForm):
-	first_name = StringField('Prenom', validators=[DataRequired(message="Merci de remplir votre preom"), Regexp('^[A-Za-z][A-Za-z]*$', 0,
+	first_name = StringField('Prenom', validators=[DataRequired(message="Merci de remplir votre prenom"), Regexp('^[A-Za-z][A-Za-z]*$', 0,
 		'Les prenoms peuvent seulement contenir des lettres')])
 	last_name = StringField('Nom', validators=[DataRequired(message="Merci de remplir votre nom"), Regexp('^[A-Za-z][A-Za-z]*$', 0,
     	'Les noms peuvent seulement contenir des lettres')])
 	email = StringField('Email', validators=[DataRequired("Il faut un email pour s'inscrire."), Email(message='Oups... Cet email est invalide.')])
-	password = PasswordField('Password', validators=[DataRequired("Aucun mot de passe detecte.")])
-	password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password', message='Les mots de passse ne correspondent pas.')])
-	mobile = StringField('Telephone Mobile (06 ou 07)', validators=[DataRequired(message='Merci de remplir votre numero mobile.'), Regexp('^((06)|(07))[0-9]{8}$', 0, message='Oups ce numero est invalide')])
-	submit = SubmitField("S'inscrire")
+	# password = PasswordField('Password', validators=[DataRequired("Aucun mot de passe detecte.")])
+	# password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password', message='Les mots de passse ne correspondent pas.')])
+	# mobile = StringField('Telephone Mobile (06 ou 07)', validators=[DataRequired(message='Merci de remplir votre numero mobile.'), Regexp('^((06)|(07))[0-9]{8}$', 0, message='Oups ce numero est invalide')])
+	submit = SubmitField("Créer un compte")
 	
 	# When a form has a method with prefix 'validate', the method is invoked along with regular validators of the field the validate function is applied on 
 	def validate_first_name(self, first_name):

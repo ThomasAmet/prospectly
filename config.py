@@ -1,6 +1,11 @@
 import os
+from dotenv import load_dotenv, find_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+# Load envrion variables from .env in local
+if os.environ.get('GAE_INSTANCE'):
+	load_dotenv(find_dotenv())
 
 # There are three different ways to store the data in the application.
 # You can choose 'datastore', 'cloudsql', or 'mongodb'. Be sure to
@@ -21,6 +26,8 @@ CLOUDSQL_CONNECTION_NAME = 'prospectly-app:europe-west1:mysql-instance'
 
 
 class BaseConfig():
+	# Mail Settings
+	MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 	MAIL_SERVER = 'smtp.gmail.com'
 	MAIL_PORT = 587
 	MAIL_USE_TLS = True
@@ -28,11 +35,8 @@ class BaseConfig():
 	# MAIL_PORT = 465
 	# MAIL_USE_TLS = False
 	# MAIL_USE_SSL = True
-	MAIL_USERNAME = 'thomas@prospecly.fr'
-	MAIL_PASSWORD = 'Helloworld2020#'
-	STRIPE_SECRET_KEY = 'sk_test_jezU1v6w8mAaxIQMvWOs2JxD00Ps2BSFcQ'
-	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
-	SECRET_KEY = os.environ.get('SECRET_KEY') or 'this-is-a-temp-key'
+
+	SECRET_KEY = os.getenv('SECRET_KEY')
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 	MAX_CONTENT_LENGTH = 0.2 * 1024 * 1024 # limit size of uploaded file to 200kb
 	UPLOAD_FOLDER = 'csv/uploads/'
@@ -48,9 +52,11 @@ class BaseConfig():
     'style-src': ['\'self\'', 'ajax.googleapis.com', 'fonts.googleapis.com', '\'unsafe-inline\'',
                  '*.gstatic.com stackpath.bootstrapcdn.com'],
     'default-src': '\'self\' *.gstatic.com https://js.stripe.com/',
-    'connect-src': 'https://api.stripe.com'
+    'connect-src': '\'self\' https://api.stripe.com'
 	}
 	
+	CLOUDSQL_USER = os.getenv('CLOUDSQL_USER')
+	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD')
 
 	# MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
 	# MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
@@ -63,14 +69,33 @@ class BaseConfig():
 
 
 class TestConfig(BaseConfig):
-    TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test-config.db')
+	TESTING = True
+	DEBUG = True
+
+	# Stripe config
+	STRIPE_SECRET_KEY = 'sk_test_jezU1v6w8mAaxIQMvWOs2JxD00Ps2BSFcQ'
+	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
+	PLAN_MONTHLY_BASIC = 'plan_GggQmCKZATWq0c'
+	PLAN_YEARLY_BASIC = 'plan_GggP03CwhdtuYk'
+	STRIPE_WEBHOOK_SECRET = 'rk_test_NNI3yluB576PgjivOw8XPA1t00fjjGpwQ0'
+
+
+	SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test-config.db')
+
+   
 
 
 class DevelopmentConfig(BaseConfig):
 	DEBUG = True
-	CLOUDSQL_USER = 'thomas_admin'
-	CLOUDSQL_PASSWORD = 'difficult-password-to-guess' or os.environ.get('CLOUDSQL_PASSWORD')
+	TESTING = False
+
+	# Stripe config
+	STRIPE_SECRET_KEY = 'sk_test_jezU1v6w8mAaxIQMvWOs2JxD00Ps2BSFcQ'
+	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
+	PLAN_MONTHLY_BASIC = 'plan_GggQmCKZATWq0c'
+	PLAN_YEARLY_BASIC = 'plan_GggP03CwhdtuYk'
+	STRIPE_WEBHOOK_SECRET = 'rk_test_NNI3yluB576PgjivOw8XPA1t00fjjGpwQ0'
+
 	
 	# CloudSQL & SQLAlchemy configuration
 	CLOUDSQL_DATABASE = 'prospectly_development_database'
@@ -97,9 +122,14 @@ class DevelopmentConfig(BaseConfig):
 
 
 class ProductionConfig(BaseConfig):
+	STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+	STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+	STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+	PLAN_MONTHLY_BASIC = os.getenv('PLAN_MONTHLY_BASIC')
+	PLAN_YEARLY_BASIC = os.getenv('PLAN_YEARLY_BASIC')
+
 	
-	CLOUDSQL_USER = 'thomas_admin'
-	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD') or 'difficult-password-to-guess'
+	
 	
 	# CloudSQL & SQLAlchemy configuration
 	CLOUDSQL_DATABASE = 'prospectly_production_database'

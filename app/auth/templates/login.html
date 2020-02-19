@@ -5,23 +5,53 @@
 
 <!--navbar start-->
 {% block navbar %}
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('landing.home') }}">ACCUEIL</a> 
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('landing.pricing') }}">OFFRE</a> 
-  </li>
-  <li class="nav-item">
-    <a class="nav-link active" href="#blanc">CONNEXION</a> 
-  </li>
+<div class="collapse navbar-collapse" id="navbarNavDropdown">
+  <ul id="main-menu" class="nav navbar-nav ml-auto">
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('landing.home') }}">ACCUEIL</a> 
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('landing.pricing') }}">OFFRE</a> 
+    </li>
+    {% if not current_user.is_authenticated %}
+    <li class="nav-item">
+      <a class="nav-link active" href="">CONNEXION</a> 
+    </li>
+    {% endif %}
+  </ul>
+</div>
 {% endblock navbar %}
 
 
 
 {% block top_content %}
+
+  <section id="service" class="pos-r o-hidden text-center pb-0">
+    <div class="container mt-4 pt-5">
+       <div class="row text-center">
+        <div class="col-lg-8 col-md-12 ml-auto mr-auto">
+          <div class="section-title">
+            <div class="bg-animation">
+    <img class="zoom-fade" src="{{url_for('static', filename='images/pattern/03.png')}}" alt="">
+  </div>
+            <div class="title-effect">
+              <div class="bar bar-top"></div>
+              <div class="bar bar-right"></div>
+              <div class="bar bar-bottom"></div>
+              <div class="bar bar-left"></div>
+            </div>
+            <h6>Connexion</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section><!-- 
 <section class="page-title o-hidden pos-r md-text-center"  style="padding: 60px;">
-  <!-- <canvas id="confetti" class='bg-white'></canvas> -->
+  <canvas id="confetti" class='bg-white'></canvas>
 </section>
+    <div class="bg-animation">
+      <img class="zoom-fade" src="static/images/pattern/03.png" alt="">
+    </div> -->
 
 {% endblock top_content %}
 
@@ -35,31 +65,27 @@
 
 <!--login start-->
 
-<section class="register pos-r o-hidden pt-0 mt-0">
+<section class="register pos-r o-hidden pt-0 pb-4 my-0">
+
   <div class="bg-animation">
     <img class="zoom-fade" src="{{url_for('static', filename='images/pattern/03.png')}}" alt="">
   </div>
-  <div class="container">
+
+  <<!-- div class='container'>
     <div class="row text-center">
-      <div class="col-lg-8 col-md-12 ml-auto mr-auto">
+      <div class="col-lg-8 col-md-12 ml-auto mr-auto pt-0 wow fadeInLeft">
         <div class="section-title">
-          <div class="title-effect">
-            <div class="bar bar-top"></div>
-            <div class="bar bar-right"></div>
-            <div class="bar bar-bottom"></div>
-            <div class="bar bar-left"></div>
-          </div>
-            <h6>Connexion</h6>
+          <h2 class="title">Inscrivez vous en quelques clics.</h2>
+          <p>Collectez vos prospects en seulement quelques secondes et gérer l'ensemble du processus de vente en un temps-record</p>
         </div>
       </div>
     </div>
-  </div>
-
+  </div> -->
 
     <div class="form container text-center">
       <div class="col-lg-8 col-md-10 ml-auto mr-auto">
         <div class="register-form text-center">
-          <form role='form' id="register-form" method="post" action="">
+          <form role='form' id="login-form" method="post" action="">
             {{ form.hidden_tag() }}
             <div class="messages">
               {% if messages %}
@@ -100,7 +126,7 @@
             </div>
             <div class="row">
               <div class="col-md-12">
-                <button type="submit" name="register" class="btn btn-theme btn-circle mb-3 mt-3" data-text="Connexion">
+                <button type="submit" name="login-register" class="btn btn-theme btn-circle mb-3" data-text="Se Connecter">
                 <span>C</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span></br>
               </div>
             </div>

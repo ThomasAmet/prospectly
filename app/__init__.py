@@ -10,11 +10,11 @@ from config import DevelopmentConfig, TestConfig, ProductionConfig
 
 
 app = Flask(__name__, static_folder = './static')
-app.config.from_object(DevelopmentConfig)
+app.config.from_object(ProductionConfig)
 
-# talisman = Talisman(app, 
-# 	content_security_policy=app.config['CSP'],
-# 	content_security_policy_nonce_in=['script-src'])
+talisman = Talisman(app, 
+	content_security_policy=app.config['CSP'],
+	content_security_policy_nonce_in=['script-src'])
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -39,17 +39,17 @@ app.register_blueprint(crm_blueprint)
 from .auth.views import *
 
 admin = Admin(app, name='ProspectLy', index_view=AdminMyIndexView(), template_mode='bootstrap3')
-admin.add_view(AdminHomeView(name='Home'))
-admin.add_view(ModelView(User, db.session))
-admin.add_view(ModelView(Lead, db.session))
-admin.add_view(ModelView(Subscription, db.session))
-admin.add_view(ModelView(Plan, db.session))
-admin.add_view(ModelView(LeadRequest, db.session))
-admin.add_view(ModelView(Contact, db.session))
-admin.add_view(ModelView(Opportunity, db.session))
-admin.add_view(ModelView(CommercialStage, db.session))
-admin.add_view(ModelView(Status, db.session))
-admin.add_view(ModelView(CommercialStageStep, db.session))
-admin.add_view(ModelView(Task, db.session))
-admin.add_view(ModelView(Note, db.session))
+# admin.add_view(AdminHomeView(name='Home'))
+admin.add_view(AdminModelView(User, db.session))
+admin.add_view(AdminModelView(Lead, db.session))
+admin.add_view(AdminModelView(Subscription, db.session))
+admin.add_view(AdminModelView(Plan, db.session))
+admin.add_view(AdminModelView(LeadRequest, db.session))
+admin.add_view(AdminModelView(Contact, db.session))
+admin.add_view(AdminModelView(Opportunity, db.session))
+admin.add_view(AdminModelView(CommercialStage, db.session))
+admin.add_view(AdminModelView(Status, db.session))
+admin.add_view(AdminModelView(CommercialStageStep, db.session))
+admin.add_view(AdminModelView(Task, db.session))
+admin.add_view(AdminModelView(Note, db.session))
 

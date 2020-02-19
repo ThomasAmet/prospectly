@@ -5,14 +5,15 @@
 
 <!--navbar start-->
 {% block navbar %}
-{{ super() }}
+  {{super()}}
 {% endblock navbar %}
 
 
 
 {% block top_content %}
-<section class="page-title o-hidden pos-r md-text-center" data-bg-color="#fbf3ed">
-  <canvas id="confetti"></canvas>
+<!-- <section class="page-title o-hidden pos-r md-text-center" data-bg-color="#fbf3ed"> -->
+<section class="page-title o-hidden pos-r md-text-center" data-bg-color="#dad5ff">
+  <!-- <canvas id="canvas"></canvas> -->
     <div class="page-title-pattern"><img class="img-fluid" src="{{url_for('static', filename='images/bg/11.png')}}" alt=""></div>
   <div class="row text-center">
     <div class="col-lg-8 col-md-12 ml-auto mr-auto">
@@ -59,7 +60,8 @@
     <div class="form container text-center">
       <div class="col-lg-8 col-md-10 ml-auto mr-auto">
         <div class="register-form text-center">
-          <form role='form' id="register-form" method="post" action="{{url_for('auth.signup')}}">
+          <form role='form' id="register-form" method="post" action="">
+            {{ form.hidden_tag() }}
             <div class="messages">
               {% if messages %}
               {% endif %}
@@ -132,13 +134,13 @@
             </div>
             <div class="row">
               <div class="col-md-12">
-                <button type="submit" name="register" id='register-submit' class="btn btn-theme btn-circle mb-3 mt-3" data-text="Create Account">
-                <span>C</span><span>r</span><span>e</span><span>a</span><span>t</span><span>e</span>
-                <span> </span><span>A</span><span>c</span><span>c</span><span>o</span><span>u</span><span>n</span><span>t</span></a></button>
+                <button type="submit" name="register" id='register-submit' class="btn btn-theme btn-circle mb-3 mt-3" data-text="Je m'inscris">
+                <span>N</span><span>o</span><span>u</span><span>v</span><span>e</span><span>a</span><span>u</span>
+                <span>c</span><span>o</span><span>m</span><span>p</span><span>t</span><span>e</span></a></button>
                 <!-- <input type="submit" name='register' class="btn btn-theme btn-circle mb-3 mt-3"> -->
                 <!-- # {{ form.submit(class="btn btn-theme btn-circle mb-3 mt-3") }} -->
               </br>
-                <h7 class="mb-0 mt-5">Deja un compte? <a href="{{url_for('auth.login')}}"><i>Connectez-vous!</i></a></h7>
+                <h7 class="mb-0 mt-5">Déjà un compte? <a href="{{url_for('auth.login')}}"><i>Connectez-vous!</i></a></h7>
               </div>
             </div>
           </form>
@@ -153,4 +155,36 @@
 
 {% block scripts %}
 {{super()}}
+<!-- <script type="text/javascript">
+// Script that works with register.html to handle stripe (v2)
+$(document).ready(function(){
+
+    $("#register-submit").click(function(){        
+        $("#register-form").submit(); // Submit the form
+    });
+
+
+    $(document).on('submit', '#register-form', function(e){
+        e.preventDefault();
+        var formData = new FormData(this);
+        $.ajax({
+            type:'POST',
+            url: '/auth/inscription',
+            data: formData,
+            success: function(response) {
+              alert(response);
+              var stripe_session_id = response;
+              var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+              stripe.redirectToCheckout({
+                  sessionId: stripe_session_id
+                }).then(function (result) {
+                }); 
+            },
+            processData: false,
+            contentType: false,
+        });
+    });
+});
+</script>
+ -->
 {% endblock scripts %}

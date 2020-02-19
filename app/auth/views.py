@@ -25,7 +25,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
-stripe.api_key = 'sk_test_jezU1v6w8mAaxIQMvWOs2JxD00Ps2BSFcQ'
+stripe.api_key = app.config.get('STRIPE_SECRET_KEY')
 
 def admin_login_required(func):
 	@wraps(func)
@@ -38,135 +38,143 @@ def admin_login_required(func):
 
 @app.route('/stripe-public-key', methods=['GET'])
 def get_publishable_key():
-	return jsonify({'publicKey': app.config.get('STRIPE_PUBLISHABLE_KEY')})
+    return jsonify({'publicKey': app.config.get('STRIPE_PUBLISHABLE_KEY')})
+
 
 
 @auth.route('/inscription', methods=['GET', 'POST']) 
-@login_required
-@admin_login_required
 def signup():
-
-	# if current_user.is_authenticated:
-		# return redirect(url_for('landing.home'))
 
 	# plan = 'plan_GggQmCKZATWq0c'
 	form = RegistrationForm()
 
 	if request.method == 'POST':
 		try:
-			plan_id = get_plan_id(request.form.get('plan_name'))
-			print(plan_id)
-			customer = stripe.Customer.create(
-				name = request.form['first_name'] + ' ' + request.form['last_name'],
-				email=request.form['email']
-			)
-			print(customer)
+			# User creation for admin doesnt require stripe payment
+			if current_user.is_authenticated:
+				if current_user.is_admin():
+					user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
+						email=form.email.data.lower(), stripe_customer_id=None)	
+					user.set_username
+					db.session.add(user)
+					db.session.commit()
+					data = {
+						'timestamp': datetime.now().timestamp(),
+						'user_id': user.id,
+					}
+					token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
-			user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
-			email=form.email.data.lower(), stripe_customer_id=customer.id)
-			user.set_username()
-			db.session.add(user)
-			db.session.commit()
+					send_email(receiver_email=user.email,
+							   html_text='<a href="' + request.host_url + 'set-password?token=' + token + '">Cliquer ici</a> pour definir votre mot depasse.')
 
-			stripe_session = stripe.checkout.Session.create(
-				customer = customer.id,
-				customer_email = customer.email,
-				payment_method_types=['card'],
-				subscription_data={
-					'items': [{
-						'plan': plan_id,
-					}],
-				},
-				success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}' %request.host_url,
-				cancel_url='%sauth/paiement-echec' %request.host_url,
-				locale='fr'
-			)
+					return Response('Success', 200)				
+				else:
+					return redirect(url_for('landing.home'))
+			else:
+				plan_id = get_plan_id(request.form.get('plan_name'))
+				print(plan_id)
+				customer = stripe.Customer.create(
+					name = request.form['first_name'] + ' ' + request.form['last_name'],
+					email=request.form['email']
+				)
+				print(customer)
 
-			return Response('Success', status=200)
+				user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
+					email=form.email.data.lower(), stripe_customer_id=customer.id)
+				user.set_username()
+				db.session.add(user)
+				db.session.commit()
+
+				print('User creation suceeded!')
+
+				stripe_session = stripe.checkout.Session.create(
+					customer = customer.id,
+					# customer_email = customer.email,
+					payment_method_types=['card'],
+					subscription_data={
+						'items': [{
+							'plan': plan_id,
+						}],
+					}, # I think u r right.
+					success_url='%sauth/connexion?session_id={CHECKOUT_SESSION_ID}' % request.host_url,
+					cancel_url='%sauth/paiement-echec' %request.host_url,
+					locale='fr'
+				)
+
+				return Response(stripe_session.id, status=200)
 		except:
+			print('User creation failed!')
 			db.session.rollback()
 			return Response('Fail', status=404)
-
-	# return render_template('register.html', form=form)
-		# if 'register' in request.form:
-		# if form.validate_on_submit():
-	# 	user = User.query.filter_by(email=request.form['email']).first()
-	# 	if user:
-	# 		user.first_name = form.first_name.data.capitalize()
-	# 		user.last_name = form.last_name.data.capitalize()
-	# 		user.stripe_session_id = request.form['session_id']
-	# 	else:
-	# 		user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(), 
-	# 	email=form.email.data.lower(), stripe_customer_id=request.form['session_id'])
-	# 		# Check if username exists within form validates
-	# 		db.session.add(user)
-	# 	try:
-	# 		db.session.commit()
-	# 	except:
-	# 		db.session.rollback()
-	# 	print(user)
-	# 	return Response('Success', status=200) 
-	# 	# else:
-	# 	# 	return redirect(url_for('landing.home'))
 	else:		
+
+		if not current_user.is_authenticated:
+			if not request.args.get('plan_name'):
+				return redirect(url_for('landing.pricing'))
+		else:
+			if not current_user.is_admin:
+				return redirect(url_for('app.home'))
 		return render_template('register.html', form=form, plan_name=request.args.get('plan_name'))
 
 
-# @auth.route("/nouvelle-inscription", methods=['POST'])
-# def create_customer_and_session():
-# 	print(request.form)
-# 	plan_id = get_plan(request.form.get('plan_name'))
-# 	# This creates a new Customer and attaches the PaymentMethod in one API call.
-# 	try:
-# 		customer = stripe.Customer.create(
-# 			name = request.form['first_name'] + ' ' + request.form['last_name'],
-# 			email=request.form['email']
-# 		)
-# 		print(customer)
-# 		# At this point, associate the ID of the Customer object with your
-# 		# own internal representation of a customer, if you have one.
-# 		user = User(first_name=request.form['first_name'].capitalize(), last_name=request.form['last_name'].capitalize(),
-# 					email=request.form['email'].data.lower(), stripe_customer_id=customer.id)
-# 		# print(user)
-# 		db.session.add(user)
-# 		db.session.commit()
-# 		# Subscribe the user to the subscription created
-# 		stripe_session = stripe.checkout.Session.create(
-# 			customer = customer.id,
-# 			customer_email = customer.email,
-# 			payment_method_types=['card'],
-# 			subscription_data={
-# 				'items': [{
-# 					'plan': plan_id,
-# 				}],
-# 			},
-# 			success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}' %request.host_url,
-# 			cancel_url='%sauth/paiement-echec' %request.host_url,
-# 			locale='fr'
-# 		)
-# 		print(stripe_session)
-# 		return jsonify({'checkoutSessionId': stripe_session['id']})
-# 	except Exception as e:
-# 		db.session.rollback()
-# 		return jsonify(error=str(e)), 403
 
+# @auth.route('/paiement-reussi', methods=['GET'])
+# def on_succeeded_payment():
+# 	session_id = request.args.get('session_id')
+# 	print(session_id)
+# 	user = User.query.filter_by(stripe_session_id=session_id).first()
+# 	print(user.email)
+# 	data = {
+# 		'timestamp': datetime.now().timestamp(),
+# 		'user_id': user.id,
+# 	}
+# 	token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
-@auth.route('/paiement-reussi', methods=['GET'])
+# 	send_email(receiver_email=user.email,
+# 			   html_text='<a href="' + request.host_url + 'set-password?token=' + token + '">Cliquer ici</a> pour definir votre mot de passe.')
+
+# 	return render_template('payment_succeeded.html')
+
+@auth.route('/paiement-reussi', methods=['POST'])
 def on_succeeded_payment():
-	session_id = request.args.get('session_id')
-	print(session_id)
-	user = User.query.filter_by(stripe_session_id=session_id).first()
-	print(user.email)
-	data = {
-		'timestamp': datetime.now().timestamp(),
-		'user_id': user.id,
-	}
-	token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
-	send_email(receiver_email=user.email,
-			   html_text='<a href="' + request.host_url + 'set-password?token=' + token + '">Cliquer ici</a> pour definir votre mot de passe.')
+	webhook_secret = app.config.get('STRIPE_WEBHOOK_SECRET')
+	request_data = json.loads(request.data)
+	
+	if webhook_secret:
+		signature = request.headers.get('stripe-signature')
+		try:
+            event = stripe.Webhook.construct_event(
+                payload=request.data, sig_header=signature, secret=webhook_secret)
+            data = event['data']
+        except Exception as e:
+            return e
+        # Get the type of webhook event sent - used to check the status of PaymentIntents.
+        event_type = event['type']
+    else:
+    	data = request_data['data']
+    	event_type = request_data['type']
+    
+    data_object = data['object']
 
-	return render_template('payment_succeeded.html')
+	if event_type == 'checkout.session.completed':
+		print(data['customer'])
+		stripe_customer = stripe.Customer.retrieve(data_object['customer'])
+		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first()
+		print(user.email)
+		data = {
+			'timestamp': datetime.now().timestamp(),
+			'user_id': user.id,
+		}
+		token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+		send_email(receiver_email=user.email,
+				   html_text='<a href="' + request.host_url + 'set-password?token=' + token + '">Cliquer ici</a> pour definir votre mot depasse.')
+
+		return Response('Success', 200)
+
+	print('Other web hook')
+	return jsonify({'status': 'success'})
 
 
 @auth.route('/paiement-echec')
@@ -209,12 +217,6 @@ def profile():
 
 
 
-@auth.route('/test')
-@login_required
-def test():
-	form = RegistrationForm()
-	return render_template('register.html', form=form)
-
 class AdminMyIndexView(AdminIndexView):
 	""" 
 		Create a CustomAdminIndeView based on AdminIndexView in order to be accessible only by user who are admin 
@@ -223,11 +225,14 @@ class AdminMyIndexView(AdminIndexView):
 		return current_user.is_authenticated and current_user.is_admin()
 
 
+class  AdminModelView(ModelView):
+	def is_accessible(self):
+		return current_user.is_authenticated and current_user.is_admin()
 
-class AdminHomeView(BaseView):
-	@expose('/')
-	def index(self):
-		return self.render(url_for('landing.home'))
+# class AdminHomeView(BaseView):
+# 	@expose('/')
+# 	def index(self):
+# 		return self.render(url_for('landing.home'))
 
 
 
@@ -236,12 +241,15 @@ def send_email(receiver_email, html_text):
     print(html_text)
 
     subject = "Prospectly - Valider votre inscription"
-    # sender_email = app.config.get('MAIL_USERNAME')
-    sender_email = 'prospectly.test@gmail.com'
+    
+    # username_email = 'prospectly.test@gmail.com'
+    # sender_email = 'prospectly.test@gmail.com'
+    username_email = 'thomas@prospectly.fr'
+    sender_email = 'hello@prospectly.fr'
     
     
-    # password = app.config.get('MAIL_PASSWORD')
-    password = 'Freelance2020#'
+    password = app.config.get('MAIL_PASSWORD')
+    # password = 'Freelance2020#'
     # Create a multipart message and set headers
     message = MIMEMultipart('alternative')
     message["From"] = "Support - Prospectly <{}>".format(sender_email)
@@ -262,10 +270,11 @@ def send_email(receiver_email, html_text):
         server.sendmail(sender_email, receiver_email, text)
 
 
+# 	return plans[plan_name]
 def get_plan_id(plan_name):
 	plans = {
-		'monthly_basic':'plan_GgreHAs62bMtM8',
-		'yearly_basic':'plan_GgrfmtKZAV6j1l'
+		'monthly_basic':app.config.get('PLAN_MONTHLY_BASIC'),
+		'yearly_basic':app.config.get('PLAN_YEARLY_BASIC')
 	}
 
 	return plans[plan_name]

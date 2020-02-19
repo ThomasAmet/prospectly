@@ -19,3 +19,7 @@ def home():
 @landing.route('/offres')
 def pricing():
 	return render_template('landing/pricing.html', title='ProspectLy - Offre')
+
+@landing.route('/conditions-generales')
+def terms_conditions():
+	return render_template('landing/terms-conditions.html', title='ProspectLy - CGV')

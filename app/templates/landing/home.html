@@ -7,17 +7,21 @@
 
 <!--navbar start-->
 {% block navbar %}
-  <li class="nav-item">
-    <a class="nav-link active" href="{{ url_for('landing.home') }}">ACCUEIL</a> 
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('landing.pricing') }}">OFFRES</a> 
-  </li>
-  {% if not current_user.is_authenticated %}
-  <li class="nav-item">
-    <a class="nav-link" href="{{url_for('auth.login')}}">CONNEXION</a> 
-  </li>
-  {% endif %}
+<div class="collapse navbar-collapse" id="navbarNavDropdown">
+  <ul id="main-menu" class="nav navbar-nav ml-auto">
+    <li class="nav-item">
+      <a class="nav-link active" href="{{ url_for('landing.home') }}">ACCUEIL</a> 
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('landing.pricing') }}">OFFRES</a> 
+    </li>
+    {% if not current_user.is_authenticated %}
+    <li class="nav-item">
+      <a class="nav-link" href="{{url_for('auth.login')}}">CONNEXION</a> 
+    </li>
+    {% endif %}
+  </ul>
+</div>
 {% endblock navbar %}
 
 
@@ -31,7 +35,7 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-7 col-md-12 img-side">
-          <img class="img-center" src="static/images/mackbook/01.png" alt="">
+          <img class="img-center" src="static/images/mackbook/02.png" alt="">
         </div>
       </div>
     </div>
@@ -39,13 +43,17 @@
     <div class="container">
       <div class="row align-items-center">
         <div class="col-lg-5 col-md-12 md-mt-5 ml-auto">
-          <h2 class="mb-4 font-weight-normal wow fadeInUp" data-wow-duration="1.5s">Adopter la <span class="font-weight-bold"> Prospection</span> Nouvelle Génération</h2>
+          <h2 class="mb-4 font-weight-normal wow fadeInUp" data-wow-duration="1.5s">Adoptez la <span class="font-weight-bold"> Prospection</span> Nouvelle Génération</h2>
           <p class="lead mb-4 wow fadeInUp" data-wow-duration="2s" data-wow-delay="0.3s">La première plateforme de génération de prospects & CRM</p>
-          <a class="btn btn-theme wow fadeInUp px-4" data-wow-duration="3s" data-wow-delay="0.5s" href="{{url_for('landing.pricing')}}" data-text="Essai Gratuit"> 
-<!--             <span>E</span><span>s</span><span>s</span><span>a</span><span>i</span>
-            <span> </span><span>G</span><span>r</span><span>a</span><span>t</span><span>u</span><span>i</span><span>t</span> -->
-            <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
-          </a>
+          <div class='row'>
+            <div class="col-lg-12">
+            <a class="btn btn-theme wow fadeInUp px-10" data-wow-duration="3s" data-wow-delay="0.5s" href="{{url_for('landing.pricing')}}" data-text="Essai Gratuit"> 
+  <!--             <span>E</span><span>s</span><span>s</span><span>a</span><span>i</span>
+              <span> </span><span>G</span><span>r</span><span>a</span><span>t</span><span>u</span><span>i</span><span>t</span> -->
+              <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
+            </a>
+          </div>  
+          </div>
          <!-- Extra Button -->
          <!--  <a class="btn btn-dark wow fadeInUp" data-wow-duration="3s" data-wow-delay="0.5s" href="#" data-text="Ici tu peux rajouter le texte pour un 2eme boutton"> <span>L</span><span>e</span><span>a</span><span>r</span><span>n</span>
             <span> </span><span>M</span><span>o</span><span>r</span><span>e</span>
@@ -261,7 +269,7 @@
 
 
   <!--cta-essai start-->
-  <section id="blog" class="pos-r o-hidden">
+  <section id="blog" class="pos-r overflow-auto pb-0 mb-0">
     <div class="container">
       <div class="row text-center">
         <div class="col-lg-8 col-md-12 ml-auto mr-auto">
@@ -275,7 +283,7 @@
         </div>
       </div>
       <center>
-        <a class="btn btn-theme wow fadeInUp px-4" data-wow-duration="3s" data-wow-delay="0.5s" href="{{ url_for('landing.pricing')}}" data-text="Essai Gratuit">
+        <a class="btn btn-theme wow fadeInUp px-10" data-wow-duration="2s" data-wow-delay="0.0  s" href="{{ url_for('landing.pricing')}}" data-text="Essai Gratuit">
           <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
         </a>
       </center>
@@ -285,3 +293,9 @@
 </div>
 {% endblock main_content %}
 
+{% block footer %}
+  <div data-bg-color="#dad5ff">
+    <img class="img-center" src="{{url_for('static', filename='images/bg/03.png')}}" alt="">
+    {{super()}}
+  </div>
+{% endblock footer %}

@@ -9,48 +9,56 @@
 
 
 <!--navbar start-->
+
 {% block navbar %}
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('landing.home') }}">ACCUEIL</a> 
-  </li>
-  <li class="nav-item">
-    <a class="nav-link active" href="{{ url_for('landing.pricing') }}">OFFRES</a> 
-  </li>
-  {% if not current_user.is_authenticated %}
-  <li class="nav-item">
-    <a class="nav-link" href="{{url_for('auth.login')}}">CONNEXION</a> 
-  </li>
-  {% endif %}
+<div class="collapse navbar-collapse" id="navbarNavDropdown">
+  <ul id="main-menu" class="nav navbar-nav ml-auto  ">
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('landing.home') }}">ACCUEIL</a> 
+    </li>
+    <li class="nav-item">
+      <a class="nav-link active" href="{{ url_for('landing.pricing') }}">OFFRES</a> 
+    </li>
+    {% if not current_user.is_authenticated %}
+    <li class="nav-item">
+      <a class="nav-link" href="{{url_for('auth.login')}}">CONNEXION</a> 
+    </li>
+  </ul>
+</div>
+{% endif %}
+
 {% endblock navbar %}
 
 
 {% block top_content %}
 
 <!--body page_content start-->
-<div class="page-content">
+<!-- <div class="page-content"> -->
+  <!-- <div class="hero-bg" data>
+    <img class="img-fluid" src="{{url_for('static', filename='images/bg/08.png')}}" alt="">
+  </div> -->
   <div class="hero-bg">
-    <img class="img-fluid" src="{{url_for('static', filename='images/bg/04.png')}}" alt="">
+    <img class="img-fluid" src="{{url_for('static', filename='images/bg/02.png')}}" alt="">
   </div>
-
   <section id="service" class="pos-r o-hidden text-center pb-0">
-	<div class="container mt-4 pt-5">
-     <div class="row text-center">
-      <div class="col-lg-8 col-md-12 ml-auto mr-auto">
-        <div class="section-title">
-          <div class="title-effect">
-            <div class="bar bar-top"></div>
-            <div class="bar bar-right"></div>
-            <div class="bar bar-bottom"></div>
-            <div class="bar bar-left"></div>
+   <!--  <div class="page-title-pattern"><img class="img-fluid" src="{{url_for('static', filename='images/bg/08.png')}}" alt=""></div> -->
+    
+
+  	<div class="container mt-4 pt-5">
+       <div class="row text-center">
+        <div class="col-lg-8 col-md-12 ml-auto mr-auto">
+          <div class="section-title">
+            <div class="title-effect">
+              <div class="bar bar-top"></div>
+              <div class="bar bar-right"></div>
+              <div class="bar bar-bottom"></div>
+              <div class="bar bar-left"></div>
+            </div>
+            <h6>Nos Abonnements</h6>
           </div>
-          <h6>Nos Abonnements</h6>
         </div>
       </div>
-    </div>
-     <div class="row">
-
-   
-
+      <div class="row">
         <div class="col-lg-8 col-md-12 ml-auto mr-auto pt-0 wow fadeInLeft">
           <div class="section-title">
             <h2 class="title">Inscrivez vous en quelques clics.</h2>
@@ -60,8 +68,13 @@
       </div>
     </div>
   </section>
-    <section id="pricing-card" class="pos-r pt-0 text-center">
-        <canvas id="canvas"></canvas>
+<!-- </div> --> 
+{% endblock top_content %}
+
+{% block main_content %}
+
+  <section id="pricing-card" class="pos-r pt-0 text-center">
+    
 
     <div class="container">
 
@@ -230,8 +243,8 @@
   </div>  
   </section>
 
-</div>
-{% endblock top_content %}
+<!-- </div> -->
+{% endblock main_content %}
 
 
 {% block scripts %}

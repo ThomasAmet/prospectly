@@ -1,14 +1,10 @@
 // Script that works with register.html to handle stripe (v2)
 $(document).ready(function(){
-    .then(function(result) {
-      return result.json();
-    })
-    .then(function(data) {
-      checkoutSessionId = data.checkoutSessionId;
-    });
+
     $("#register-submit").click(function(){        
         $("#register-form").submit(); // Submit the form
     });
+
 
     $(document).on('submit', '#register-form', function(e){
         e.preventDefault();
@@ -18,7 +14,9 @@ $(document).ready(function(){
             url: '/auth/inscription',
             data: formData,
             success: function(response) {
-              var stripe_session_id = result.json();
+              alert(response);
+              var stripe_session_id = response;
+              var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
               stripe.redirectToCheckout({
                   sessionId: stripe_session_id
                 }).then(function (result) {
@@ -29,7 +27,6 @@ $(document).ready(function(){
         });
     });
 });
-
 
 
 // Script that works with register.html to handle stripe (v1)

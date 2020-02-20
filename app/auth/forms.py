@@ -10,6 +10,10 @@ csrf = CSRFProtect()
 
 
 
+class SetPasswordForm(FlaskForm):
+	password = PasswordField('Mot de passe:', validators=[DataRequired()])
+	password_confirmation = PasswordField('Confirmez le mot de passe', validators=[DataRequired(), EqualTo('password', message='Les mots de passse ne correspondent pas.')])
+	
 class LoginForm(FlaskForm):
 	email = StringField('Email:',
 						validators=[DataRequired(message="Il faut un email pour se connecter."),

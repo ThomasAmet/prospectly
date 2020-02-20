@@ -14,9 +14,12 @@ $(document).ready(function(){
             url: '/auth/inscription',
             data: formData,
             success: function(response) {
-              alert(response);
+              // alert(response);
               var stripe_session_id = response;
-              var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+              // Public Key for test
+              // var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+              // Public Key for production
+              var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
               stripe.redirectToCheckout({
                   sessionId: stripe_session_id
                 }).then(function (result) {

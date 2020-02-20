@@ -28,6 +28,7 @@ partial==1.0
 PyJWT==1.7.1
 PyMySQL==0.9.3
 python-dateutil==2.8.0
+python-dotenv==0.11.0
 python-editor==1.0.4
 pytz==2019.3
 requests==2.22.0

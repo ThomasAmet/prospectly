@@ -10,7 +10,7 @@ from config import DevelopmentConfig, TestConfig, ProductionConfig
 
 
 app = Flask(__name__, static_folder = './static')
-app.config.from_object(ProductionConfig)
+app.config.from_object(ProductionConfig) # Dont forget to switch stripe key in prospectly.js
 
 talisman = Talisman(app, 
 	content_security_policy=app.config['CSP'],

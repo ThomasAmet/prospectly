@@ -55,8 +55,6 @@ class BaseConfig():
     'connect-src': '\'self\' https://api.stripe.com'
 	}
 	
-	CLOUDSQL_USER = os.getenv('CLOUDSQL_USER')
-	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD')
 
 	# MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
 	# MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
@@ -77,7 +75,7 @@ class TestConfig(BaseConfig):
 	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
 	PLAN_MONTHLY_BASIC = 'plan_GggQmCKZATWq0c'
 	PLAN_YEARLY_BASIC = 'plan_GggP03CwhdtuYk'
-	STRIPE_WEBHOOK_SECRET = 'rk_test_NNI3yluB576PgjivOw8XPA1t00fjjGpwQ0'
+	STRIPE_WEBHOOK_SECRET = 'whsec_jouz3Ee2M3Mqzc7xKj8ViZDhy8Zfr10E'
 
 
 	SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test-config.db')
@@ -94,11 +92,13 @@ class DevelopmentConfig(BaseConfig):
 	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
 	PLAN_MONTHLY_BASIC = 'plan_GggQmCKZATWq0c'
 	PLAN_YEARLY_BASIC = 'plan_GggP03CwhdtuYk'
-	STRIPE_WEBHOOK_SECRET = 'rk_test_NNI3yluB576PgjivOw8XPA1t00fjjGpwQ0'
+	STRIPE_WEBHOOK_SECRET = 'whsec_jouz3Ee2M3Mqzc7xKj8ViZDhy8Zfr10E'
 
 	
 	# CloudSQL & SQLAlchemy configuration
 	CLOUDSQL_DATABASE = 'prospectly_development_database'
+	CLOUDSQL_USER = os.getenv('CLOUDSQL_USER')
+	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD')
 	# To start the proxy, use:
 	#
 	#	$ cloud_sql_proxy -instances=your-connection-name=tcp:3306
@@ -133,6 +133,8 @@ class ProductionConfig(BaseConfig):
 	
 	# CloudSQL & SQLAlchemy configuration
 	CLOUDSQL_DATABASE = 'prospectly_production_database'
+	CLOUDSQL_USER = os.getenv('CLOUDSQL_USER')
+	CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD')
 	# To start the proxy, use:
 	#
 	#	$ cloud_sql_proxy -instances=your-connection-name=tcp:3306

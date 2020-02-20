@@ -1,5 +1,6 @@
 from functools import wraps 
 from datetime import datetime
+from time import time
 
 from flask import render_template, redirect, url_for, request, flash, abort, jsonify, Response
 from flask_login import login_user, logout_user, login_required, current_user
@@ -9,7 +10,7 @@ from flask_admin.contrib.sqla import ModelView
 
 from app import db, app
 from . import auth
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, SetPasswordForm
 from ..models import User
 
 import stripe
@@ -118,68 +119,76 @@ def signup():
 
 
 
-# @auth.route('/paiement-reussi', methods=['GET'])
-# def on_succeeded_payment():
-# 	session_id = request.args.get('session_id')
-# 	print(session_id)
-# 	user = User.query.filter_by(stripe_session_id=session_id).first()
-# 	print(user.email)
-# 	data = {
-# 		'timestamp': datetime.now().timestamp(),
-# 		'user_id': user.id,
-# 	}
-# 	token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-
-# 	send_email(receiver_email=user.email,
-# 			   html_text='<a href="' + request.host_url + 'set-password?token=' + token + '">Cliquer ici</a> pour definir votre mot de passe.')
-
-# 	return render_template('payment_succeeded.html')
-
 @auth.route('/paiement-reussi', methods=['POST'])
 def on_succeeded_payment():
 
 	webhook_secret = app.config.get('STRIPE_WEBHOOK_SECRET')
-	request_data = json.loads(request.data)
-	
+
 	if webhook_secret:
 		signature = request.headers.get('stripe-signature')
 		try:
-            event = stripe.Webhook.construct_event(
+			event = stripe.Webhook.construct_event(
                 payload=request.data, sig_header=signature, secret=webhook_secret)
-            data = event['data']
-        except Exception as e:
-            return e
-        # Get the type of webhook event sent - used to check the status of PaymentIntents.
-        event_type = event['type']
-    else:
-    	data = request_data['data']
-    	event_type = request_data['type']
-    
-    data_object = data['object']
+			data = event['data']
+			event_type = event['type']
+		except Exception as e:
+			return e
+		# Get the type of webhook event sent - used to check the status of PaymentIntents.
+	else:
+		request_data = json.loads(request.data)
+		data = request_data['data']
+		event_type = request_data['type']
+
+	data_object = data['object']
 
 	if event_type == 'checkout.session.completed':
-		print(data['customer'])
+		print(data_object['customer'])
 		stripe_customer = stripe.Customer.retrieve(data_object['customer'])
 		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first()
 		print(user.email)
 		data = {
-			'timestamp': datetime.now().timestamp(),
+			# 'timestamp': datetime.now().timestamp(),
 			'user_id': user.id,
+			'exp': time() + 600
 		}
 		token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-
 		send_email(receiver_email=user.email,
-				   html_text='<a href="' + request.host_url + 'set-password?token=' + token + '">Cliquer ici</a> pour definir votre mot depasse.')
-
+				   html_text=render_template('email/welcome-validation.html', user=user, token=token))
 		return Response('Success', 200)
 
 	print('Other web hook')
 	return jsonify({'status': 'success'})
 
 
+
+
+@auth.route('/confirmation-compte', methods=['GET', 'POST'])
+def confirm_account():
+	if current_user.is_authenticated:
+		redirect( url_for('landing.home'))
+
+	token = request.args.get('token')
+	# created_time = datetime.fromtimestamp(token_data['timestamp'])
+	form = SetPasswordForm()
+	if form.validate_on_submit():
+		try:
+			token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+			user = User.query.filter_by(id=token_data['user_id'])
+			user.set_password(form.password.data)
+			db.session.commit()
+			flash('Votre mot de passe est enregistré')
+			return redirect(url_for('auth.login', email=user.email))
+		except(e):
+			db.session.rollback()
+			return redirect( url_for('landing.home'))
+	return render_template('confirm_account.html', form=form)
+
+
+
 @auth.route('/paiement-echec')
 def on_fail_payment():
 	return render_template('payment_failed.html')
+
 
 
 @auth.route('/connexion', methods=['GET', 'POST'])
@@ -237,37 +246,37 @@ class  AdminModelView(ModelView):
 
 
 def send_email(receiver_email, html_text):
-    print(receiver_email)
-    print(html_text)
+	print(receiver_email)
+	print(html_text)
 
-    subject = "Prospectly - Valider votre inscription"
-    
-    # username_email = 'prospectly.test@gmail.com'
+	subject = "Prospectly - Valider votre inscription"
+	#
+	# username_email = 'prospectly.test@gmail.com'
     # sender_email = 'prospectly.test@gmail.com'
-    username_email = 'thomas@prospectly.fr'
-    sender_email = 'hello@prospectly.fr'
-    
-    
-    password = app.config.get('MAIL_PASSWORD')
-    # password = 'Freelance2020#'
+	username_email = 'thomas@prospectly.fr'
+	sender_email = 'hello@prospectly.fr'
+
+	password = app.config.get('MAIL_PASSWORD')
+	print(password)
+	# password = 'Freelance2020#'
     # Create a multipart message and set headers
-    message = MIMEMultipart('alternative')
-    message["From"] = "Support - Prospectly <{}>".format(sender_email)
-    message["To"] = receiver_email
-    message["Subject"] = subject
-    # message["Bcc"] = receiver_email  # Recommended for mass emails
+	message = MIMEMultipart('alternative')
+	message["From"] = "Support - Prospectly <{}>".format(sender_email)
+	message["To"] = receiver_email
+	message["Subject"] = subject
+	# message["Bcc"] = receiver_email  # Recommended for mass emails
 
-    part2 = MIMEText(html_text, 'html')
-    message.attach(part2)
+	part2 = MIMEText(html_text, 'html')
+	message.attach(part2)
 
-    # Add body to email
-    text = message.as_string()
+	# Add body to email
+	text = message.as_string()
 
-    # Log in to server using secure context and send email
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-        server.login(username_email, password)
-        server.sendmail(sender_email, receiver_email, text)
+	# Log in to server using secure context and send email
+	context = ssl.create_default_context()
+	with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+		server.login(username_email, password)
+		server.sendmail(sender_email, receiver_email, text)
 
 
 # 	return plans[plan_name]
@@ -276,5 +285,4 @@ def get_plan_id(plan_name):
 		'monthly_basic':app.config.get('PLAN_MONTHLY_BASIC'),
 		'yearly_basic':app.config.get('PLAN_YEARLY_BASIC')
 	}
-
 	return plans[plan_name]

@@ -58,8 +58,8 @@ class User(db.Model, UserMixin):
 	registration_date = db.Column(db.DateTime, default=datetime.utcnow)
 	# avatar = db.Column(db.String(120))
 	admin = db.Column(db.Boolean, default=False)
-	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
-	leads_requested = db.relationship('LeadRequest', foreign_keys=[LeadRequest.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
+	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete')# many side
+	leads_requested = db.relationship('LeadRequest', foreign_keys=[LeadRequest.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete')# many side
 	contacts = db.relationship('Contact', backref='user', lazy='dynamic')# one-to-many (many side)
 	opportunities = db.relationship('Opportunity', backref='user', lazy='dynamic')# one-to-many (many-side)
 	commercial_stages = db.relationship('CommercialStage', backref='user', lazy='dynamic')# one-to-many (many-side)
@@ -103,7 +103,7 @@ class Plan(db.Model):
 	yearly_price = db.Column(db.Integer)
 	limit_daily_query = db.Column(db.Integer)
 	crm_access = db.Column(db.Boolean, default=False)
-	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.plan_id], backref=db.backref('plan', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
+	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.plan_id], backref=db.backref('plan', lazy='joined'), lazy='dynamic', cascade='all, delete')# many side
 
 	def __repr__(self):
 		return "<{}>".format(self.plan_name)
@@ -124,7 +124,7 @@ class Lead(db.Model):
 	company_activity_field = db.Column(db.String(60), index=True, unique=False, nullable=False)
 	owner_firstname	= db.Column(db.String(60), index=True, unique=False, nullable=True)
 	owner_lastname = db.Column(db.String(60), index=True, unique=False, nullable=True)
-	requests = db.relationship('LeadRequest', foreign_keys=[LeadRequest.lead_id], backref=db.backref('lead', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
+	requests = db.relationship('LeadRequest', foreign_keys=[LeadRequest.lead_id], backref=db.backref('lead', lazy='joined'), lazy='dynamic', cascade='all, delete')# many side
 
 	def exists(self):
 		lead = Lead.query.filter(Lead.company_name==self.company_name, Lead.company_postal_code==self.company_postal_code).first()
@@ -183,7 +183,7 @@ class Opportunity(db.Model):
 	contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'))
 	name = db.Column(db.String(120), nullable=False)
 	euros_value = db.Column(db.Numeric(8,2))
-	commercial_stages = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.opportunity_id], backref=db.backref('opportunity', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with CommercialStage (many side of a many-to-one with CommercialStageStep)
+	commercial_stages = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.opportunity_id], backref=db.backref('opportunity', lazy='joined'), lazy='dynamic', cascade='all, delete')# many-to-many with CommercialStage (many side of a many-to-one with CommercialStageStep)
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	deal_closed = db.Column(db.Boolean, default=False)
 	last_update = db.Column(db.DateTime, default=datetime.utcnow)
@@ -221,7 +221,7 @@ class Note(db.Model):
 class CommercialStage(db.Model):
 	__tablename__ = 'commercial_stages'
 	id = db.Column(db.Integer, primary_key=True)
-	stage_steps = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.commercial_stage_id], backref=db.backref('commercial_stage', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with Opportunity (many side of a many-to-one with CommercialStageStep)
+	stage_steps = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.commercial_stage_id], backref=db.backref('commercial_stage', lazy='joined'), lazy='dynamic', cascade='all, delete')# many-to-many with Opportunity (many side of a many-to-one with CommercialStageStep)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True) # one-side (necessary when user wants to creata a custom Stage)
 	name = db.Column(db.String(60))
 	closing_perc = db.Column(db.Numeric(2,2))

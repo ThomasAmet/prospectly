@@ -14,6 +14,7 @@ class SetPasswordForm(FlaskForm):
 	password = PasswordField('Mot de passe:', validators=[DataRequired()])
 	password_confirmation = PasswordField('Confirmez le mot de passe', validators=[DataRequired(), EqualTo('password', message='Les mots de passse ne correspondent pas.')])
 	
+	
 class LoginForm(FlaskForm):
 	email = StringField('Email:',
 						validators=[DataRequired(message="Il faut un email pour se connecter."),
@@ -53,7 +54,7 @@ class RegistrationForm(FlaskForm):
 		username = str(self.first_name.data).capitalize() + '_' + str(last_name.data).capitalize()
 		user = User.query.filter_by(username=username).first()
 		if user is not None:
-			raise ValidationError("Merci de changer le prenom ou le nom.")
+			raise ValidationError("Ce nom d'utilisateur existe. Merci de changer le prénom ou le nom.")
 
 	def validate_email(self, email):
 		'''

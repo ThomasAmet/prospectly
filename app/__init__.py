@@ -27,6 +27,8 @@ login_manager.login_message = 'Vous devez etre connectes pour voir cette page'
 
 from .models import *
 
+from .errors import errors as errors_blueprint
+app.register_blueprint(errors_blueprint)
 from .landing import landing as landing_blueprint
 app.register_blueprint(landing_blueprint)
 from .auth import auth as auth_blueprint

@@ -75,6 +75,8 @@ class TestConfig(BaseConfig):
 	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
 	PLAN_MONTHLY_BASIC = 'plan_GggQmCKZATWq0c'
 	PLAN_YEARLY_BASIC = 'plan_GggP03CwhdtuYk'
+	# stripe login
+	# stripe listen --forward-to localhost:9191/auth/paiement-reussi
 	STRIPE_WEBHOOK_SECRET = 'whsec_jouz3Ee2M3Mqzc7xKj8ViZDhy8Zfr10E'
 
 

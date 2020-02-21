@@ -37,7 +37,7 @@ def admin_login_required(func):
 	return decorated_view
 
 
-@app.route('/stripe-public-key', methods=['GET'])
+@auth.route('/stripe-public-key', methods=['GET'])
 def get_publishable_key():
     return jsonify({'publicKey': app.config.get('STRIPE_PUBLISHABLE_KEY')})
 
@@ -45,11 +45,12 @@ def get_publishable_key():
 
 @auth.route('/inscription', methods=['GET', 'POST']) 
 def signup():
-
+	
 	# plan = 'plan_GggQmCKZATWq0c'
 	form = RegistrationForm()
 
-	if request.method == 'POST':
+	# if request.method == 'POST':
+	if form.validate_on_submit():
 		try:
 			# User creation for admin doesnt require stripe payment
 			if current_user.is_authenticated:
@@ -60,15 +61,16 @@ def signup():
 					db.session.add(user)
 					db.session.commit()
 					data = {
-						'timestamp': datetime.now().timestamp(),
 						'user_id': user.id,
+						'exp': time() + 600
 					}
 					token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
 					send_email(receiver_email=user.email,
-							   html_text='<a href="' + request.host_url + 'set-password?token=' + token + '">Cliquer ici</a> pour definir votre mot depasse.')
+							   html_text=render_template('email/welcome-validation.html', user=user, token=token))
 
-					return Response('Success', 200)				
+					flash('Utilisateur crée.')
+					return Response('Success! Compte cree', 200)				
 				else:
 					return redirect(url_for('landing.home'))
 			else:
@@ -144,7 +146,7 @@ def on_succeeded_payment():
 	if event_type == 'checkout.session.completed':
 		print(data_object['customer'])
 		stripe_customer = stripe.Customer.retrieve(data_object['customer'])
-		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first()
+		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first_or_404()
 		print(user.email)
 		data = {
 			# 'timestamp': datetime.now().timestamp(),
@@ -173,15 +175,16 @@ def confirm_account():
 	if form.validate_on_submit():
 		try:
 			token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-			user = User.query.filter_by(id=token_data['user_id'])
+			user = User.query.filter_by(id=token_data['user_id']).first_or_404()
+			print(user)
 			user.set_password(form.password.data)
 			db.session.commit()
 			flash('Votre mot de passe est enregistré')
 			return redirect(url_for('auth.login', email=user.email))
-		except(e):
+		except:
 			db.session.rollback()
 			return redirect( url_for('landing.home'))
-	return render_template('confirm_account.html', form=form)
+	return render_template('confirm-account.html', form=form)
 
 
 

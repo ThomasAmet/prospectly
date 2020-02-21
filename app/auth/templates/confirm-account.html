@@ -96,7 +96,7 @@
                 <div class="form-group">
                     {{ form.password(placeholder="Mot de passe",class="form-control") }}
                   <div class="help-block with-errors">
-                    {% for error in form.email.errors %}
+                    {% for error in form.password.errors %}
                       {{error}}                    
                     {% endfor %}
                   </div>
@@ -108,7 +108,7 @@
                 <div class="form-group">
                   {{ form.password_confirmation(placeholder="Confirmez le mot de passe", class="form-control") }}
                   <div class="help-block with-errors"></div>
-                  {% for error in form.email.errors %}
+                  {% for error in form.password_confirmation.errors %}
                     {{error}}                    
                   {% endfor %}
                 </div>
@@ -116,7 +116,7 @@
             </div>
             <div class="row">
               <div class="col-md-12">
-                <button type="submit" name="password-confirmation-submit" class="btn btn-theme btn-circle mb-3" data-text="Valider">
+                <button type="submit" name="confirm" class="btn btn-theme btn-circle mb-3" data-text="Valider">
                 <span>V</span><span>a</span><span>l</span><span>i</span><span>d</span><span>a</span><span>t</span><span>o</span><span>n</span></br>
               </div>
             </div>

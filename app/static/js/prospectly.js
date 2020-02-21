@@ -1,5 +1,18 @@
-// Script that works with register.html to handle stripe (v2)
+// Script that works with register.html to handle stripe (v2) Why this script not called?
+
 $(document).ready(function(){
+    var stripe = null;
+
+    $.ajax({
+        type:'GET',
+        url: '/auth/stripe-public-key',
+        success: function(response) {
+          // alert(response['publicKey']);
+          stripe = Stripe(response['publicKey']); //pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+        },
+        processData: false,
+        contentType: false,
+    });
 
     $("#register-submit").click(function(){        
         $("#register-form").submit(); // Submit the form
@@ -19,7 +32,7 @@ $(document).ready(function(){
               // Public Key for test
               // var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
               // Public Key for production
-              var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
+              // var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
               stripe.redirectToCheckout({
                   sessionId: stripe_session_id
                 }).then(function (result) {
@@ -136,65 +149,65 @@ switcher.addEventListener("click", function(){
 
 
 
-//  Monthly Live
-$(document).ready(function(){
-  var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
-  var checkoutButton = document.getElementById('checkout-button-plan_GgreHAs62bMtM8');
+// //  Monthly Live
+// $(document).ready(function(){
+//   var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
+//   var checkoutButton = document.getElementById('checkout-button-plan_GgreHAs62bMtM8');
 
-  checkoutButton.addEventListener('click', function () {
-    // When the customer clicks on the button, redirect
-    // them to Checkout.
-    stripe.redirectToCheckout({
-      items: [{plan: 'plan_GgreHAs62bMtM8', quantity: 1}],
+//   checkoutButton.addEventListener('click', function () {
+//     // When the customer clicks on the button, redirect
+//     // them to Checkout.
+//     stripe.redirectToCheckout({
+//       items: [{plan: 'plan_GgreHAs62bMtM8', quantity: 1}],
 
-      // Do not rely on the redirect to the successUrl for fulfilling
-      // purchases, customers may not always reach the success_url after
-      // a successful payment.
-      // Instead use one of the strategies described in
-      // https://stripe.com/docs/payments/checkout/fulfillment
-      successUrl: window.location.protocol + '//app.prospectly.fr/success',
-      cancelUrl: window.location.protocol + '//app.prospectly.fr/canceled',
-    })
-    .then(function (result) {
-      if (result.error) {
-        // If `redirectToCheckout` fails due to a browser or network
-        // error, display the localized error message to your customer.
-        var displayError = document.getElementById('error-message');
-        displayError.textContent = result.error.message;
-      }
-    });
-  });
-});
+//       // Do not rely on the redirect to the successUrl for fulfilling
+//       // purchases, customers may not always reach the success_url after
+//       // a successful payment.
+//       // Instead use one of the strategies described in
+//       // https://stripe.com/docs/payments/checkout/fulfillment
+//       successUrl: window.location.protocol + '//app.prospectly.fr/success',
+//       cancelUrl: window.location.protocol + '//app.prospectly.fr/canceled',
+//     })
+//     .then(function (result) {
+//       if (result.error) {
+//         // If `redirectToCheckout` fails due to a browser or network
+//         // error, display the localized error message to your customer.
+//         var displayError = document.getElementById('error-message');
+//         displayError.textContent = result.error.message;
+//       }
+//     });
+//   });
+// });
 
-// Yearly Live
-$(document).ready(function(){
-  var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
+// // Yearly Live
+// $(document).ready(function(){
+//   var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
 
-  var checkoutButton = document.getElementById('checkout-button-plan_GgrfmtKZAV6j1l');
-  checkoutButton.addEventListener('click', function () {
-    // When the customer clicks on the button, redirect
-    // them to Checkout.
-    stripe.redirectToCheckout({
-      items: [{plan: 'plan_GgrfmtKZAV6j1l', quantity: 1}],
+//   var checkoutButton = document.getElementById('checkout-button-plan_GgrfmtKZAV6j1l');
+//   checkoutButton.addEventListener('click', function () {
+//     // When the customer clicks on the button, redirect
+//     // them to Checkout.
+//     stripe.redirectToCheckout({
+//       items: [{plan: 'plan_GgrfmtKZAV6j1l', quantity: 1}],
 
-      // Do not rely on the redirect to the successUrl for fulfilling
-      // purchases, customers may not always reach the success_url after
-      // a successful payment.
-      // Instead use one of the strategies described in
-      // https://stripe.com/docs/payments/checkout/fulfillment
-      successUrl: window.location.protocol + '//app.prospectly.fr/success',
-      cancelUrl: window.location.protocol + '//app.prospectly.fr/canceled',
-    })
-    .then(function (result) {
-      if (result.error) {
-        // If `redirectToCheckout` fails due to a browser or network
-        // error, display the localized error message to your customer.
-        var displayError = document.getElementById('error-message');
-        displayError.textContent = result.error.message;
-      }
-    });
-  });
-});
+//       // Do not rely on the redirect to the successUrl for fulfilling
+//       // purchases, customers may not always reach the success_url after
+//       // a successful payment.
+//       // Instead use one of the strategies described in
+//       // https://stripe.com/docs/payments/checkout/fulfillment
+//       successUrl: window.location.protocol + '//app.prospectly.fr/success',
+//       cancelUrl: window.location.protocol + '//app.prospectly.fr/canceled',
+//     })
+//     .then(function (result) {
+//       if (result.error) {
+//         // If `redirectToCheckout` fails due to a browser or network
+//         // error, display the localized error message to your customer.
+//         var displayError = document.getElementById('error-message');
+//         displayError.textContent = result.error.message;
+//       }
+//     });
+//   });
+// });
 
 
 // //  Monthly Test

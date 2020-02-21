@@ -70,11 +70,10 @@
               <div class="col-md-6 mx-auto">
                 <div class="form-group">
                     {{ form.first_name(placeholder="Prénom",class="form-control") }}
-                  <div class="help-block with-errors">
+                  <div class="help-block with-errors"></div>
                     {% for error in form.first_name.errors %}
-                    {{error}}                    
+                      {{error}}                    
                     {% endfor %}
-                  </div>
                 </div>
               </div>
             </div>
@@ -82,20 +81,25 @@
               <div class="col-md-6 mx-auto">
                 <div class="form-group">
                     {{ form.last_name(placeholder="Nom",class="form-control") }}
-                  <div class="help-block with-errors">
+                  <div class="help-block with-errors"></div>
+                    <ul class=errors>
                     {% for error in form.last_name.errors %}
-                    {{error}}                    
+                      </li>{{error}}</li>                    
                     {% endfor %}
-                  </div>
+                    </ul>
                 </div>
               </div>
             </div>
             <div class="row">
               <div class="col-md-6 mx-auto">
                 <div class="form-group">
-                  <input id="form_email" type="email" name="email" class="form-control" placeholder="Email" required="required" data-error="Un email valide est necessaire.">
+                  <!-- <input id="form_email" type="email" name="email" class="form-control" placeholder="Email" required="required" data-error="Un email valide est necessaire.">
+                  <div class="help-block with-errors"></div> -->
+                  {{ form.email(placeholder="Email",class="form-control") }}
                   <div class="help-block with-errors"></div>
-                  <!-- {{ form.email(placeholder="Email",class="form-control") }} -->
+                    {% for error in form.email.errors %}
+                      {{error}}                    
+                    {% endfor %}
                 </div>
               </div>
             </div>
@@ -138,7 +142,7 @@
                 <span>N</span><span>o</span><span>u</span><span>v</span><span>e</span><span>a</span><span>u</span>
                 <span>c</span><span>o</span><span>m</span><span>p</span><span>t</span><span>e</span></a></button>
                 <!-- <input type="submit" name='register' class="btn btn-theme btn-circle mb-3 mt-3"> -->
-                <!-- # {{ form.submit(class="btn btn-theme btn-circle mb-3 mt-3") }} -->
+                <!-- {{ form.submit(class="btn btn-theme btn-circle mb-3 mt-3") }} -->
               </br>
                 <h7 class="mb-0 mt-5">Déjà un compte? <a href="{{url_for('auth.login')}}"><i>Connectez-vous!</i></a></h7>
               </div>

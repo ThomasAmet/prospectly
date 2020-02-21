@@ -1,0 +1,86 @@
+{% extends 'layout/landing_base.html' %}
+<!--header start-->
+{% block header_attribs %} id="site-header" class="header header-2"{% endblock header_attribs %}
+
+
+<!--navbar start-->
+{% block navbar %}
+<div class="collapse navbar-collapse" id="navbarNavDropdown">
+  <ul id="main-menu" class="nav navbar-nav ml-auto">
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('landing.home') }}">ACCUEIL</a> 
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('landing.pricing') }}">OFFRE</a> 
+    </li>
+    {% if not current_user.is_authenticated %}
+    <li class="nav-item">
+      <a class="nav-link active" href="">CONNEXION</a> 
+    </li>
+    {% else %}
+    <li class='nav-item'>
+      <a class="nav-link active" href="{{url_for('crm.dashboard')}}">DASHBOARD</a> 
+    </li>
+    {% endif %}
+  </ul>
+</div>
+{% endblock navbar %}
+
+
+
+{% block top_content %}
+
+  <section id="service" class="pos-r o-hidden text-center pb-0">
+    <div class="container mt-4 pt-5">
+       <div class="row text-center">
+        <div class="col-lg-8 col-md-12 ml-auto mr-auto">
+          <div class="section-title">
+            <div class="bg-animation">
+    <img class="zoom-fade" src="{{url_for('static', filename='images/pattern/03.png')}}" alt="">
+  </div>
+            <div class="title-effect">
+              <div class="bar bar-top"></div>
+              <div class="bar bar-right"></div>
+              <div class="bar bar-bottom"></div>
+              <div class="bar bar-left"></div>
+            </div>
+            <h6>Erreur - Internal Error</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section><!-- 
+<section class="page-title o-hidden pos-r md-text-center"  style="padding: 60px;">
+  <canvas id="confetti" class='bg-white'></canvas>
+</section>
+    <div class="bg-animation">
+      <img class="zoom-fade" src="static/images/pattern/03.png" alt="">
+    </div> -->
+
+{% endblock top_content %}
+
+<!--page title end-->
+
+
+<!--body content start-->
+{% block main_content %}
+
+<div class="page-content">
+
+<section class="text-center o-hidden pt-0">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="error-page">
+        <span>4</span>
+  <span class="rotateme"><span class="screen-reader-text">0</span></span>
+  <span class="rotateme"><span class="screen-reader-text">0</span></span>
+  
+</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+{% endblock main_content %}

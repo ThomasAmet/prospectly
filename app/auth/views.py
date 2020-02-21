@@ -75,19 +75,31 @@ def signup():
 					return redirect(url_for('landing.home'))
 			else:
 				plan_id = get_plan_id(request.form.get('plan_name'))
-				print(plan_id)
-				customer = stripe.Customer.create(
-					name = request.form['first_name'] + ' ' + request.form['last_name'],
-					email=request.form['email']
-				)
-				print(customer)
+				user = User.query.filter_by(email=request.form['email']).first
+				# Case to handle custome who enter email but dont pay
+				if user:
+					# If user password it means customer paid
+					if user.password_hash:
+						return redirect(url_for('auth.login'))
 
-				user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
-					email=form.email.data.lower(), stripe_customer_id=customer.id)
-				user.set_username()
-				db.session.add(user)
+					else:
+						customer = stripe.Customer.retrieve(user.stripe_customer_id)
+						user.first_name = form.first_name.data.capitalize()
+						user.last_name = form.last_name.data.capitalize()
+				else:
+					plan_id = get_plan_id(request.form.get('plan_name'))
+					print(plan_id)
+					customer = stripe.Customer.create(
+						name = request.form['first_name'] + ' ' + request.form['last_name'],
+						email=request.form['email']
+					)
+
+					user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
+						email=form.email.data.lower(), stripe_customer_id=customer.id)
+					user.set_username()
+					db.session.add(user)
+
 				db.session.commit()
-
 				print('User creation suceeded!')
 
 				stripe_session = stripe.checkout.Session.create(
@@ -98,6 +110,7 @@ def signup():
 						'items': [{
 							'plan': plan_id,
 						}],
+						'trial_period_days':14,
 					}, # I think u r right.
 					success_url='%sauth/connexion?session_id={CHECKOUT_SESSION_ID}' % request.host_url,
 					cancel_url='%sauth/paiement-echec' %request.host_url,

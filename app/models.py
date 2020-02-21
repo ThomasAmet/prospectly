@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
-from datetime import datetime
+from datetime import datetime, timedelta, date
 # from db import Column, String, Integer, Boolean, DateTime, ForeignKey, relationship, backref
 
 
@@ -13,6 +13,7 @@ class Subscription(db.Model):
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)# one side
 	yearly = db.Column(db.Boolean, default=False)
 	subscription_date = db.Column(db.DateTime, default=datetime.utcnow)
+	next_payment = db.Column(db.DateTime)
 
 	def is_valid(self):
 		if Plan.query.get(self.plan_id).plan_name == 'Beta':
@@ -22,6 +23,26 @@ class Subscription(db.Model):
 		else:
 			limit_subscription = self.subscription_date.replace(month=self.subscription_date.month+1)
 		return limit_subscription >= datetime.utcnow()
+
+	def update_next_payment(self):
+		if Plan.query.get(self.plan_id).plan_name == 'Beta':
+			self.next_payment = datetime.utcnow() + timedelta(year=4)
+
+		if self.next_payment is None:
+			try:
+				self.next_payment = datetime.utcnow()+timedelta(days=14)
+			except ValueError:
+				self.next_payment = datetime.utcnow()+timedelta(days=15)
+		if self.yearly:
+			try:
+				self.next_payment = self.next_payment.replace(year=self.next_payment.year+1)
+			except ValueError:
+				self.next_payment = self.next_payment.replace(year=self.next_payment.year+1, month=self.next_payment.year+1, day=1)
+		else:
+			try:
+				self.next_payment = self.next_payment.replace(month=self.next_payment.month+1)
+			except ValueError:
+				self.next_payment = self.next_payment.replace(month=self.next_payment.month+2, day=1)
 
 	def __repr__(self):
 		return "<On {}, user {} subscribed to a yearly({}) plan {}>".format(self.subscription_date, self.user_id, self.yearly, self.plan_id )
@@ -102,7 +123,7 @@ class Plan(db.Model):
 	monthly_price = db.Column(db.Integer)
 	yearly_price = db.Column(db.Integer)
 	limit_daily_query = db.Column(db.Integer)
-	crm_access = db.Column(db.Boolean, default=False)
+	lead_generator = db.Column(db.Boolean, default=False)
 	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.plan_id], backref=db.backref('plan', lazy='joined'), lazy='dynamic', cascade='all, delete')# many side
 
 	def __repr__(self):

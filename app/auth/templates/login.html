@@ -114,9 +114,9 @@
                 </div>
               </div>
             </div>
-            <div class="row mt-3">
+            <div class="row mt-1">
               <div class="col-md-12">
-                <div class="remember-checkbox clearfix mb-5">
+                <div class="remember-checkbox clearfix mb-3 ">
                   <div class="custom-control custom-checkbox">
                     <input type="checkbox" class="custom-control-input" name='remember-me' id="customCheck1">
                     <label class="custom-control-label" for="customCheck1">Se rappeler de moi</label>
@@ -124,10 +124,15 @@
                 </div> 
               </div>
             </div>
-            <div class="row">
+           <div class="row">
               <div class="col-md-12">
-                <button type="submit" name="login-register" class="btn btn-theme btn-circle mb-3" data-text="Se Connecter">
-                <span>C</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span></br>
+                <button type="submit" name="login" id='login-submit' class="btn btn-theme btn-circle mb-3 mt-3" data-text="Se connecter">
+                  <span>C</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span>
+                </button>
+                <!-- <input type="submit" name='register' class="btn btn-theme btn-circle mb-3 mt-3"> -->
+                <!-- {{ form.submit(class="btn btn-theme btn-circle mb-3 mt-3") }} -->
+                </br>
+                <h7 class="mb-0 mt-5">Pas encore de compte? <a href="{{url_for('auth.signup')}}"><i>Inscrivez-vous maintenant!</i></a></h7>
               </div>
             </div>
           </form>

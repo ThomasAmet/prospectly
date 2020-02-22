@@ -70,7 +70,9 @@ def signup():
 							   html_text=render_template('email/welcome-validation.html', user=user, token=token))
 
 					flash('Utilisateur crée.')
-					return Response('Success! Compte cree', 200)				
+					# return Response('Success! Compte cree', 200)
+					return redirect(url_for('auth.signup'))
+
 				else:
 					return redirect(url_for('landing.home'))
 			else:

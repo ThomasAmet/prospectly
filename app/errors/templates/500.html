@@ -1,4 +1,4 @@
-{% extends 'layout/landing_base.html' %}
+{% extends 'main_landing_base.html' %}
 <!--header start-->
 {% block header_attribs %} id="site-header" class="header header-2"{% endblock header_attribs %}
 
@@ -8,10 +8,10 @@
 <div class="collapse navbar-collapse" id="navbarNavDropdown">
   <ul id="main-menu" class="nav navbar-nav ml-auto">
     <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('landing.home') }}">ACCUEIL</a> 
+      <a class="nav-link" href="{{ url_for('main.home') }}">ACCUEIL</a> 
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('landing.pricing') }}">OFFRE</a> 
+      <a class="nav-link" href="{{ url_for('main.pricing') }}">OFFRE</a> 
     </li>
     {% if not current_user.is_authenticated %}
     <li class="nav-item">
@@ -19,7 +19,7 @@
     </li>
     {% else %}
     <li class='nav-item'>
-      <a class="nav-link active" href="{{url_for('crm.dashboard')}}">DASHBOARD</a> 
+      <a class="nav-link active" href="{{url_for('crm.home')}}">DASHBOARD</a> 
     </li>
     {% endif %}
   </ul>

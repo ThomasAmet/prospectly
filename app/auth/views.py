@@ -36,6 +36,9 @@ def admin_login_required(func):
 		return func(*args, **kwargs)
 	return decorated_view
 
+@auth.route('/')
+def index():
+	return render_template('profile.html')
 
 @auth.route('/stripe-public-key', methods=['GET'])
 def get_publishable_key():
@@ -74,7 +77,7 @@ def signup():
 					return redirect(url_for('auth.signup'))
 
 				else:
-					return redirect(url_for('landing.home'))
+					return redirect(url_for('main.home'))
 			else:
 				plan_id = get_plan_id(request.form.get('plan_name'))
 				user = User.query.filter_by(email=request.form['email']).first
@@ -128,7 +131,7 @@ def signup():
 
 		if not current_user.is_authenticated:
 			if not request.args.get('plan_name'):
-				return redirect(url_for('landing.pricing'))
+				return redirect(url_for('main.pricing'))
 		else:
 			if not current_user.is_admin:
 				return redirect(url_for('app.home'))
@@ -182,7 +185,7 @@ def on_succeeded_payment():
 @auth.route('/confirmation-compte', methods=['GET', 'POST'])
 def confirm_account():
 	if current_user.is_authenticated:
-		redirect( url_for('landing.home'))
+		redirect( url_for('main.home'))
 
 	token = request.args.get('token')
 	# created_time = datetime.fromtimestamp(token_data['timestamp'])
@@ -198,7 +201,7 @@ def confirm_account():
 			return redirect(url_for('auth.login', email=user.email))
 		except:
 			db.session.rollback()
-			return redirect( url_for('landing.home'))
+			return redirect( url_for('main.home'))
 	return render_template('confirm-account.html', form=form)
 
 
@@ -212,7 +215,7 @@ def on_fail_payment():
 @auth.route('/connexion', methods=['GET', 'POST'])
 def login():
 	# if current_user.is_authenticated:
-	# 	redirect( url_for('landing.home'))
+	# 	redirect( url_for('main.home'))
 	form = LoginForm()
 	if form.validate_on_submit():
 		user = User.query.filter_by(email=form.email.data.lower()).first()
@@ -232,8 +235,8 @@ def login():
 @login_required
 def logout():
 	logout_user()
-	flash('You have been logged out.')
-	return redirect(url_for('landing.home'))
+	flash('Vous etes maintenant deconnectes.')
+	return redirect(url_for('main.home'))
 
 
 
@@ -259,7 +262,7 @@ class  AdminModelView(ModelView):
 # class AdminHomeView(BaseView):
 # 	@expose('/')
 # 	def index(self):
-# 		return self.render(url_for('landing.home'))
+# 		return self.render(url_for('main.home'))
 
 
 

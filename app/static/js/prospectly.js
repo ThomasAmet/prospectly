@@ -44,7 +44,6 @@ $(document).ready(function(){
     });
 });
 
-
 // Script that works with register.html to handle stripe (v1)
 // $(document).ready(function(){
   
@@ -77,6 +76,11 @@ $(document).ready(function(){
 
 
 $(document).ready(function(){
+  
+  $('#banner-wrap').addClass("fadeInDown wow");
+
+
+ 
 // // JQuery to change the format of element from the datepicker class
   let datepicker = $('#due-date-datepicker');
   if(datepicker.length > 0){

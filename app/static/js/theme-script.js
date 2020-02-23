@@ -209,10 +209,20 @@ function headerheight() {
 --------------------------------------*/
 function fxheader() {
   $(window).on('scroll', function () {
-    if ($(window).scrollTop() >= 100) {
+    if ($(window).scrollTop() >= 80) {
       $('#header-wrap').addClass('fixed-header');
     } else {
       $('#header-wrap').removeClass('fixed-header');
+    }
+  });
+};
+
+function fxbanner() {
+  $(window).on('scroll', function () {
+    if ($(window).scrollTop() >= 80) {
+      $('#banner-wrap').addClass('fixed-banner');
+    } else {
+      $('#banner-wrap').removeClass('fixed-banner');
     }
   });
 };
@@ -428,6 +438,7 @@ $(document).ready(function() {
     scrolltop(),
     headerheight(),
     fxheader(),
+    fxbanner(), 
     scrolling(),
     databgcolor(),  
     accordian(),

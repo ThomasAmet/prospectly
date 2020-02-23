@@ -1,0 +1,134 @@
+{% extends 'main_base.html' %}
+<!--header start-->
+{% block header_attribs %} id="site-header" class="header header-2"{% endblock header_attribs %}
+
+
+<!--navbar start-->
+{% block navbar %}
+{{super()}}
+{% endblock navbar %}
+
+
+
+
+{% block top_content %}
+
+<!--body page_content start-->
+<div class="page-content">
+<!-- s -->
+  <section id="service" class="pos-r o-hidden text-center pb-0">
+    <div class="hero-bg">
+        <img class="img-fluid" src="{{url_for('static', filename='images/bg/08.png')}}" alt="">
+    </div>
+    <!-- <div class="page-title-pattern" data-bg-color="#dad5ff"><img class="img-fluid" src="{{url_for('static', filename='images/bg/03.png')}}" alt=""></div> -->
+
+    <div class="container mt-4 pt-10  ">
+       <div class="row text-center">
+        <div class="col-lg-8 col-md-12 ml-auto mr-auto">
+          <div class="section-title">
+            <div class="title-effect">
+              <div class="bar bar-top"></div>
+              <div class="bar bar-right"></div>
+              <div class="bar bar-bottom"></div>
+              <div class="bar bar-left"></div>
+            </div>
+            <h6>Conditions générales</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock top_content %}
+
+{% block main_content %}
+
+<!-- <div class="page-content"> -->
+
+<!--terms start-->
+
+<section class='pt-6 pb-0'>
+  <div class="container">
+    <div class="row mt-0">
+      <div class="col-lg-12 col-md-12">
+        <h4 class="text-theme">1. Termes</h4>
+        <p class="mb-3">En accédant au logiciel "Prospectly" vous ("l'acheteur") accepte les termes et conditions mentionnés ci-dessous, ainsi que toutes les lois et régulations applicables, selon le fort du vendeur soit Prospectly LLC - Albuquerque, NM, États-Unis. Si vous n'acceptez pas ces termes, vous avez interdiction de commander, accéder, acheter et utiliser le contenu de ce logiciel.
+        Prospectly LLC ("le vendeur") s'engage à fournir l'accès complet aux fonctionnalités du logiciel selon le plan sélectionné par l’acheteur. Il s'engage à fournir l'accès au logiciel tant que l’abonnement est payé tous les mois par l’acheteur.
+        </p>
+
+        <h4 class="text-theme mt-5">2. Propriété intellectuelle</h4>
+        <p class="mb-3">Le matériel, informations, contenus et tout autre documents accessibles ou fournis par le logiciel est sujet à l'application des lois de l'état du Nouveau Mexique aux États-Unis et internationales sur la propriété intellectuelle. Tout acte de téléchargement, de partage, de reproduction ou de réutilisation de ce matériel peut et sera poursuivi en justice.
+        Si l'acheteur revend de manière directe ou indirecte les données proposées par le vendeur, ce dernier se réserve le droit de supprimer les accès au compte de l'acheteur ainsi que de poursuivre en justice l'acheteur.
+        Toute réutilisation, direct ou indirect du contenu du logiciel est strictement interdite. 
+        </p>
+
+        <h4 class="text-theme mt-5"> 3. Licence d'utilisation</h4>
+        <p class="mb-3">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente, distinctio iste praesentium totam quasi tempore, magnam ipsum cum animi.</p>
+
+        <h4 class="text-theme mt-5">4. Politique tarifaire</h4>
+        <p class="mb-3">Toute les personnes ayant acheté le logiciel ont le droit d'utiliser les informations contenues pour et seulement dans le cadre d'une utilisation personnelle. Nous nous réservons le droit de retirer l'accès au logiciel.</p>
+
+        <!-- <ul class="list-unstyled list-icon mb-3">
+          <li class="mb-3"> <i class="la la-check"></i> Lorem ipsum dolor sit amet, consectetur</li>
+          <li class="mb-3"> <i class="la la-check"></i> Quidem error quae illo excepturi nostrum blanditiis laboriosam</li>
+          <li class="mb-3"> <i class="la la-check"></i> Molestias, eum nihil expedita dolorum odio dolorem</li>
+          <li class="mb-3"> <i class="la la-check"></i> Eum nihil expedita dolorum odio dolorem</li>
+          <li> <i class="la la-check"></i> Explicabo rem illum magni perferendis</li>
+        </ul> -->
+        
+        <h4 class="text-theme mt-5">5. Paiement</h4>
+        <p class="mb-5">Les paiements par carte bancaire sont débités au moment de la commande sauf si il y a une période d’essai. Le paiement sécurisé en ligne par carte bancaire est réalisé par l’intermédiaire de tiers de paiement. Les informations transmises sont chiffrées dans les règles de l’art et ne peuvent être lues au cours du transport sur le réseau. Toute garantie quant à la sécurité de ce système est entièrement de la responsabilité du sous-traitant et ne saurait nous être imputée.
+        Les paiements effectués par l'acheteur ne seront considérés comme définitifs qu'après encaissement effectif des sommes dues par l'acheteur.
+        Les éventuels accès seront alors délivrés après encaissement du paiement (ou du premier paiement selon échéancier convenu) et envoyés à l'acheteur par courrier électronique.
+        En cas d’absence de règlement ou de retard de règlement de l'acheteur, y compris dès le premier incident de paiement constaté, Prospectly LLC ne sera pas tenue de délivrer les accès et Ace Up Media  LLC se réserve le droit de suspendre l’accès au logiciel.
+        En outre, Prospetcly LLC se réserve le droit, en cas de non-respect des conditions de paiement figurant ci-dessus, de suspendre ou d'annuler les accès de l'acheteur.
+        Tout contrat conclu avec un échelonnement de paiement est définitif. Tout retard de paiement entraînera de plein droit: l’application d’un taux de pénalités de retard de 20%, exigible automatiquement le jour suivant la date de règlement prévue l’application d’une pénalité pour couverture des frais de recouvrement de 100€ (sachant qu’un surplus pourrait être demandé si les frais de recouvrement réellement engagés dépassaient ce montant forfaitaire).
+        Les sommes versées à la commande ne pourront à aucun moment, être considérées comme des arrhes ou des acomptes.
+        </p>
+
+         <h4 class="text-theme mt-5">6. Politique de remboursement</h4>
+                <p class="mb-3">Nous n'offrons pas de remboursement concernant l’abonnement de prospectly. Tout achat est considéré comme final. Par conséquent, toute demande d'annulation de l’abonnement ne sera prise en compte.
+        A titre informatif, la réglementation exclut du délai de rétractation légal la “fourniture d’enregistrements audio ou vidéo, ou de logiciels informatiques lorsqu’ils ont été descellés par le consommateur”. Le délai de rétractation légal est donc nul à partir du moment où le produit commandé est consulté ou téléchargé partiellement ou en totalité.
+        La non demande de remboursement de l'acheteur dans le délai mentionné sur la page de vente équivaut à un renoncement express de son droit de rétractation.
+        </p>
+
+        <h4 class="text-theme mt-5">7. Clause de non-responsabilité</h4>
+        <p class="mb-3">Le matériel de ce logiciel est fournis "tel quel". Nous ne donnons aucune garantie sur l'apparition de matériel complémentaire. Nous ne sommes en aucun cas responsables de tous problèmes légaux, litiges, amendes ou toutes autres sanctions juridiques résultants de l'application du contenu de ce logiciel. Nous encourageons chaque participants à faire ses propres recherches et à se renseigner sur les risques légaux que peut entraîner une activité commerciale ainsi que sur les étapes nécessaires à la déclaration de ses revenus, et autres formalités fiscales, juridiques ou administratives.</p>
+
+         <h4 class="text-theme mt-5"> 8. Limitations</h4>
+        <p class="mb-3">Nous ne sommes en aucun cas responsables de lésions, préjudices ou dommages (qui incluent, sans limitation, perte de données, financière ou due à l'interruption d'un business) étant liés à l'utilisation du matériel et informations procurés dans le logiciel.</p>
+
+        <h4 class="text-theme mt-5">9. Liens</h4>
+        <p class="mb-3">Nous ne sommes pas responsables du contenu des sources vers lesquelles pointent les liens ou sites internets partagés dans le cadre du logiciel.</p>
+
+        <h4 class="text-theme mt-5">10. Liens</h4>
+        <p class="mb-3">Les termes et conditions générales de ce site peuvent être changés à tout moment, sans que vous ne soyez prévenus. En utilisant le contenu du logiciel, vous acceptez d'être lié à la version actuelle et donc la plus récente des termes et conditions générales.
+        Toutes les clause mentionnées dans ces présentes CGV s'appliquent de facto à toute future version du logiciel vendue par Prospectly LLC.
+        </p>
+
+        <h4 class="text-theme mt-5">11. Loi Applicable</h4>
+        <p class="mb-3">Toutes réclamations concernant les termes et conditions générales de ce site sont soumises aux lois du Nouveau Mexique,  de la société Prospectly LLC basé à ALBUQUERQUE, 87120, NM, États-Unis.</p>
+
+       <!--  <a class="btn btn-theme" href="#" data-text="Accept"> <span>A</span><span>c</span><span>c</span><span>e</span><span>p</span>
+            <span>t</span>
+          </a>
+          <a class="btn btn-dark" href="#" data-text="Close"> <span>C</span><span>l</span><span>o</span><span>s</span><span>e</span>
+           </a> -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--terms end-->
+
+<!-- </div> -->
+{% endblock main_content %}
+
+
+{% block footer %}
+  <div data-bg-color="#dad5ff">
+    <img class="img-fluid" src="{{url_for('static', filename='images/bg/03.png')}}" alt="">
+  {{super()}}
+  </div>
+{% endblock footer %}

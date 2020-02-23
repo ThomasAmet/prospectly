@@ -66,7 +66,7 @@ def add_prospect():
 	return redirect(url_for('crm.view_prospect_list'))
 	# except:
 	# 	db.session.rollback()
-	# 	# return redirect(url_for('landing.home'))
+	# 	# return redirect(url_for('main.home'))
 	# 	return render_template('test.html')
 
 

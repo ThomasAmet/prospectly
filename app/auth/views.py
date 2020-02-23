@@ -52,7 +52,6 @@ def signup():
 	# plan = 'plan_GggQmCKZATWq0c'
 	form = RegistrationForm()
 
-	# if request.method == 'POST':
 	if form.validate_on_submit():
 		try:
 			# User creation for admin doesnt require stripe payment
@@ -80,28 +79,28 @@ def signup():
 					return redirect(url_for('main.home'))
 			else:
 				plan_id = get_plan_id(request.form.get('plan_name'))
-				user = User.query.filter_by(email=request.form['email']).first
+				user = User.query.filter_by(email=request.form['email']).first()
 				# Case to handle custome who enter email but dont pay
 				if user:
-					# If user password it means customer paid
+					# If user password exists, it means customer paid so we redirect to login
 					if user.password_hash:
 						return redirect(url_for('auth.login'))
-
+					# Else retrieve user and update info
 					else:
+						user.first_name = request.form['first_name'].capitalize()
+						user.last_name = request.form['last_name'].capitalize()
 						customer = stripe.Customer.retrieve(user.stripe_customer_id)
-						user.first_name = form.first_name.data.capitalize()
-						user.last_name = form.last_name.data.capitalize()
+						customer.name = request.form['first_name'].capitalize() + ' ' + request.form['last_name'].capitalize()		
+				# If not user, create a new one		
 				else:
 					plan_id = get_plan_id(request.form.get('plan_name'))
 					print(plan_id)
 					customer = stripe.Customer.create(
-						name = request.form['first_name'] + ' ' + request.form['last_name'],
-						email=request.form['email']
+						name = request.form['first_name'].capitalize() + ' ' + request.form['last_name'].capitalize(),
+						email=request.form['email'].lower()
 					)
-
 					user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
-						email=form.email.data.lower(), stripe_customer_id=customer.id)
-					user.set_username()
+								semail=form.email.data.lower(), stripe_customer_id=customer.id)
 					db.session.add(user)
 
 				db.session.commit()
@@ -195,6 +194,7 @@ def confirm_account():
 			token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
 			user = User.query.filter_by(id=token_data['user_id']).first_or_404()
 			print(user)
+			user.set_username()
 			user.set_password(form.password.data)
 			db.session.commit()
 			flash('Votre mot de passe est enregistré')

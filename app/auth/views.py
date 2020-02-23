@@ -49,8 +49,15 @@ def signup():
 	# plan = 'plan_GggQmCKZATWq0c'
 	form = RegistrationForm()
 
-	# if request.method == 'POST':
-	if form.validate_on_submit():
+	if request.method == 'POST':
+		username = form.first_name.data.capitalize()+'_'+form.last_name.data.capitalize()
+		user = User.query.filter_by(username=username).first()
+		if user is not None:
+			# print("Ce prenom et nom sont deja utilises")
+			flash("Ce prenom et nom sont deja utilises")
+			return redirect(url_for('auth.signup', plan_name=request.form.get('plan_name')))
+
+	# if form.validate_on_submit():
 		try:
 			# User creation for admin doesnt require stripe payment
 			if current_user.is_authenticated:
@@ -72,12 +79,14 @@ def signup():
 					flash('Utilisateur crée.')
 					return Response('Success! Compte cree', 200)				
 				else:
+					flash("Une erreur s'est produite.")
 					return redirect(url_for('landing.home'))
 			else:
 				plan_id = get_plan_id(request.form.get('plan_name'))
-				user = User.query.filter_by(email=request.form['email']).first
+				user = User.query.filter_by(email=request.form['email']).first()
+				# print(user)
 				# Case to handle custome who enter email but dont pay
-				if user:
+				if user is not None:
 					# If user password it means customer paid
 					if user.password_hash:
 						return redirect(url_for('auth.login'))
@@ -87,8 +96,6 @@ def signup():
 						user.first_name = form.first_name.data.capitalize()
 						user.last_name = form.last_name.data.capitalize()
 				else:
-					plan_id = get_plan_id(request.form.get('plan_name'))
-					print(plan_id)
 					customer = stripe.Customer.create(
 						name = request.form['first_name'] + ' ' + request.form['last_name'],
 						email=request.form['email']
@@ -129,7 +136,7 @@ def signup():
 				return redirect(url_for('landing.pricing'))
 		else:
 			if not current_user.is_admin:
-				return redirect(url_for('app.home'))
+				return redirect(url_for('crm.home'))
 		return render_template('register.html', form=form, plan_name=request.args.get('plan_name'))
 
 

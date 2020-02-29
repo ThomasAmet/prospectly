@@ -16011,9 +16011,9 @@ textarea[resize="horizontal"] {
 }
 
 .has-success:after {
-  content: "\ea26";
+/*  content: "\ea26";
   color: daken(#2dce89, 18%);
-  background-color: #69deac;
+  background-color: #69deac;*/
 }
 
 .has-success .form-control {
@@ -16029,9 +16029,9 @@ textarea[resize="horizontal"] {
 }
 
 .has-danger:after {
-  content: "\ea53";
+/*  content: "\ea53";
   color: daken(#fb6340, 18%);
-  background-color: #fda08b;
+  background-color: #fda08b;*/
 }
 
 .has-danger .form-control {

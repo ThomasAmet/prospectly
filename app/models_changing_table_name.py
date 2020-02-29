@@ -75,7 +75,6 @@ class User(db.Model, UserMixin):
 	username = db.Column(db.String(60), index=True)
 	email = db.Column(db.String(120), index=True, unique=True)
 	stripe_customer_id = db.Column(db.String(256), nullable=True)
-	last_token = db.Column(db.String(120), nullable=True)
 	password_hash = db.Column(db.String(120))
 	registration_date = db.Column(db.DateTime, default=datetime.utcnow)
 	# avatar = db.Column(db.String(120))
@@ -84,7 +83,7 @@ class User(db.Model, UserMixin):
 	leads_requested = db.relationship('LeadRequest', foreign_keys=[LeadRequest.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
 	contacts = db.relationship('Contact', backref='user', lazy='dynamic')# one-to-many (many side)
 	opportunities = db.relationship('Opportunity', backref='user', lazy='dynamic')# one-to-many (many-side)
-	commercial_stages = db.relationship('CommercialStage', backref='user', lazy='dynamic')# one-to-many (many-side)
+	commercial_steps = db.relationship('CommercialStep', backref='user', lazy='dynamic')# one-to-many (many-side)
 	tasks =  db.relationship('Task', backref='user', lazy='dynamic')# many-to-one with Task (many-side)
 
 	@validates(first_name, last_name)
@@ -155,14 +154,28 @@ class Lead(db.Model):
 		return True
 
 	def __repr__(self):
-		return "{} situe a {}".format(self.company_name, self.company_city)
+		return "<{} situe a {}>".format(self.company_name, self.company_city)
 
 
 
-class CommercialStageStep(db.Model):
-	__tablename__ = 'commercial_stage_steps'	
+# class CommercialStageStep(db.Model): #OpportunityStage
+# 	__tablename__ = 'commercial_stage_steps'	
+# 	opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunities.id'), primary_key=True)# pk
+# 	commercial_stage_id = db.Column(db.Integer, db.ForeignKey('commercial_stages.id'), primary_key=True)# pk
+# 	status_id = db.Column(db.Integer, db.ForeignKey('status.id'), primary_key=True)# many-to-one (one side)
+# 	note_id = db.Column(db.Integer, db.ForeignKey('notes.id'), nullable=True)
+# 	task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=True) # task activated only when status == 'a faire'
+# 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
+# 	last_update = db.Column(db.DateTime, default=datetime.utcnow)
+
+# 	def __repr__(self):
+# 		return "<Opp. {} on stage {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stage.name, self.status.title, self.creation_date)
+
+
+class OpportunityStage(db.Model):
+	__tablename__ = 'oppportunity_stages'	
 	opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunities.id'), primary_key=True)# pk
-	commercial_stage_id = db.Column(db.Integer, db.ForeignKey('commercial_stages.id'), primary_key=True)# pk
+	commercial_step_id = db.Column(db.Integer, db.ForeignKey('commercial_steps.id'), primary_key=True)# pk
 	status_id = db.Column(db.Integer, db.ForeignKey('status.id'), primary_key=True)# many-to-one (one side)
 	note_id = db.Column(db.Integer, db.ForeignKey('notes.id'), nullable=True)
 	task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=True) # task activated only when status == 'a faire'
@@ -170,7 +183,7 @@ class CommercialStageStep(db.Model):
 	last_update = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def __repr__(self):
-		return "<Opp. {} on stage {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stage.name, self.status.title, self.creation_date)
+		return "<Opp. {} on step {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stage.name, self.status.title, self.creation_date)
 
 
 class Contact(db.Model):
@@ -205,7 +218,7 @@ class Opportunity(db.Model):
 	contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'))
 	name = db.Column(db.String(120), nullable=False)
 	euros_value = db.Column(db.Numeric(8,2))
-	commercial_stages = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.opportunity_id], backref=db.backref('opportunity', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with CommercialStage (many side of a many-to-one with CommercialStageStep)
+	stages = db.relationship('OpportunityStage', foreign_keys=[OpportunityStage.opportunity_id], backref=db.backref('opportunity', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with CommercialStep (many side of a many-to-one with OpportunityStage)
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	deal_closed = db.Column(db.Boolean, default=False)
 	last_update = db.Column(db.DateTime, default=datetime.utcnow)
@@ -219,9 +232,9 @@ class Task(db.Model):
 	__tablename__ = 'tasks'
 	id = db.Column(db.Integer, primary_key=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id')) # many-to-one with User (one side)
-	stage_step = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.task_id], backref=db.backref('task', uselist=False))# one-to-one
+	stage_step = db.relationship('OpportunityStage', foreign_keys=[OpportunityStage.task_id], backref=db.backref('task', uselist=False))# one-to-one
 	task_title = db.Column(db.String(60))
-	task_content = db.Column(db.String(240), nullable=True)
+	task_content = db.Column(db.String(240))
 	priority = db.Column(db.String(30))
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	due_date = db.Column(db.DateTime)
@@ -235,15 +248,15 @@ class Task(db.Model):
 class Note(db.Model):
 	__tablename__ = 'notes'
 	id = db.Column(db.Integer, primary_key=True)
-	stage_step = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.note_id], backref=db.backref('note', uselist=False))# one-to-one  
+	opportunity_stage = db.relationship('OpportunityStage', foreign_keys=[OpportunityStage.note_id], backref=db.backref('note', uselist=False))# one-to-one  
 	note_content = db.Column(db.String(240), default='')
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-class CommercialStage(db.Model):
-	__tablename__ = 'commercial_stages'
+class CommercialStep(db.Model): #CommercialStep
+	__tablename__ = 'commercial_steps'
 	id = db.Column(db.Integer, primary_key=True)
-	stage_steps = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.commercial_stage_id], backref=db.backref('commercial_stage', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with Opportunity (many side of a many-to-one with CommercialStageStep)
+	opportunity_stage = db.relationship('OpportunityStage', foreign_keys=[OpportunityStage.commercial_step_id], backref=db.backref('commercial_step', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with Opportunity (many side of a many-to-one with CommercialStageStep)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True) # one-side (necessary when user wants to creata a custom Stage)
 	name = db.Column(db.String(60))
 	closing_perc = db.Column(db.Numeric(2,2))
@@ -253,12 +266,11 @@ class CommercialStage(db.Model):
 		return "<{}>".format(self.name)
 
 
-
 class Status(db.Model):
 	__tablename__ = 'status'
 	id = db.Column(db.Integer, primary_key=True)
 	title = db.Column(db.String(30), unique=True)
-	stage_steps = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.status_id],  backref=db.backref('status', lazy='joined'))	
+	stage_steps = db.relationship('OpportunityStage', foreign_keys=[OpportunityStage.status_id],  backref=db.backref('status', lazy='joined'))	
 
 	def __repr__(self):
 		return "<{}>".format(self.title)
@@ -292,7 +304,7 @@ def distinct_stages_values():
 	'''	Exctract distinct names from Status table.
 		Return a dict with each value paired with a label that will be displayed on the form field '''
 	try:
-		distinct_stages = db.session.query(CommercialStage.name).distinct().all()
+		distinct_stages = db.session.query(CommercialStep.name).distinct().all()
 	except:
 		distinct_stages = [('',)]
 	list_distinct_stages = [elt[0] for elt in distinct_stages]
@@ -359,3 +371,5 @@ def get_list_opportunities(user_id, limit, cursor):
 	next_page = cursor + limit if len(opportunities)>limit else None 
 	previous_page = cursor - limit if cursor > 0 else None
 	return (opportunities[:limit], next_page, previous_page)
+
+

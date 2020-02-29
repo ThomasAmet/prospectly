@@ -75,13 +75,11 @@ $(document).ready(function(){
 // });``
 
 
+// Script to change appearance of flash message
 $(document).ready(function(){
-  
   $('#banner-wrap').addClass("fadeInDown wow");
-
-
  
-// // JQuery to change the format of element from the datepicker class
+// JQuery to change the format of element from the datepicker class
   let datepicker = $('#due-date-datepicker');
   if(datepicker.length > 0){
     datepicker.datepicker({
@@ -90,7 +88,7 @@ $(document).ready(function(){
     });
   }
 
-  // JQuery for Displaying part of the Edition form
+// JQuery for Displaying part of the OpportunityStageEdition form
   if ($("#status-value").val()=='A faire'){
       $("[class*='note-form-group']").hide();
       $("[class*='task-form-group']").show();
@@ -99,6 +97,7 @@ $(document).ready(function(){
       $("[class*='note-form-group']").show();
       $("[class*='task-form-group']").hide();      
     }
+
   $("#status-value").change(function(){
     if ($("#status-value").val()=='A faire'){
       $("[class*='note-form-group']").hide();
@@ -109,6 +108,28 @@ $(document).ready(function(){
       $("[class*='task-form-group']").hide();      
     }
   });
+
+// JQuery for Displaying part of the OpportunityAdd form
+  if ($("#addOpportunityForm #status-value").val()=='A faire'){ 
+      $("[class*='note-form-group']").hide();
+      $("[class*='task-form-group']").show();
+    }
+    else{
+      $("[class*='note-form-group']").show();
+      $("[class*='task-form-group']").hide();      
+    }
+    
+  $("#status-value").change(function(){
+    if ($("#addOpportunityForm #status-value").val()=='A faire'){
+      $("[class*='note-form-group']").hide();
+      $("[class*='task-form-group']").show();
+    }
+    else{
+      $("[class*='note-form-group']").show();
+      $("[class*='task-form-group']").hide();      
+    }
+  });
+
 });
 
 

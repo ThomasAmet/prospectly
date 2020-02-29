@@ -1,0 +1,164 @@
+{% extends "main_base.html" %}
+
+{% block styles %}
+{{ super() }}
+{% endblock styles %}
+
+
+<!--navbar start-->
+
+{% block navbar %}
+{{super()}}
+{% endblock navbar %}
+
+
+{% block top_content %}
+
+<section id="service" class="pos-r o-hidden text-left pb-0">
+
+  <!--   <div class="container-fluid">
+      <div class="row text-center">
+        <div class="col-lg-8 col-md-12">
+          
+        </div>
+      </div>
+    </div> -->
+
+  <div class="hero-bg" style="z-index:-2;">
+    <img class="img-fluid" src="{{url_for('static', filename='images/bg/04.png')}}">
+  </div>
+  <div class="hero-bg" style="z-index:-1;">
+    <img class="img-fluid" src="{{url_for('static', filename='images/bg/02.png')}}" alt="">
+  </div>
+
+  <section id="service" class="pos-r o-hidden text-center pb-0">
+  <!-- <section class="contact-1"> -->
+
+    <div class="container mt-4 pt-5">
+       <div class="row text-center">
+        <div class="col-lg-8 col-md-12 ml-auto mr-auto">
+          <div class="section-title">
+            <div class="title-effect">
+              <div class="bar bar-top"></div>
+              <div class="bar bar-right"></div>
+              <div class="bar bar-bottom"></div>
+              <div class="bar bar-left"></div>
+            </div>
+            <h6>Contact</h6>
+          </div>
+        </div>
+      </div>
+      <div class="row text-center">
+        <div class="col-lg-8 col-md-12 ml-auto mr-auto pt-0 wow fadeInLeft">
+          <div class="section-title">
+            <h2 class="title">Une question? Ecrivez-nous!</h2>
+            <p>Remplissez le formulaire de contact et nous vous répondrons sous 2 jours ouvrés.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+<!-- </div> --> 
+{% endblock top_content %}
+
+{% block main_content %}
+
+<!--contact start-->
+<!-- <section class="contact-1 pt-5"> -->
+  <!-- <div class="container py-5" style="background-color: rgba(248, 249, 254, 0.85 ); z-index: 1;"> -->
+  <div class="container mb-6 py-5" style="background-color: rgba(227, 228, 247, 0.4); z-index: 1; box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.1);">
+    <div class="row">
+      <div class="col-lg-10 col-md-10 ml-auto mr-auto">
+        <form id="contact-form" method="post" action="{{url_for('main.contact')}}">
+          <div class="messages"></div>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Prénom</label>
+                <input id="form_firstname" type="text" name="first_name" class="form-control" placeholder="Entrez votre prénom" required="required" data-error="Le prénom est requis." >
+                <div class="help-block with-errors"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Nom</label>
+                <input id="form_lastname" type="text" name="last_name" class="form-control" placeholder="Entrez votre nom" required="required" data-error="Le nom est requis.">
+                <div class="help-block with-errors"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Email</label>
+                <input id="form_email" type="email" name="email" class="form-control" placeholder="Renseignez votre email" required="required" data-error="Un email valide est requis.">
+                <div class="help-block with-errors"></div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label>Message</label>
+                <textarea id="form_message" name="message" class="form-control" placeholder="Votre message" rows="4" required="required" data-error="Ecrivez-nous un petit mot."></textarea>
+                <div class="help-block with-errors"></div>
+              </div>
+            </div>
+            <div class="col-lg-12col-md-12 mt-2 ml-auto mr-auto">
+              <button class="btn btn-theme btn-circle px-6" type='submit' data-text="Contactez-nous"><span>E</span><span>n</span><span>v</span><span>o</span><span>y</span><span>e</span><span>r</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<section class="contact-info p-0 z-index-1">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-4 col-md-12">
+        <div class="contact-media"> <i class="flaticon-paper-plane"></i><span>Addresse:</span>
+          <p>Albuquerque, New Mexico, USA</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 md-mt-5">
+        <a href="mailto:contact@prospectly.fr?subject=Question%20a%20propos%20de%20Prospectly">
+          <div class="contact-media"> <i class="flaticon-email"></i><span>Email:</span>
+           contact@prospectly.fr</a>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 md-mt-5">
+        <div class="contact-media"> <i class="flaticon-social-media"></i><span>Telephone:</span><a href="tel:+1(408) 899-5211">+1(408) 899-5211</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="o-hidden p-0 custom-mt-10 z-index-0">
+  <div class="container-fluid p-0">
+    <div class="row align-items-center">
+      <div class="col-md-12">
+        <div class="map iframe-h-2">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3263.9304269814143!2d-106.73261514281464!3d35.108448114169214!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87226d5ddbc96751%3A0xa9245f0b8abab998!2sVista%20Oeste%20NW%2C%20Albuquerque%2C%20NM%2087120%2C%20USA!5e0!3m2!1sen!2sfr!4v1582901701114!5m2!1sen!2sfr" width="600" height="450" frameborder="0" style="border:0;" allowfullscreen=""></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</section>
+
+<!--contact end-->
+
+{% endblock main_content %}
+
+{% block footer %}
+{{super()}}
+{% endblock footer %}

@@ -1,8 +1,8 @@
-"""first migration
+"""empty message
 
-Revision ID: 6635f0e3fd7d
+Revision ID: 965bd97ac24e
 Revises: 
-Create Date: 2020-01-30 19:19:58.754769
+Create Date: 2020-02-24 09:26:30.377626
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6635f0e3fd7d'
+revision = '965bd97ac24e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -48,7 +48,7 @@ def upgrade():
     sa.Column('monthly_price', sa.Integer(), nullable=True),
     sa.Column('yearly_price', sa.Integer(), nullable=True),
     sa.Column('limit_daily_query', sa.Integer(), nullable=True),
-    sa.Column('crm_access', sa.Boolean(), nullable=True),
+    sa.Column('lead_generator', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_plans_plan_name'), 'plans', ['plan_name'], unique=False)
@@ -64,13 +64,14 @@ def upgrade():
     sa.Column('last_name', sa.String(length=30), nullable=True),
     sa.Column('username', sa.String(length=60), nullable=True),
     sa.Column('email', sa.String(length=120), nullable=True),
+    sa.Column('stripe_customer_id', sa.String(length=256), nullable=True),
     sa.Column('password_hash', sa.String(length=120), nullable=True),
     sa.Column('registration_date', sa.DateTime(), nullable=True),
     sa.Column('admin', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
-    op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
+    op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=False)
     op.create_table('commercial_stages',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -117,6 +118,7 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('yearly', sa.Boolean(), nullable=True),
     sa.Column('subscription_date', sa.DateTime(), nullable=True),
+    sa.Column('next_payment', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['plan_id'], ['plans.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('plan_id', 'user_id')

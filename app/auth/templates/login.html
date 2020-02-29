@@ -5,25 +5,42 @@
 
 <!--navbar start-->
 {% block navbar %}
-<div class="collapse navbar-collapse" id="navbarNavDropdown">
-  <ul id="main-menu" class="nav navbar-nav ml-auto">
-    <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('main.home') }}">ACCUEIL</a> 
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('main.pricing') }}">OFFRE</a> 
-    </li>
-    {% if not current_user.is_authenticated %}
-    <li class="nav-item">
-      <a class="nav-link active" href="{{url_for('auth.login')}}">CONNEXION</a> 
-    </li>
-    {% else %}
-    <li class='nav-item'>
-      <a class="nav-link" href="{{url_for('crm.home')}}">DASHBOARD</a> 
-    </li>
-    {% endif %}
-  </ul>
-</div>
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul id="main-menu" class="nav navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.home') }}">ACCUEIL</a> 
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.pricing') }}">OFFRES</a> 
+      </li>
+      {% if not current_user.is_authenticated %}
+      <li class="nav-item">
+        <a class="nav-link active" href="{{url_for('auth.login')}}">CONNEXION</a> 
+      </li>
+      {% else %}
+      <li class='nav-item'>
+        <a class="nav-link" href="{{url_for('crm.home')}}">DASHBOARD</a> 
+      </li>
+      {% endif %}
+      {% if current_user.is_authenticated %}
+      <li class='nav-item'>
+        <a id='logout-btn' class="btn btn-theme btn-md" href="{{url_for('auth.logout')}}" data-text="Se déconnecter">
+          <span>D</span><span>é</span><span>c</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span>
+        </a>
+        <a id='logout-btn-collapse' class="nav-link" href="{{url_for('auth.logout')}}" data-text="Se déconnecter">
+          DECONNEXION
+        </a>
+      </li>
+      {% else %}
+      <li class='nav-item'>
+        <a id='free-trial-btn' class="btn btn-theme btn-md px-5" href="{{url_for('main.pricing')}}" data-text="Essai Gratuit">
+          <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
+        </a>
+        <a id='free-trial-btn-collapse' class="nav-link" href="{{url_for('main.pricing')}}">ESSAI GRATUIT</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
 {% endblock navbar %}
 
 
@@ -137,9 +154,12 @@
                 <!-- {{ form.submit(class="btn btn-theme btn-circle mb-3 mt-3") }} -->
                 </br>
                 <h7 class="mb-0 mt-5">Pas encore de compte? <a href="{{url_for('auth.signup')}}"><i>Inscrivez-vous maintenant!</i></a></h7>
+                </br>
+                <h7 class="mb-0 mt-5 mb-5">Mot de passe <a href="{{url_for('auth.signup')}}"><i>oublié?</i></a></h7>
               </div>
             </div>
           </form>
+
         </div>
       </div>
     </div>

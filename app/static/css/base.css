@@ -217,7 +217,7 @@ a, i, .btn, .btn span, button, img, span, .dropdown-item, .social-icons li:hover
 
 #header-wrap.fixed-header .logo img {height: 55px;}
 #header-wrap.fixed-header {padding: 5px 20px; position: fixed; top:0; left:0; width: 100%; z-index: 999 !important; background: #ffffff !important;}
-#banner-wrap.fixed-banner {margin-top: 75px; padding: 2px 15px; position: fixed; top:0; left:0; width: 100%; z-index: 800 !important; background: #ffffff !important;}
+#banner-wrap.fixed-banner {margin-top: 75px; padding: 2px 15px; position: fixed; top:0; left:0; width: 100%; z-index: 800 !important;}
 #header-wrap.fixed-header:before, #header-wrap.fixed-header:after{display: none;}
 #banner-wrap.fixed-banner:before, #header-wrap.fixed-banner:after{display: none;}
 
@@ -425,7 +425,7 @@ font-style: normal;
 
 .alert-dismissible .close {
   position: absolute;
-  top: 0;
+  top: 50%;
   right: 0;
   padding: 1rem 1.5rem;
   color: inherit;

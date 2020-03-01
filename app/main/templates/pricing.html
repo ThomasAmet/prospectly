@@ -27,7 +27,7 @@
                   {% endif %}
                   {% if current_user.is_authenticated %}
                   <li class='nav-item'>
-                    <a id='logout-btn' class="btn btn-theme btn-md" href="{{url_for('auth.logout')}}" data-text="Se déconnecter">
+                    <a id='logout-btn' class="btn btn-theme btn-circle btn-md" href="{{url_for('auth.logout')}}" data-text="Se déconnecter">
                       <span>D</span><span>é</span><span>c</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span>
                     </a>
                     <a id='logout-btn-collapse' class="nav-link" href="{{url_for('auth.logout')}}" data-text="Se déconnecter">
@@ -36,7 +36,7 @@
                   </li>
                   {% else %}
                   <li class='nav-item'>
-                    <a id='free-trial-btn' class="btn btn-theme btn-md px-5" href="{{url_for('main.pricing')}}" data-text="Essai Gratuit">
+                    <a id='free-trial-btn' class="btn btn-theme  btn-circle btn-md px-5" href="{{url_for('main.pricing')}}" data-text="Essai Gratuit">
                       <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
                     </a>
                     <a id='free-trial-btn-collapse' class="nav-link" href="{{url_for('main.pricing')}}">ESSAI GRATUIT</a>
@@ -139,7 +139,7 @@
               <!-- Live button -->
               <!-- <div class="btn"> -->
               <a href="{{url_for('auth.signup', plan_name='yearly_basic')}}">
-                <button id="checkout-button-plan_GgrfmtKZAV6j1l" role="link">
+                <button id="checkout-button-plan_GgrfmtKZAV6j1l" role="link" class='btn-white btn btn-border btn-circle'>
                 <!-- Test button -->
                 <!-- <button id="checkout-button-plan_GggP03CwhdtuYk" role="link"> -->
                  Je m'inscris
@@ -173,7 +173,7 @@
               <li> <i class="fa fa-check" aria-hidden="true"></i> Accompagnement dans le processus de vente </li>
               </ul>
             </div>
-            <button>A venir...</button>
+            <button class='btn-white btn btn-border btn-circle'>A venir...</button>
           </div>
         </div>
         <!-- end card 2 -->
@@ -211,7 +211,7 @@
             </div>
             <!-- Live button -->
             <a href="{{url_for('auth.signup', plan_name='monthly_basic')}}">
-              <button id="checkout-button-plan_GgreHAs62bMtM8" role="link">
+              <button id="checkout-button-plan_GgreHAs62bMtM8" role="link" class='btn-white btn btn-border btn-circle'>
               <!-- Test button -->
               <!-- <button id="checkout-button-plan_GggQmCKZATWq0c" role="link"> -->
                 Je m'inscris             
@@ -244,7 +244,7 @@
               <li> <i class="fa fa-check" aria-hidden="true"></i> Accompagnement dans le processus de vente </li>
               </ul>
             </div>
-            <button>A venir...</button>
+            <button class='btn-white btn btn-border btn-circle'>A venir...</button>
           </div>
         </div>
         <!-- end card 2 -->

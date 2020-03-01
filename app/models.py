@@ -24,7 +24,7 @@ class Subscription(db.Model):
 			limit_subscription = self.subscription_date.replace(month=self.subscription_date.month+1)
 		return limit_subscription >= datetime.utcnow()
 
-	def update_next_payment(self):
+	def set_next_payment(self):
 		if Plan.query.get(self.plan_id).plan_name == 'Beta':
 			self.next_payment = datetime.utcnow() + timedelta(year=4)
 
@@ -33,6 +33,11 @@ class Subscription(db.Model):
 				self.next_payment = datetime.utcnow()+timedelta(days=14)
 			except ValueError:
 				self.next_payment = datetime.utcnow()+timedelta(days=15)
+
+	def update_next_payment(self):
+		if Plan.query.get(self.plan_id).plan_name == 'Beta':
+			self.next_payment = datetime.utcnow() + timedelta(year=4)
+			
 		if self.yearly:
 			try:
 				self.next_payment = self.next_payment.replace(year=self.next_payment.year+1)
@@ -44,9 +49,13 @@ class Subscription(db.Model):
 			except ValueError:
 				self.next_payment = self.next_payment.replace(month=self.next_payment.month+2, day=1)
 
+	def __init__(self, **kwargs):
+		super(Subscription, self).__init__(**kwargs)
+		self.set_next_payment()
+
 	def __repr__(self):
 		return "<On {}, user {} subscribed to a yearly({}) plan {}>".format(self.subscription_date, self.user_id, self.yearly, self.plan_id )
-
+	# define next_paymnet date when initiate
 
 
 class LeadRequest(db.Model):
@@ -61,7 +70,6 @@ class LeadRequest(db.Model):
 			return False
 		return True
 
-
 	def __repr__(self):
 		return "<On {}, user {} queried lead {}>".format(self.query_date, self.user_id, self.lead_id)
 
@@ -75,7 +83,7 @@ class User(db.Model, UserMixin):
 	username = db.Column(db.String(60), index=True)
 	email = db.Column(db.String(120), index=True, unique=True)
 	stripe_customer_id = db.Column(db.String(256), nullable=True)
-	last_token = db.Column(db.String(120), nullable=True)
+	last_token = db.Column(db.String(256), nullable=True)
 	password_hash = db.Column(db.String(120))
 	registration_date = db.Column(db.DateTime, default=datetime.utcnow)
 	# avatar = db.Column(db.String(120))

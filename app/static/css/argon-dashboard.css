@@ -1,3 +1,4 @@
+@charset 'UTF-8';
 /*!
 
 =========================================================
@@ -14951,6 +14952,11 @@ a.text-lighter:focus {
 .btn-sm,
 .btn-group-sm>.btn {
   font-size: 0.75rem;
+}
+
+.btn-md,
+.btn-group-sm>.btn {
+  font-size: 0.825rem;
 }
 
 .btn-lg,

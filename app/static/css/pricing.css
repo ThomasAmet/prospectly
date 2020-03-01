@@ -24,14 +24,6 @@
 
 /* style for the plan options description	*/
 .card-item  .option ul li{margin:0 0 10px; padding: 0; list-style: none; color: #1c1d3e; opacity: .8; font-size: 16px;}
-
-.card-item button {position: relative; z-index: 2; background: #fff; opacity: .8;  color: black; width: 150px; height: 40px;
-  line-height: 40px; border-radius: 15px; display: inline-block; text-align: center; margin: 20px auto 0 ; font-size: 16px;
-  cursor: pointer; -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .1);box-shadow: 0 5px 10px rgba(0, 0, 0, .1); 
-  box-sizing: border-box; outline: medium none !important; transition: all 0.5s ease-in-out 0s;}
-.card-item button ::selection {background: #6551ff; color: #fff; text-shadow: none; box-sizing: border-box;}
-/* turn font bold when hover for links*/
-.card-item:hover button{text-decoration: none;  font-weight: 500; opacity: 1;}
 /* turn font-color white when hover*/
 .card-item:hover .title h2,.card-item:hover .option ul li, .card-item:hover .option ul li i, 
 .card-item:hover .price h4{color: #ffffff; opacity: 1;}

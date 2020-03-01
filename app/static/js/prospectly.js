@@ -14,9 +14,9 @@ $(document).ready(function(){
         contentType: false,
     });
 
-    $("#register-submit").click(function(){        
-        $("#register-form").submit(); // Submit the form
-    });
+    // $("#register-submit").click(function(){        
+    //     $("#register-form").submit(); // Submit the form
+    // });
 
 
     $(document).on('submit', '#register-form', function(e){
@@ -26,21 +26,45 @@ $(document).ready(function(){
             type:'POST',
             url: '/auth/inscription',
             data: formData,
-            success: function(response) {
-              // alert(response);
-              var stripe_session_id = response;
-              // Public Key for test
-              // var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
-              // Public Key for production
-              // var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
-              stripe.redirectToCheckout({
-                  sessionId: stripe_session_id
-                }).then(function (result) {
-                }); 
-            },
+            dataType: 'text',
+            // contentType: "form-data",
+            // success: function(response) {
+            //   alert(response);
+            //   var stripe_session_id = response;
+            //   // Public Key for test
+            //   // var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+            //   // Public Key for production
+            //   // var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
+            //   stripe.redirectToCheckout({
+            //       sessionId: stripe_session_id
+            //     }).then(function (result) {
+            //     }); 
+            // },
             processData: false,
             contentType: false,
+        })
+        .done(function(data) { 
+          // alert('Success')
+          // alert(data);
+          var stripe_session_id = data;
+            // Public Key for test
+            // var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+            // Public Key for production
+            // var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
+            stripe.redirectToCheckout({
+              sessionId: stripe_session_id
+            })
+            .then(function (result) {
+            });
+        })
+        .fail(function(jqXHR, textStatus, errorThrown){
+          // alert('Fail')
+          // alert(jqXHR.responseText);
+          // window.location.replace("http://stackoverflow.com");
+          // window.location.assign(jqXHR.responseText);
+          location.href=jqXHR.responseText;
         });
+
     });
 });
 

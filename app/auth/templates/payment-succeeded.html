@@ -1,0 +1,98 @@
+{% extends 'main_base.html' %}
+<!--header start-->
+{% block header_attribs %} id="site-header" class="header header-2"{% endblock header_attribs %}
+
+
+<!--navbar start-->
+{% block navbar %}
+  {{super()}}
+{% endblock navbar %}
+
+
+
+{% block top_content %}
+
+  <section id="service" class="pos-r o-hidden text-center pb-0">
+    <div class="container mt-4 pt-5">
+
+      <div class="row text-center">
+        <div class="col-lg-8 col-md-12 ml-auto mr-auto">
+          <div class="section-title">
+            <div class="bg-animation">
+             <img class="zoom-fade" src="{{url_for('static', filename='images/pattern/03.png')}}" alt="">
+            </div>
+            <div class="title-effect">
+              <div class="bar bar-top"></div>
+              <div class="bar bar-right"></div>
+              <div class="bar bar-bottom"></div>
+              <div class="bar bar-left"></div>
+            </div>
+            <h6>PAIEMENT accepté</h6>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-10 col-md-12 ml-auto mr-auto pt-0 wow fadeInLeft">
+          <div class="section-title">
+            <h3 class="title">Félicitations</h3>
+            <p>D'ici quelques minutes, vous recevrez un mail de validation à l'adresse renseignée lors de votre inscription.<br>Cet email contient un lien qui vous permettra de définir votre mot de passe. Il a une validité de 2 heures.<br>
+            Il se peut que le mail se trouve dans vos courriers indésirables, pensez à y jeter un coup d'oeil.</p></br>
+            <p>Si toutefois vous ne recevez pas le mail, merci de contacter le support.</br></br>L'équipe Prospectly</p>
+          </div>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col-md-8 ml-auto mr-auto'>
+          <a href="{{url_for('auth.login')}}">
+            <button class='btn btn-theme btn-circle'>Connexion</button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section><!-- 
+<section class="page-title o-hidden pos-r md-text-center"  style="padding: 60px;">
+  <canvas id="confetti" class='bg-white'></canvas>
+</section>
+    <div class="bg-animation">
+      <img class="zoom-fade" src="static/images/pattern/03.png" alt="">
+    </div> -->
+
+{% endblock top_content %}
+
+<!--page title end-->
+
+
+<!--body content start-->
+{% block main_content %}
+
+<div class="page-content">
+
+<!--login start-->
+
+<section class="register pos-r o-hidden pt-0 pb-4 my-0">
+
+  <div class="bg-animation">
+    <img class="zoom-fade" src="{{url_for('static', filename='images/pattern/03.png')}}" alt="">
+  </div>
+
+  <!-- div class='container'>
+    <div class="row text-center">
+      <div class="col-lg-8 col-md-12 ml-auto mr-auto pt-0 wow fadeInLeft">
+        <div class="section-title">
+          <h2 class="title">Inscrivez vous en quelques clics.</h2>
+          <p>Collectez vos prospects en seulement quelques secondes et gérer l'ensemble du processus de vente en un temps-record</p>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+    <div class="form container text-center">
+      <div class="col-lg-8 col-md-10 ml-auto mr-auto">
+
+      </div>
+    </div>
+  </div>
+
+</section>
+</div>
+{% endblock main_content %}

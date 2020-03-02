@@ -14,9 +14,9 @@ $(document).ready(function(){
         contentType: false,
     });
 
-    $("#register-submit").click(function(){        
-        $("#register-form").submit(); // Submit the form
-    });
+    // $("#register-submit").click(function(){        
+    //     $("#register-form").submit(); // Submit the form
+    // });
 
 
     $(document).on('submit', '#register-form', function(e){
@@ -26,24 +26,47 @@ $(document).ready(function(){
             type:'POST',
             url: '/auth/inscription',
             data: formData,
-            success: function(response) {
-              // alert(response);
-              var stripe_session_id = response;
-              // Public Key for test
-              // var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
-              // Public Key for production
-              // var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
-              stripe.redirectToCheckout({
-                  sessionId: stripe_session_id
-                }).then(function (result) {
-                }); 
-            },
+            dataType: 'text',
+            // contentType: "form-data",
+            // success: function(response) {
+            //   alert(response);
+            //   var stripe_session_id = response;
+            //   // Public Key for test
+            //   // var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+            //   // Public Key for production
+            //   // var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
+            //   stripe.redirectToCheckout({
+            //       sessionId: stripe_session_id
+            //     }).then(function (result) {
+            //     }); 
+            // },
             processData: false,
             contentType: false,
+        })
+        .done(function(data) { 
+          // alert('Success')
+          // alert(data);
+          var stripe_session_id = data;
+            // Public Key for test
+            // var stripe = Stripe('pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+            // Public Key for production
+            // var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
+            stripe.redirectToCheckout({
+              sessionId: stripe_session_id
+            })
+            .then(function (result) {
+            });
+        })
+        .fail(function(jqXHR, textStatus, errorThrown){
+          // alert('Fail')
+          // alert(jqXHR.responseText);
+          // window.location.replace("http://stackoverflow.com");
+          // window.location.assign(jqXHR.responseText);
+          location.href=jqXHR.responseText;
         });
+
     });
 });
-
 
 // Script that works with register.html to handle stripe (v1)
 // $(document).ready(function(){
@@ -76,8 +99,11 @@ $(document).ready(function(){
 // });``
 
 
+// Script to change appearance of flash message
 $(document).ready(function(){
-// // JQuery to change the format of element from the datepicker class
+  $('#banner-wrap').addClass("fadeInDown wow");
+ 
+// JQuery to change the format of element from the datepicker class
   let datepicker = $('#due-date-datepicker');
   if(datepicker.length > 0){
     datepicker.datepicker({
@@ -86,7 +112,7 @@ $(document).ready(function(){
     });
   }
 
-  // JQuery for Displaying part of the Edition form
+// JQuery for Displaying part of the OpportunityStageEdition form
   if ($("#status-value").val()=='A faire'){
       $("[class*='note-form-group']").hide();
       $("[class*='task-form-group']").show();
@@ -95,6 +121,7 @@ $(document).ready(function(){
       $("[class*='note-form-group']").show();
       $("[class*='task-form-group']").hide();      
     }
+
   $("#status-value").change(function(){
     if ($("#status-value").val()=='A faire'){
       $("[class*='note-form-group']").hide();
@@ -105,6 +132,28 @@ $(document).ready(function(){
       $("[class*='task-form-group']").hide();      
     }
   });
+
+// JQuery for Displaying part of the OpportunityAdd form
+  if ($("#addOpportunityForm #status-value").val()=='A faire'){ 
+      $("[class*='note-form-group']").hide();
+      $("[class*='task-form-group']").show();
+    }
+    else{
+      $("[class*='note-form-group']").show();
+      $("[class*='task-form-group']").hide();      
+    }
+    
+  $("#status-value").change(function(){
+    if ($("#addOpportunityForm #status-value").val()=='A faire'){
+      $("[class*='note-form-group']").hide();
+      $("[class*='task-form-group']").show();
+    }
+    else{
+      $("[class*='note-form-group']").show();
+      $("[class*='task-form-group']").hide();      
+    }
+  });
+
 });
 
 

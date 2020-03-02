@@ -1,5 +1,5 @@
                 <!-- #start 2nd block# -->
-                <hr class="my-3" />
+                <hr class="mt-2 mb-3" />
                 <h6 class="heading-small text-muted mb-4">Tâches & Notes</h6>
                 <div class="pl-lg-2">  
 
@@ -9,7 +9,7 @@
                     <!-- Note description -->
                     <div class='col'>
                     <div class="form-group">
-                      <label>Note</label>
+                      <label class="form-control-label">Note</label>
                       <!-- <textarea rows="4" class="form-control form-control-alternative">Une petite note concernant l'etape commerciale en cours ...</textarea> -->
                       {{form.note_content(class="form-control form-control-alternative", placeholder='Ici, on note tout ce qui peut etre necessaire...')}}
                     </div>
@@ -71,7 +71,7 @@
                         <label class="custom-control-label" for="customCheck1">Bravo! Mission accoomplie.</label>
                       {% else %}
                         <input class="custom-control-input" id="customCheck1" name='task-done-value' type="checkbox" value=False>
-                        <label class="custom-control-label" for="customCheck1">Avez-vous termine la tache?</label>
+                        <label class="custom-control-label" for="customCheck1">Avez-vous terminé la tâche?</label>
                       {% endif %}
                       </div>                  
                     </div>

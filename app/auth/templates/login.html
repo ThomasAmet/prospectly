@@ -1,25 +1,46 @@
-{% extends 'layout/landing_base.html' %}
+{% extends 'main_base.html' %}
 <!--header start-->
 {% block header_attribs %} id="site-header" class="header header-2"{% endblock header_attribs %}
 
 
 <!--navbar start-->
 {% block navbar %}
-<div class="collapse navbar-collapse" id="navbarNavDropdown">
-  <ul id="main-menu" class="nav navbar-nav ml-auto">
-    <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('landing.home') }}">ACCUEIL</a> 
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('landing.pricing') }}">OFFRE</a> 
-    </li>
-    {% if not current_user.is_authenticated %}
-    <li class="nav-item">
-      <a class="nav-link active" href="">CONNEXION</a> 
-    </li>
-    {% endif %}
-  </ul>
-</div>
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul id="main-menu" class="nav navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.home') }}">ACCUEIL</a> 
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.pricing') }}">OFFRES</a> 
+      </li>
+      {% if not current_user.is_authenticated %}
+      <li class="nav-item">
+        <a class="nav-link active" href="{{url_for('auth.login')}}">CONNEXION</a> 
+      </li>
+      {% else %}
+      <li class='nav-item'>
+        <a class="nav-link" href="{{url_for('crm.home')}}">DASHBOARD</a> 
+      </li>
+      {% endif %}
+      {% if current_user.is_authenticated %}
+      <li class='nav-item'>
+        <a id='logout-btn' class="btn btn-theme btn-circle btn-md" href="{{url_for('auth.logout')}}" data-text="Se déconnecter">
+          <span>D</span><span>é</span><span>c</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span>
+        </a>
+        <a id='logout-btn-collapse' class="nav-link" href="{{url_for('auth.logout')}}" data-text="Se déconnecter">
+          DECONNEXION
+        </a>
+      </li>
+      {% else %}
+      <li class='nav-item'>
+        <a id='free-trial-btn' class="btn btn-theme  btn-circle btn-md px-5" href="{{url_for('main.pricing')}}" data-text="Essai Gratuit">
+          <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
+        </a>
+        <a id='free-trial-btn-collapse' class="nav-link" href="{{url_for('main.pricing')}}">ESSAI GRATUIT</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
 {% endblock navbar %}
 
 
@@ -40,7 +61,7 @@
               <div class="bar bar-bottom"></div>
               <div class="bar bar-left"></div>
             </div>
-            <h6>Connexion</h6>
+            <h6>Connectez-vous</h6>
           </div>
         </div>
       </div>
@@ -124,18 +145,21 @@
                 </div> 
               </div>
             </div>
-           <div class="row">
+           <div class="row mt-2 mb-4  ">
               <div class="col-md-12">
-                <button type="submit" name="login" id='login-submit' class="btn btn-theme btn-circle mb-3 mt-3" data-text="Se connecter">
+                <button type="submit" name="login" id='login-submit' class="btn btn-theme btn-circle mb-4  mt-3" data-text="Se connecter">
                   <span>C</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span>
                 </button>
                 <!-- <input type="submit" name='register' class="btn btn-theme btn-circle mb-3 mt-3"> -->
                 <!-- {{ form.submit(class="btn btn-theme btn-circle mb-3 mt-3") }} -->
                 </br>
-                <h7 class="mb-0 mt-5">Pas encore de compte? <a href="{{url_for('auth.signup')}}"><i>Inscrivez-vous maintenant!</i></a></h7>
+                <h7>Pas encore de compte? <a href="{{url_for('auth.signup')}}"><i>Inscrivez-vous maintenant!</i></a></h7>
+                </br>
+                <h7 >Mot de passe <a href="{{url_for('auth.request_new_password')}}"><i>oublié?</i></a></h7>
               </div>
             </div>
           </form>
+
         </div>
       </div>
     </div>

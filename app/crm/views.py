@@ -66,7 +66,7 @@ def add_prospect():
 	return redirect(url_for('crm.view_prospect_list'))
 	# except:
 	# 	db.session.rollback()
-	# 	# return redirect(url_for('landing.home'))
+	# 	# return redirect(url_for('main.home'))
 	# 	return render_template('test.html')
 
 
@@ -75,6 +75,7 @@ def add_prospect():
 @login_required
 def view_opportunities_list():
 	form = AddOpportunityForm()
+	editForm = EditOpportunityStageForm()
 	form.initiate_choices()
 
 	token = request.args.get('page_token', None)
@@ -86,6 +87,64 @@ def view_opportunities_list():
 	
 	# return render_template('test.html', opportunities=opportunities, latest_steps=latest_steps, next_page_token=next_page, previous_page_token=previous_page, cursor=token)
 	return render_template('opportunities-list-view.html', form=form, opportunities=opportunities, next_page_token=next_page, previous_page_token=previous_page)
+
+
+
+@crm.route('/opportunites/ajout', methods=['POST'])
+@login_required
+def add_opportunity():
+	if request.method=='GET':
+		return redirect(url_for('crm.view_opportunities_list'))
+
+	form = AddOpportunityForm(request.form)
+	
+	if form.validate_on_submit():
+		print(request.form)
+		# for k,v in request.form:
+			# print('key:{}, value:{}'.format(k,v))
+
+		opportunity = Opportunity(user_id=current_user.id,
+							 	  contact_id=form.contact.data.id,
+							  	  name=form.name.data,
+							  	  euros_value=form.euros_value.data)
+		db.session.add(opportunity)
+
+		db.session.flush()
+
+		stage = CommercialStage.query.filter_by(name=form.stage.data).first_or_404()
+		status = Status.query.filter_by(title=form.status.data).first_or_404()
+		opportunity_stage=CommercialStageStep(opportunity_id=opportunity.id,
+											  commercial_stage_id=stage.id,
+											  status_id=status.id)
+		db.session.add(opportunity_stage)
+
+		if form.status.data=='A faire':
+			due_date = request.form.get('due-date-value')
+			due_date = datetime(year=int(due_date[-4:]), month=int(due_date[:2].replace('0','')), day=int(due_date[3:-5].replace('0',''))) if due_date else None # Parse due from mm/dd/yyyy to dd/mm/yyyy if exists
+
+			task = Task(user_id=current_user.id,
+						task_title=form.task_title.data,
+						task_content=form.task_content.data, 
+						priority=form.task_priority.data, 
+						due_date=due_date,
+						done=request.form.get('task-done-value'))
+			db.session.add(task)
+			db.session.flush()
+			opportunity_stage.task_id = task.id
+		else:
+			note = Note(note_content=form.note_content.data)
+			db.session.add(note)
+			db.session.flush()
+			opportunity_stage.note_id = note.id
+
+		try:
+			db.session.commit()
+			return redirect(url_for('crm.view_opportunities_list'))
+		except:
+			db.session.rollback()
+			flash('Une erreur est survenue.Veuillez réessayer.')
+			return redirect(url_for('crm.view_opportunities_list'))
+	
 
 
 
@@ -210,40 +269,6 @@ def edit_opportunity_stage(id):
 	return redirect(url_for('crm.view_opportunities_list'))
 
 	
-
-
-@crm.route('/opportunites/ajout', methods=['POST'])
-@login_required
-def add_opportunity():
-	if request.method=='GET':
-		return redirect(url_for('crm.view_opportunities_list'))
-
-	form = AddOpportunityForm(request.form)
-	
-	if request.method=='POST' and form.validate_on_submit():
-		flash('form validated')
-		opportunity = Opportunity(user_id=current_user.id,
-							 	  contact_id=form.contact.data.id,
-							  	  name=form.name.data,
-							  	  euros_value=form.euros_value.data)
-		db.session.add(opportunity)
-		db.session.flush()
-
-		stage_id = CommercialStage.query.filter_by(name=form.stage.data).first().id
-		status_id = Status.query.filter_by(title=form.status.data).first().id
-		opportunity_stage=CommercialStageStep(opportunity_id=opportunity.id,
-											  commercial_stage_id=stage_id,
-											  status_id=status_id)
-		db.session.add(opportunity_stage)
-
-
-		try:
-			db.session.commit()
-			return redirect(url_for('crm.view_opportunities_list'))
-		except:
-			return render_template('test.html')
-	
-
 
 
 @crm.route('/error')

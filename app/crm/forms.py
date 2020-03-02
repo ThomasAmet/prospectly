@@ -48,9 +48,9 @@ class EditOpportunityStageForm(FlaskForm):
 class AddOpportunityForm(FlaskForm):
 	contact = QuerySelectField(query_factory=contact_choices, allow_blank=False)#add arg 'get_label=company_name' if we just want to return company name
 	name = StringField("Nom de l'opportunite", validators=[DataRequired()])
-	euros_value = DecimalField("Montant en euros", default=0)
+	euros_value = DecimalField("Montant en euros", default=0, places=2)
 	stage = SelectField(u'Etape Commerciale', choices=distinct_stages_values(), validators=[DataRequired()])
-	status = SelectField('Status', choices=distinct_status_values(), validators=[DataRequired()])
+	status = SelectField('Status', choices=distinct_status_values(), default='En attente', validators=[DataRequired()]) #list(distinct_status_values())[2][0]
 	note_content = TextAreaField('Note', validators=[Optional(), Length(max=200)], default=None)
 	task_title = StringField('Nom de la tache', validators=[Optional()], default=None)
 	task_content = TextAreaField('Descriptif', validators=[Optional(), Length(max=200)], default=None)

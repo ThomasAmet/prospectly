@@ -1,3 +1,4 @@
+@charset 'UTF-8';
 /*!
 
 =========================================================
@@ -14953,6 +14954,11 @@ a.text-lighter:focus {
   font-size: 0.75rem;
 }
 
+.btn-md,
+.btn-group-sm>.btn {
+  font-size: 0.825rem;
+}
+
 .btn-lg,
 .btn-group-lg>.btn {
   font-size: 0.875rem;
@@ -16011,9 +16017,9 @@ textarea[resize="horizontal"] {
 }
 
 .has-success:after {
-  content: "\ea26";
+/*  content: "\ea26";
   color: daken(#2dce89, 18%);
-  background-color: #69deac;
+  background-color: #69deac;*/
 }
 
 .has-success .form-control {
@@ -16029,9 +16035,9 @@ textarea[resize="horizontal"] {
 }
 
 .has-danger:after {
-  content: "\ea53";
+/*  content: "\ea53";
   color: daken(#fb6340, 18%);
-  background-color: #fda08b;
+  background-color: #fda08b;*/
 }
 
 .has-danger .form-control {

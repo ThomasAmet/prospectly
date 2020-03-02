@@ -9,7 +9,7 @@ from flask_talisman import Talisman, ALLOW_FROM
 from config import DevelopmentConfig, TestConfig, ProductionConfig
 
 
-app = Flask(__name__, static_folder = './static')
+app = Flask(__name__, static_folder = './static', template_folder='./layout')
 app.config.from_object(ProductionConfig) # Dont forget to switch stripe key in prospectly.js
 
 talisman = Talisman(app, 
@@ -22,15 +22,15 @@ migrate = Migrate(app, db)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'# set the endpoint for the login page
-login_manager.login_message = 'Vous devez etre connectes pour voir cette page'
+login_manager.login_message = 'Vous devez etre connectés pour voir cette page.'
 
 
 from .models import *
 
 from .errors import errors as errors_blueprint
 app.register_blueprint(errors_blueprint)
-from .landing import landing as landing_blueprint
-app.register_blueprint(landing_blueprint)
+from .main import main as main_blueprint
+app.register_blueprint(main_blueprint)
 from .auth import auth as auth_blueprint
 app.register_blueprint(auth_blueprint)
 from .leads import leads as leads_blueprint
@@ -49,9 +49,9 @@ admin.add_view(AdminModelView(Plan, db.session))
 admin.add_view(AdminModelView(LeadRequest, db.session))
 admin.add_view(AdminModelView(Contact, db.session))
 admin.add_view(AdminModelView(Opportunity, db.session))
-admin.add_view(AdminModelView(CommercialStage, db.session))
-admin.add_view(AdminModelView(Status, db.session))
 admin.add_view(AdminModelView(CommercialStageStep, db.session))
+admin.add_view(AdminModelView(Status, db.session))
+admin.add_view(AdminModelView(CommercialStage, db.session))
 admin.add_view(AdminModelView(Task, db.session))
 admin.add_view(AdminModelView(Note, db.session))
 

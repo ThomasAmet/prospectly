@@ -22,7 +22,7 @@
             <!-- End card header -->
 
             <!-- Start form -->
-            <form action="{{url_for('crm.add_opportunity')}}" method="post">
+            <form action="{{url_for('crm.add_opportunity')}}" method="post" id=addOpportunityForm>
               {{ form.csrf_token }}
               <!-- start card body -->
               <div class="card-body">
@@ -90,10 +90,10 @@
                 <!-- #end 1st block# -->
 
                 <!-- Paste Task and Note between here.... -->
-                {#% include "layouts/task-and-note-form.html" %#}
+                {% include "layouts/task-and-note-form.html" %}
                 <!-- ...and here -->
 
-                <hr class="my-3" />
+                <hr class="my-2" />
               </div>
               <!-- end card body -->
 

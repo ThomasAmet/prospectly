@@ -525,6 +525,7 @@
 ------------------------*/
 .btn{padding: 12px 25px; font-weight: 500; background: none; color: #1c1d3e; overflow: hidden; border-radius: 7px; border: none; position: relative; z-index: 9;}
 .btn-sm{padding: 10px 20px;}
+.btn.btn-md{padding: 10px 24px; font-weight: 500; background: none; color: #1c1d3e; overflow: hidden; border-radius: 7px; border: none; position: relative; z-index: 9;}
 .dark-bg .btn, .theme-bg .btn{color: #ffffff;}
 .btn.focus, .btn:focus{box-shadow: none;}
 .btn:hover {background: #6551ff; color: #fff; transform: translateY(-3px);}

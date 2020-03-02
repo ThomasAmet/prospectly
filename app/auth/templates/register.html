@@ -1,4 +1,4 @@
-{% extends 'layout/landing_base.html' %}
+  {% extends 'main_base.html' %}
 <!--header start-->
 {% block header_attribs %} id="site-header" class="header header-2"{% endblock header_attribs %}
 
@@ -50,7 +50,7 @@
             <div class="bar bar-bottom"></div>
             <div class="bar bar-left"></div>
           </div>
-            <h6>Creez votre compte</h6>
+            <h6>Créez votre compte</h6>
         </div>
       </div>
     </div>
@@ -60,7 +60,7 @@
     <div class="form container text-center">
       <div class="col-lg-8 col-md-10 ml-auto mr-auto">
         <div class="register-form text-center">
-          <form role='form' id="register-form" method="post" action="">
+          <form role='form' id="register-form" action="{{url_for('auth.signup')}}" method='post'>
             {{ form.hidden_tag() }}
             <div class="messages">
               {% if messages %}

@@ -11,7 +11,7 @@ from flask_admin.contrib.sqla import ModelView
 
 from app import db, app
 from . import auth
-from .forms import LoginForm, RegistrationForm, SetPasswordForm
+from .forms import LoginForm, RegistrationForm, SetPasswordForm, RequestNewPasswordForm
 from ..models import User, Subscription, Plan
 
 import stripe
@@ -186,7 +186,7 @@ def session_completed_webhook():
 			'exp': time() + 7200			
 		}
 		token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256')
-		receiver_email=user.email
+		receiver_email = user.email
 		subject = "Prospectly - Valider votre inscription"
 		html_text=render_template('email/welcome-validation.html', user=user, token=token)
 		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
@@ -208,7 +208,7 @@ def confirm_account():
 
 	if current_user.is_authenticated:
 		if current_user.is_admin:
-			render_template('account-validation.html', form=form)
+			render_template('password-set.html', form=form)
 		else:
 			redirect( url_for('main.home'))
 
@@ -216,23 +216,77 @@ def confirm_account():
 	# print(token)
 	
 	if form.validate_on_submit():
-		# try:
-		token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-		user = User.query.filter_by(id=token_data['user_id']).first_or_404()
-		if token == user.last_token:
-			flash('Ce lien a déjà été utilisé pour définir un mot de passe.')
+		try:
+			token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+			user = User.query.filter_by(id=token_data['user_id']).first_or_404()
+			if token == user.last_token:
+				flash('Ce lien a déjà été utilisé pour définir un mot de passe.')
+				return redirect(url_for('auth.login', email=user.email))
+			user.set_password(form.password.data)
+			user.last_token = token
+			db.session.commit()
+			flash('Votre mot de passe est enregistré.')
 			return redirect(url_for('auth.login', email=user.email))
-		user.set_password(form.password.data)
-		user.last_token = token
-		db.session.commit()
-		flash('Votre mot de passe est enregistré.')
-		return redirect(url_for('auth.login', email=user.email))
-		# except:
-		# 	db.session.rollback()
-		# 	flash('Une erreur est survenue. Merci de contacter le support.')
-		# 	return redirect( url_for('main.home'))
+		except:
+			db.session.rollback()
+			flash('Une erreur est survenue. Merci de contacter le support.')
+			return redirect( url_for('main.home'))
+	return render_template('password-set.html', form=form)
 
-	return render_template('account-validation.html', form=form)
+
+@auth.route('/oubli-mot-de-passe', methods=['GET','POST'])
+def request_new_password():
+	if current_user.is_authenticated:
+		return redirect(url_for('crm.home'))
+
+	form = RequestNewPasswordForm()
+	if form.validate_on_submit():
+		user = User.query.filter_by(email=form.email.data).first()
+		if user is None:
+			flash("Un email de réinitialisation vient d'être envoyé à l'addresse indiquée.")
+			return redirect(url_for('auth.login'))
+		data = {'user_id':user.id,
+				'exp':time() + 600}
+		token = jwt.encode(data, user.password_hash, algorithm='HS256')# use of password hash as secret key to encode to ensure single use password
+		receiver_email = user.email
+		subject = "Prospectly - Réinitialiser votre mot de passe"
+		html_text=render_template('email/reset-password.html', user=user, token=token)
+		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
+		
+		flash("Un email de réinitialisation vient d'être envoyé à l'addresse indiquée.")
+		return redirect(url_for('auth.login'))
+	return render_template('new-password-request.html', form=form)
+
+
+
+@auth.route('/reinitialisation-mot-de-passe', methods=['GET','POST'])
+def reset_password():
+	form = SetPasswordForm()
+
+	if current_user.is_authenticated:
+		if current_user.is_admin:
+			render_template('password-set.html', form=form)
+		else:
+			flash("Déconnectez vous avant de changer votre mot de passe.")
+			redirect( url_for('main.home'))
+
+	token = request.args.get('token')
+	# print(token)
+	
+	if form.validate_on_submit():
+		try:
+			secret = User.query.get(jwt.decode(token, verify=False)['user_id']).password_hash
+			token_data = jwt.decode(token, secret, algorithms=['HS256'])
+			user = User.query.filter_by(id=token_data['user_id']).first_or_404()
+			user.set_password(form.password.data)
+			db.session.commit()
+			flash('Votre mot de passe a bien été changé.')
+			return redirect(url_for('auth.login', email=user.email))
+		except:
+			db.session.rollback()
+			flash("Ce lien n'est plus valide. Si l'erreur persiste, merci de contacter le support.")
+			return redirect( url_for('main.home'))
+	return render_template('password-set.html', form=form)
 
 
 

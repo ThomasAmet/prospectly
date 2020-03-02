@@ -8,7 +8,11 @@ logging.basicConfig(level=logging.INFO)
 
 csrf = CSRFProtect()
 
-
+class RequestNewPasswordForm(FlaskForm):
+	email = StringField('Email:',
+						validators=[DataRequired(message="Il faut un email pour se connecter."),
+									Email(message="Oups... Ce n'est pas un format valide.")])
+	submit = SubmitField('Se connecter')
 
 class SetPasswordForm(FlaskForm):
 	password = PasswordField('Mot de passe:', validators=[DataRequired()])

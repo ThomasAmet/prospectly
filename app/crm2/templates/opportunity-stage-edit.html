@@ -1,0 +1,182 @@
+  {% extends 'index.html' %}
+
+  {% block stylesheets %}
+    {{ super() }}
+  {% endblock stylesheets %}
+
+  {% block header %}
+      {{ super() }}
+  {% endblock header %}
+
+  {% block main_content %}
+
+    <div class="container-fluid mt--8">
+      <div class='row'>
+        <div class="col-xl-10 order-xl-1 pl-0 pr-0 mx-auto">
+          <div class="card bg-secondary shadow">
+
+            <!-- Start card header -->
+            <div class="card-header bg-white border-0">
+              <div class="row align-items-center">
+                <div class="col-8">
+                  <h3 class="mb-0">Edition de l'étape commerciale</h3>
+                </div>
+                <div class="col-4 text-right">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <a href="{{url_for('crm.view_opportunities_list')}}">
+                      <span aria-hidden="true">&times;</span>
+                    </a>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- End card header -->
+
+            <!-- Start form -->
+            <form action="{{url_for('crm.edit_opportunity_stage', id=opportunity.id)}}" method="post">
+              {{form.csrf_token()}}
+              <!-- start card body -->
+              <div class="card-body">
+                <!-- #start 1st block# -->
+                <h6 class="heading-small text-muted mb-2">Détails de l'opportunité</h6>
+                <div class="pl-lg-2">
+                  <!-- start 1st row -->
+                  <div class="row">
+                    <!-- Opportunity Name -->
+                    <div class="col-lg-8">                      
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-opportunity-name">Nom</label>
+                        <input id="input-opp-name" class="form-control form-control-alternative" placeholder="Ex: 'Nom de l'entreprise - type de contrat'" value="{{opportunity.name}}" type="text" disabled="">
+                      </div>
+                    </div>
+                    <!-- Opportunity Amount -->
+                    <div class="col-lg-4">
+                    <div class="form-group">
+                      <label class="form-control-label" for="input-country">Montant - € </label>
+                      <input type="text" id="input-postal-code" class="form-control form-control-alternative" placeholder="Montant en €" value={{opportunity.euros_value}} disabled="">
+                    </div>
+                    </div>
+                  </div>
+                  <!-- end 1st row -->
+                  <!-- start 2nd row -->
+                  <div class="row">
+                    <!-- 1st half of the row -->
+                    <div class="col-lg-6">
+                    <div class='row'>
+                      <!-- Name of Step's Stage  -->
+                      <div class="col-lg-7">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-city">Etape commerciale</label>
+                        <!-- <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="City" value="{{session['stage']}}"> -->
+                        {{form.stage(class="form-control form-control-alternative", placeholder="Ex:'Qualifié'")}}
+                      </div>
+                      </div>
+                      <!-- Closing Percentage Chance  -->
+                      <div class="col-lg-5">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-country">Chance de signer</label>
+                        <input type="text" id="input-country" class="form-control form-control-alternative" placeholder="" value="{{session['stage_closing_perc']}}" disabled="">
+                      </div>
+                      </div>
+                    </div>
+                    </div>
+                    <!-- end 1st half of the row -->
+                    <!-- start 2nd half of the row -->
+                    <div class="col-lg-6">
+                    <div class="row justify-content-center">
+                      <!-- Status of the Commercial Stage Step  -->
+                      <div class="col-lg-4">
+                      <div class="form-group">
+                        <label class="form-control-label" for="input-country">Status</label>
+                        <!-- <select id="input-status" class="form-control form-control-alternative" placeholder="Nom du status"><option></option></select> -->
+                        {{form.status(id="status-value", class="form-control form-control-alternative", placeholder="Ex:'En attente'")}}
+                      </div>
+                      </div>
+                    </div>
+                    </div>
+                    <!-- end 2nd half of the row -->
+                  </div>
+                  <!-- end 2nd row -->
+                </div>
+                <!-- #end 1st block# -->
+
+                <!-- #start 2nd block# -->
+                {% include "layouts/task-and-note-form.html" %}
+                <!-- #end 2nd block# -->
+
+                <!-- #start 3rd block# -->
+                <hr class="my-3" />
+                <div class="row pl-3">
+                    <h6 class="heading-small text-muted mb-2" style="position: relative; top:50%;">
+                      Informations à propos du contact
+                    </h6>
+                    <a class='ml-2' style='position: relative; top:50%;' href="#">
+                        <i class='fas fa-pencil-alt'></i>
+                    </a>
+                </div>
+                <div class="pl-lg-2">
+                  <!-- start 1st row -->
+                  <div class="row">
+                      <div class="col-lg-4">
+                      <div class="form-group">
+                          <label class="form-control-label" for="input-comapny-name">Entreprise</label>
+                          <input type="text" class="form-control form-control-alternative" placeholder="Nom de l'entreprise" value="{{ opportunity.contact.company_name }}" disabled>
+                      </div>
+                      </div>
+                      <div class="col-lg-4">
+                      <div class="form-group">
+                          <label class="form-control-label" for="input-company-email">Email</label>
+                          <input type="email" id="input-company-email" class="form-control form-control-alternative" placeholder="Email" value="{{ opportunity.contact.company_email }}" disabled>
+                      </div>
+                      </div>
+                      <div class="col-lg-4">
+                      <div class="form-group">
+                          <label class="form-control-label" for="input-company-phone">Telephone</label>
+                          <input type="text" id="input-company-phone" class="form-control form-control-alternative" 
+                                 placeholder="Telephone" value="{{ opportunity.contact.phone }}" disabled>
+                      </div>
+                      </div>
+                  </div>
+                  <!-- start 2nd row -->
+                  <div class="row">
+                      <div class="col-lg-6">
+                      <div class="form-group">
+                          <label class="form-control-label" for="input-company-address">Adresse</label>
+                          <input type="text" id="input-company-address" class="form-control form-control-alternative" placeholder="Adresse" value="{{ opportunity.contact.company_address }}" disabled>
+                      </div>
+                      </div>
+                      <div class="col-lg-6">
+                      <div class="form-group">
+                          <label class="form-control-label" for="input-company-city">Ville</label>
+                          <input type="text" id="input-company-city" class="form-control form-control-alternative" placeholder="Ville" value="{{ opportunity.contact.company_city }}" disabled>
+                      </div>
+                      </div>
+                  </div>
+                  <!-- end 2nd row -->
+                </div>
+                  <!-- #end 3rd block# -->
+              </div>
+              <!-- end card body -->
+
+              <!-- #start footer# -->
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary"><a href="{{url_for('crm.view_opportunities_list')}}">Annuler</a></button>
+                  <input name="submit-btn" type="submit" class="btn btn-primary" value="Valider">
+              </div>
+              <!-- #end footer# -->
+            </form>
+            <!-- end form -->
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  {% endblock main_content %}
+
+
+
+{% block javascripts %}
+{{ super() }}
+<!-- ProspectLy JS -->
+<script src="{{url_for('static', filename='js/prospectly.js')}}"></script>
+{% endblock javascripts%}

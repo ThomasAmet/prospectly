@@ -343,7 +343,7 @@ def login():
 @login_required
 def logout():
 	logout_user()
-	flash('Vous êtes maintenant deconnectés.')
+	flash('Vous êtes maintenant deconnecté.')
 	return redirect(url_for('main.home'))
 
 

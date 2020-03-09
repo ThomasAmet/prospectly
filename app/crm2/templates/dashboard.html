@@ -1,0 +1,16 @@
+{% extends "layout/base.html" %}
+
+{% block title %} Dashboard {% endblock title %}
+
+
+{% block header%}
+  {% include "dahsboard-header.html" %}
+{% endblock header %}
+
+{% block main_content %}
+  {% include "dahsboard-content.html" %}
+{% endblock main_content %}
+
+{% block javascripts %}
+  {{ super()}}
+{% endblock javascripts %}

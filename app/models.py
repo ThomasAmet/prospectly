@@ -314,7 +314,7 @@ def distinct_status_values():
 	''' Exctract distinct status title's from Status table.
 		Return a dict with each value paired with a label that will be displayed on the form field '''
 	try:
-		distinct_status = db.session.query(Status.title).distinct().all()
+		distinct_status = db.session.query(Status.title).distinct().order_by(Status.title.desc()).all()
 	except:
 		distinct_status = [('',)]
 	list_distinct_status = [elt[0] for elt in distinct_status]

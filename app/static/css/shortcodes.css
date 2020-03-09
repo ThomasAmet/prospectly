@@ -535,7 +535,7 @@
 .btn.btn-border{border:2px solid rgba(0,0,0,0.05);}
 .dark-bg .btn.btn-border, .theme-bg .btn.btn-border{border:2px solid rgba(255,255,255,0.2);}
 .btn.btn-circle{border-radius: 30px;}
-.btn.btn-white{background: #ffffff; color: #1c1d3e}
+.btn.btn-white{background: #ffffff; color: #1c1d3e;}
 .btn.btn-white.btn-border{border-color: #ffffff; background: none; color: #ffffff;}
 .btn.btn-white:hover{background: #ffffff; color: #6551ff;}
 .btn.btn-white.btn-border:hover{color: #6551ff;}

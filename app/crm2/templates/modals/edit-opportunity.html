@@ -1,0 +1,167 @@
+<div class="modal fade" tabindex="-1" role="dialog" id="editOpportunityModal">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="col-xl-12 order-xl-1 pl-0 pr-0">
+                <div class="card bg-secondary shadow">
+                    <div class="card-header bg-white border-0">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <h3 class="mb-0">Edition Opportunite</h3>
+                            </div>
+                            <div class="col-4 text-right">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            {{ form.csrf_token }}
+                            <div class="pl-3">
+                            <div class="row">
+                                <h6 class="heading-small text-muted mb-2" style="position: relative; top:50%;
+                                ">Informations a propos du contact</h6>
+                                <a class='ml-2' style='position: relative; top:50%;' href="#">
+                                    <i class='fas fa-pencil-alt'></i>
+                                </a>
+                            </div>
+                            </div>
+                            <div class="pl-lg-2">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="input-comapny-name">Entreprise</label>
+                                    <input type="text" id="input-comapny-name" class="form-control form-control-alternative" placeholder="Nom de l'entreprise" value="" disabled>
+                                </div>
+                                </div>
+                                <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="input-company-email">Email</label>
+                                    <input type="email" id="input-company-email" class="form-control form-control-alternative" 
+                                           placeholder="Email" value="{{ current_user.email }}" disabled>
+                                </div>
+                                </div>
+                                <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="input-company-phone">Telephone</label>
+                                    <input type="text" id="input-company-phone" class="form-control form-control-alternative" 
+                                           placeholder="Telephone" value="{{ current_user.phone }}" disabled>
+                                </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="input-company-address">Adresse</label>
+                                    <input type="text" id="input-company-address" class="form-control form-control-alternative" placeholder="Adresse" value="{{ current_user.company_address }}" disabled>
+                                </div>
+                                </div>
+                                <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="input-company-city">Ville</label>
+                                    <input type="text" id="input-company-city" class="form-control form-control-alternative" placeholder="Ville" value="{{ current_user.company_city }}" disabled>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+                            <hr class="my-3" />
+                            <!-- Address -->
+                            <h6 class="heading-small text-muted mb-2">Details de l'opportunite</h6>
+                            <div class="pl-lg-2">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="input-opportunity-name">Nom</label>
+                                        <input id="input-opp-name" class="form-control form-control-alternative" placeholder="Ex: 'Nom de l'entreprise - type de contrat'" value="Ex: 'Nom de l'entreprise - type de contrat'" type="text" disabled="">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="input-country">Montant</label>
+                                    <input type="text" id="input-postal-code" class="form-control form-control-alternative" placeholder="1000€" disabled="">
+                                </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                <div class='row'>
+                                    <div class="col-lg-9">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="input-city">Etape Commerciale</label>
+                                        <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="City" value="New York">
+                                    </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="input-country">Pourcentage</label>
+                                        <input type="text" id="input-country" class="form-control form-control-alternative" placeholder="Country" value="United States" disabled="">
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                                <div class="col-lg-6">
+                                <div class="row justify-content-center">
+                                    <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="input-country">Status</label>
+                                        <input type="number" id="input-postal-code" class="form-control form-control-alternative" placeholder="Postal code">
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+                            <hr class="my-3" />
+                            <!-- Description -->
+                            <h6 class="heading-small text-muted mb-4">Tâches & Notes</h6>
+                            <div class="pl-lg-2">
+                            <div class="form-group" id='note-form-group'>
+                                <label>Note</label>
+                                <textarea rows="4" class="form-control form-control-alternative" placeholder="A few words about you ...">A beautiful Dashboard for Bootstrap 4. It is Free and Open Source.</textarea>
+                            </div>
+                            <div class="form-group" id='task-form-group'>
+                                <div class="row justify-between">
+                                    <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="input-city">Tâches</label>
+                                        <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="City" value="New York">
+                                    </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="input-city">Importance</label>
+                                        <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="City" value="New York">
+                                    </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="input-country">Date limite</label>
+                                        <div class="input-group input-group-alternative">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="ni ni-calendar-grid-58"></i></span>
+                                            </div>
+                                            <input class="form-control datepicker" placeholder="Select date" type="text" value="" format>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                <label>Descriptif</label>
+                                <textarea rows="4" class="form-control form-control-alternative" placeholder="A few words about you ...">A beautiful Dashboard for Bootstrap 4. It is Free and Open Source.</textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                <button type="button" class="btn btn-primary">Sauvegarder</button>
+                            </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

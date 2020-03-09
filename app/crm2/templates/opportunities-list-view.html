@@ -28,18 +28,10 @@
                 <div class='col-lg-5 col-sm-2'>
                   <div class='row justify-content-end'>
                     <div clas='col-3'>
-                      <div class="dropdown">
-                        <button class="btn btn-icon btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          <span class="btn-inner--icon"><i class="ni ni-atom"></i></span>
-                          <span class="btn-inner--text">Actions</span>
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                          <a class="dropdown-item" href="" id='deleteAll'>Tous supprimer</a>
-                          <div class="dropdown-divider"></div>
-                          <a class="dropdown-item" href="#">Editer les étapes</a>
-                          <a class="dropdown-item" href="#">Editer les status</a>
-                        </div>
-                      </div>
+                      <button class="btn btn-icon btn-3 btn-primary" type="button">
+                        <span class="btn-inner--icon"><i class="ni ni-atom"></i></span>
+                        <span class="btn-inner--text">Actions</span>
+                      </button>
                     </div>
                     <div class='col-2 mr-2'>
                       <!-- Trigger/Open the AddOpportunityModal -->
@@ -83,15 +75,14 @@
                 </thead>
                 <!-- End Table Head -->
                 <!-- Table Body -->
-                <tbody id='opportunitiesTable'>
+                <tbody>
                 {% for key, value in opportunities.items() %}
-                <!-- key is the id of the opportunity -->
                 <!-- value is a list of type [opportunity, latest_step associate]  -->
                   <tr>
-                    <td>
+                    <td class='clickable-row' data-href="{{url_for('crm.view_opportunity_stage', id=value[0].id)}}">
                       <span class="custom-checkbox">
-                        <input type="checkbox" name="checkbox[]" value="{{value[0].id}}">
-                        <!-- <label for="checkbox{{key}}"></label> -->
+                        <input type="checkbox" id="checkbox1" name="options[]" value="1">
+                        <label for="checkbox1"></label>
                       </span>
                     </td>
                     <td class='clickable-row' data-href="{{url_for('crm.view_opportunity_stage', id=value[0].id)}}">
@@ -134,14 +125,7 @@
                             <i class="fas fa-ellipsis-v"></i>
                           </a>
                           <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                            <a class="dropdown-item" href="{{url_for('crm.view_opportunity_stage', id=value[0].id)}}">  Editer l'opportunité
-                            </a>
-                            <form method="post" action="{{url_for('crm.delete_opportunity')}}">
-                              <input name='opp_id' value="{{value[0].id}}" type='hidden'>
-                              <button class="dropdown-item">
-                                Supprimer l'opportunité
-                              </button>
-                            </form>
+                            <a class="dropdown-item" href="{{url_for('crm.view_opportunity_stage', id=value[0].id)}}">Editer l'opportunité</a>
                           </div>
                       </div>                     
                     </td>
@@ -157,14 +141,14 @@
                     <li class="page-item">
                       <a class="page-link" href="?page_token={{previous_page_token}}" tabindex="-1">
                         <i class="fas fa-angle-left"></i>
-                        <span class="sr-only">Page précédente</span>
+                        <span class="sr-only">Page precedente</span>
                       </a>
                     </li>
                   {% else %}
                     <li class="page-item disabled">
                       <a class="page-link" href="#" tabindex="-1">
                         <i class="fas fa-angle-left"></i>
-                        <span class="sr-only">Page precedente (désactivée)</span>
+                        <span class="sr-only">Page precedente(desactivee)</span>
                       </a>
                     </li>
                   {% endif %}
@@ -188,7 +172,7 @@
                   <li class="page-item disabled">
                     <a class="page-link" href="">
                       <i class="fas fa-angle-right"></i>
-                      <span class="sr-only">Page suivante (désactivée)</span>
+                      <span class="sr-only">Page suivante</span>
                     </a>
                   </li>
                   {% endif %}
@@ -215,5 +199,5 @@
 
   {% block javascripts %}
   {{ super() }}
-  <!-- <script type="text/javascript" src="{{url_for('static', filename='js/prospectly.js')}}"></script> -->
+  <script type="text/javascript" src="{{url_for('static', filename='js/prospectly.js')}}"></script>
   {% endblock javascripts%}

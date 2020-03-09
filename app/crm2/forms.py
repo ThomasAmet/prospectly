@@ -1,4 +1,4 @@
-from flask_wtf import FlaskForm, CSRFProtect
+sfrom flask_wtf import FlaskForm, CSRFProtect
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField, DecimalField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.fields.html5 import DateField
@@ -22,8 +22,7 @@ class EditOpportunityStageForm(FlaskForm):
 	# task_due_date = DateField('A faire pour:', format='%Y-%m-%d')
 	# submit = SubmitField('Valider')
 
-	def __init__(self, *args, **kwargs):
-		super(EditOpportunityStageForm, self).__init__(*args, **kwargs)
+	def initiate_choices(self):
 		# Update choices for the select fields
 		self.stage.choices = distinct_stages_values()
 		self.status.choices = distinct_status_values()
@@ -58,9 +57,8 @@ class AddOpportunityForm(FlaskForm):
 	task_priority = SelectField('Priorité', choices=distinct_priority_values(), validators=[Optional()])
 	# task_due_date = DateField('A faire pour:', format='%Y-%m-%d', validators=[Optional()], default=None)
 
-	# Define choices within _init__ to prevent error when manually initiatin choices
-	def __init__(self, *args, **kwargs):
-		super(AddOpportunityForm, self).__init__(*args, **kwargs)
+	def initiate_choices(self):
+		# Update choices for the select fields
 		self.stage.choices = distinct_stages_values()
 		self.status.choices = distinct_status_values()
 		self.task_priority.choices = distinct_priority_values()

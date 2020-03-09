@@ -29,7 +29,7 @@
     {% endblock meta %}
 
   <title>
-    ProspectLy App - {% block title %}Dashboard{% endblock %} | Prospectly
+    Prospectly App - {% block title %}Dashboard{% endblock %} | Prospectly
   </title>
 
   {% block stylesheets %}
@@ -60,6 +60,7 @@
   {% block javascripts %}
     <!-- Core -->
     <script src="{{ url_for('static', filename='js/plugins/jquery/dist/jquery.min.js') }}"></script>
+    <script src="https://js.stripe.com/v3"></script>
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
 
     <!-- Boostrap 4.3.1 -->
@@ -71,6 +72,7 @@
     <script src="{{ url_for('static', filename='js/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
     <!-- Argon JS -->
     <script src="{{ url_for('static', filename='js/argon-dashboard.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/prospectly.js') }}"></script>
   {% endblock javascripts %}
 
 </body>

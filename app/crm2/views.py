@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, session, jsonify, flash, Response
+from flask import render_template, redirect, url_for, request, session, jsonify, flash
 from . import crm
 from .forms import EditOpportunityStageForm, AddOpportunityForm, AddProspectForm
 from app import db
@@ -27,8 +27,7 @@ def clear_session():
 @crm.route('/', methods=['GET','POST'])
 @login_required
 def index():
-	flash('Test')
-	return render_template('base2.html')
+    return render_template('base2.html')
 
 
 
@@ -74,48 +73,49 @@ def add_prospect():
 
 @crm.route('/opportunites/liste')
 @login_required
-def view_opportunities_list():	
+def view_opportunities_list():
 	form = AddOpportunityForm()
-	edit_form = EditOpportunityStageForm()
-	
+	editForm = EditOpportunityStageForm()
+	form.initiate_choices()
+
 	token = request.args.get('page_token', None)
-	
 	if token:
 		token = token.encode('utf-8')
-	
 	opportunities, next_page, previous_page = get_list_opportunities(user_id=current_user.id, limit=20, cursor=token)
 	latest_steps = [CommercialStageStep.query.filter_by(opportunity_id=opportunity.id).order_by(CommercialStageStep.creation_date.desc()).first() for opportunity in opportunities]
-	# ids = [opp.id for opp in opportunities]
-	# opportunities = dict(zip(ids,list(zip(opportunities, latest_steps)))) #dict of list: key is an integer, value is a list. Each list is compose of an opportunity and its latest stage. 
-	opportunities = dict(zip(range(len(opportunities)),list(zip(opportunities, latest_steps)))) #dict of list: key is an integer, value is a list. Each list is compose of an opportunity and its latest stage. 
+	ids = [opp.id for opp in opportunities]
+	# print(ids)
+	# print(dict(zip(ids,list(zip(opportunities, latest_steps)))))
+	opportunities = dict(zip(ids,list(zip(opportunities, latest_steps)))) #dict of list: key is an integer, value is a list. Each list is compose of an opportunity and its latest stage. 
 	
+	# return render_template('test.html', opportunities=opportunities, latest_steps=latest_steps, next_page_token=next_page, previous_page_token=previous_page, cursor=token)
 	return render_template('opportunities-list-view.html', form=form, opportunities=opportunities, next_page_token=next_page, previous_page_token=previous_page)
 
 
 
-@crm.route('/opportunites/ajout', methods=['GET','POST'])
+@crm.route('/opportunites/ajout', methods=['POST'])
 @login_required
 def add_opportunity():
 	if request.method=='GET':
 		return redirect(url_for('crm.view_opportunities_list'))
 
 	form = AddOpportunityForm(request.form)
-
-	if not form.validate():
-		print(form.errors)
-		flash('Une erreur est survenue. Veuillez réessayer.')
-		return redirect(url_for('crm.view_opportunities_list'))
 	
-	try:
+	if form.validate_on_submit():
+		print(request.form)
+		# for k,v in request.form:
+			# print('key:{}, value:{}'.format(k,v))
+
 		opportunity = Opportunity(user_id=current_user.id,
 							 	  contact_id=form.contact.data.id,
 							  	  name=form.name.data,
 							  	  euros_value=form.euros_value.data)
 		db.session.add(opportunity)
+
 		db.session.flush()
 
-		stage = CommercialStage.query.filter_by(name=request.form.get('stage')).first_or_404()
-		status = Status.query.filter_by(title=request.form.get('status')).first_or_404()
+		stage = CommercialStage.query.filter_by(name=form.stage.data).first_or_404()
+		status = Status.query.filter_by(title=form.status.data).first_or_404()
 		opportunity_stage=CommercialStageStep(opportunity_id=opportunity.id,
 											  commercial_stage_id=stage.id,
 											  status_id=status.id)
@@ -126,59 +126,28 @@ def add_opportunity():
 			due_date = datetime(year=int(due_date[-4:]), month=int(due_date[:2].replace('0','')), day=int(due_date[3:-5].replace('0',''))) if due_date else None # Parse due from mm/dd/yyyy to dd/mm/yyyy if exists
 
 			task = Task(user_id=current_user.id,
-						task_title=request.form.get('task_title'),
-						task_content=request.form.get('task_content'), 
-						priority=request.form.get('task_priority'), 
+						task_title=form.task_title.data,
+						task_content=form.task_content.data, 
+						priority=form.task_priority.data, 
 						due_date=due_date,
 						done=request.form.get('task-done-value'))
 			db.session.add(task)
 			db.session.flush()
 			opportunity_stage.task_id = task.id
 		else:
-			note = Note(note_content=request.form.get('note_content'))
+			note = Note(note_content=form.note_content.data)
 			db.session.add(note)
 			db.session.flush()
 			opportunity_stage.note_id = note.id
+
+		try:
+			db.session.commit()
+			return redirect(url_for('crm.view_opportunities_list'))
+		except:
+			db.session.rollback()
+			flash('Une erreur est survenue.Veuillez réessayer.')
+			return redirect(url_for('crm.view_opportunities_list'))
 	
-		db.session.commit()
-	except:
-		db.session.rollback()
-	return redirect(url_for('crm.view_opportunities_list'))	
-	
-
-
-@crm.route('/oppportunites/suppression', methods=['POST','GET'])
-@login_required
-def delete_opportunity():
-	# try:
-	if request.form.get('opp_id'):
-		opp_ids = [request.form.get('opp_id')] #row by row deletion
-	else:
-		opp_ids = request.get_json()['opp_ids'] #multiple rows deletion
-	# print(opp_ids)
-
-	try:
-		for id in opp_ids:
-			id = int(id)
-			opportunity = Opportunity.query.get(id)
-			
-			note_ids = [stage.note_id for stage in opportunity.commercial_stages if stage.note_id]
-			if len(note_ids) > 0:
-				for note_id in note_ids:
-					note = Note.query.get(note_id)
-					db.session.delete(note)
-
-			task_ids = [stage.task_id for stage in opportunity.commercial_stages if stage.task_id]		
-			if len(task_ids) > 0:
-				for task_id in task_ids:
-					task = Task.query.get(note_id)
-					db.session.delete(task)
-			db.session.delete(opportunity)
-		db.session.commit()
-	except:
-		db.session.rollback()
-	return redirect(url_for('crm.view_opportunities_list'))
-
 
 
 

@@ -1,26 +1,70 @@
-// Script that works with register.html to handle stripe (v2) Why this script not called?
+// Script to delete multiple row in opportunities view page
+$(document).ready(function(){
 
+  $("#selectAll").click(function(){
+        $("input[type=checkbox]").prop('checked', $(this).prop('checked'));// $(this).prop('checked') equals True or False depending on state of master checkbox
+  });
+
+  $('#deleteAll').click(function(){
+    var rowIds = [];
+    $.each($('#opportunitiesTable').find("input[name='checkbox[]']:checked"), function(){
+                rowIds.push($(this).val());
+            });
+    // alert(rowIds);
+
+    data = JSON.stringify({'opp_ids':rowIds})
+    
+    // alert(data)
+    $.ajax({
+      type: 'POST',
+      // url: '/app/oppportunites/suppression-multiple',
+      url: '/app/oppportunites/suppression',
+      data: data,
+      dataType: 'json',
+      contentType: 'application/json',
+      async: false,
+    })
+    .done(function(data){
+      // location.href = '/app/opportunites/liste';
+      location.href = '/app/dashboard';
+    })
+    .fail(function(jqXHR, textStatus, errorThrown){
+      location.href = '/app/opportunites/liste';
+    });
+  });
+});
+
+// Script that works with register.html to handle stripe (v2) Why this script not called?
 $(document).ready(function(){
     var stripe = null;
 
-    $.ajax({
-        type:'GET',
-        url: '/auth/stripe-public-key',
-        success: function(response) {
-          // alert(response['publicKey']);
-          stripe = Stripe(response['publicKey']); //pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
-        },
-        processData: false,
-        contentType: false,
-    });
+    // $.ajax({
+    //     type:'GET',
+    //     url: '/auth/stripe-public-key',
+    //     success: function(response) {
+    //       // alert(response['publicKey']);
+    //       stripe = Stripe(response['publicKey']); //pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+    //     },
+    //     processData: false,
+    //     contentType: false,
+    // });
 
     // $("#register-submit").click(function(){        
     //     $("#register-form").submit(); // Submit the form
     // });
 
-
     $(document).on('submit', '#register-form', function(e){
         e.preventDefault();
+        $.ajax({
+          type:'GET',
+          url: '/auth/stripe-public-key',
+          success: function(response) {
+            // alert(response['publicKey']);
+            stripe = Stripe(response['publicKey']); //pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+          },
+          processData: false,
+          contentType: false,
+        });
         var formData = new FormData(this);
         $.ajax({
             type:'POST',
@@ -68,6 +112,111 @@ $(document).ready(function(){
     });
 });
 
+$(document).ready(function(){
+  // 
+  // Script to change appearance of flash message
+  $('#offerBar').css("display","block");
+  $('#closeBar').click(function(){
+    // $('#offerBar').css("visibility","hidden");
+    $('#offerBar').css("display","none");
+    // $('#offerBar').hide();
+  });
+  $('#banner-wrap').addClass("fadeInDown wow");
+ 
+  // 
+  // JQuery to change the format of element from the datepicker class
+  let datepicker = $('#due-date-datepicker');
+  if(datepicker.length > 0){
+    datepicker.datepicker({
+      format: "mm/dd/yyyy",
+      startDate: new Date()
+    });
+  }
+
+  // 
+  // JQuery for Displaying part of the OpportunityStageEdition form
+  if ($("#status-value").val()=='A faire'){
+      $("[class*='note-form-group']").hide();
+      $("[class*='task-form-group']").show();
+    }
+    else{
+      $("[class*='note-form-group']").show();
+      $("[class*='task-form-group']").hide();      
+    }
+
+  $("#status-value").change(function(){
+    if ($("#status-value").val()=='A faire'){
+      $("[class*='note-form-group']").hide();
+      $("[class*='task-form-group']").show();
+    }
+    else{
+      $("[class*='note-form-group']").show();
+      $("[class*='task-form-group']").hide();      
+    }
+  });
+
+  // 
+  // JQuery for Displaying part of the OpportunityAdd form
+  if ($("#addOpportunityForm #status-value").val()=='A faire'){ 
+      $("[class*='note-form-group']").hide();
+      $("[class*='task-form-group']").show();
+    }
+    else{
+      $("[class*='note-form-group']").show();
+      $("[class*='task-form-group']").hide();      
+    }
+    
+  $("#status-value").change(function(){
+    if ($("#addOpportunityForm #status-value").val()=='A faire'){
+      $("[class*='note-form-group']").hide();
+      $("[class*='task-form-group']").show();
+    }
+    else{
+      $("[class*='note-form-group']").show();
+      $("[class*='task-form-group']").hide();      
+    }
+  });
+
+  // 
+  // Jquery to make the entire row of a table clickable
+  $(".clickable-row").click(function() {
+    window.location = $(this).data("href");
+  });
+
+  // 
+  // Jquery for Toggle Pricing
+  let monthlyChoice = $('#monthly-choice');
+  let yearlyChoice = $('#yearly-choice');
+  let switcher = $('#switcher');
+  // div monthly
+  let monthlySubs = $("#monthly-subscriptions");
+  // div hourly
+  let yearlySubs = $("#yearly-subscriptions");
+
+  monthlyChoice.click(function(){
+    switcher.prop("checked", false);
+    monthlyChoice.addClass("toggler--is-active");
+    yearlyChoice.removeClass("toggler--is-active");
+    monthlySubs.addClass("hide");
+    yearlySubs.removeClass("hide");
+  });
+
+  yearlyChoice.click(function(){
+    switcher.prop("checked", true);
+    yearlyChoice.addClass("toggler--is-active");
+    monthlyChoice.removeClass("toggler--is-active");
+    yearlySubs.addClass("hide");
+    monthlySubs.removeClass("hide");
+  });
+
+  switcher.click(function(){
+    yearlyChoice.toggleClass("toggler--is-active");
+    monthlyChoice.toggleClass("toggler--is-active");
+    yearlySubs.toggleClass("hide");
+    monthlySubs.toggleClass("hide");
+  });
+});
+  
 // Script that works with register.html to handle stripe (v1)
 // $(document).ready(function(){
   
@@ -96,105 +245,40 @@ $(document).ready(function(){
 
         
 //     });
-// });``
+// });
 
 
-// Script to change appearance of flash message
-$(document).ready(function(){
-  $('#banner-wrap').addClass("fadeInDown wow");
- 
-// JQuery to change the format of element from the datepicker class
-  let datepicker = $('#due-date-datepicker');
-  if(datepicker.length > 0){
-    datepicker.datepicker({
-      format: "mm/dd/yyyy",
-      startDate: new Date()
-    });
-  }
+// // // JS for Toggle Pricing (in Javascript native)
+// let monthlyChoice = document.getElementById("monthly-choice");
+// let yearlyChoice = document.getElementById("yearly-choice");
+// let switcher = document.getElementById("switcher");
+// // div monthly
+// let monthlySubs = document.getElementById("monthly-subscriptions");
+// // div hourly
+// let yearlySubs = document.getElementById("yearly-subscriptions");
 
-// JQuery for Displaying part of the OpportunityStageEdition form
-  if ($("#status-value").val()=='A faire'){
-      $("[class*='note-form-group']").hide();
-      $("[class*='task-form-group']").show();
-    }
-    else{
-      $("[class*='note-form-group']").show();
-      $("[class*='task-form-group']").hide();      
-    }
+// monthlyChoice.addEventListener("click", function(){
+//   switcher.checked = false;
+//   monthlyChoice.classList.add("toggler--is-active");
+//   yearlyChoice.classList.remove("toggler--is-active");
+//   monthlySubs.classList.remove("hide");
+//   yearlySubs.classList.add("hide");
+// });
 
-  $("#status-value").change(function(){
-    if ($("#status-value").val()=='A faire'){
-      $("[class*='note-form-group']").hide();
-      $("[class*='task-form-group']").show();
-    }
-    else{
-      $("[class*='note-form-group']").show();
-      $("[class*='task-form-group']").hide();      
-    }
-  });
+// yearlyChoice.addEventListener("click", function(){
+//   switcher.checked = true;
+//   yearlyChoice.classList.add("toggler--is-active");
+//   monthlyChoice.classList.remove("toggler--is-active");
+//   monthlySubs.classList.add("hide");
+//   yearlySubs.classList.remove("hide");
+// });
 
-// JQuery for Displaying part of the OpportunityAdd form
-  if ($("#addOpportunityForm #status-value").val()=='A faire'){ 
-      $("[class*='note-form-group']").hide();
-      $("[class*='task-form-group']").show();
-    }
-    else{
-      $("[class*='note-form-group']").show();
-      $("[class*='task-form-group']").hide();      
-    }
-    
-  $("#status-value").change(function(){
-    if ($("#addOpportunityForm #status-value").val()=='A faire'){
-      $("[class*='note-form-group']").hide();
-      $("[class*='task-form-group']").show();
-    }
-    else{
-      $("[class*='note-form-group']").show();
-      $("[class*='task-form-group']").hide();      
-    }
-  });
-
-});
-
-
-$(document).ready(function(){
-    $(".clickable-row").click(function() {
-        window.location = $(this).data("href");
-    });
-});
-
-
-// JS for Toggle Pricing
-let monthlyChoice = document.getElementById("monthly-choice");
-let yearlyChoice = document.getElementById("yearly-choice");
-let switcher = document.getElementById("switcher");
-// div monthly
-let monthlySubs = document.getElementById("monthly-subscriptions");
-// div hourly
-let yearlySubs = document.getElementById("yearly-subscriptions");
-
-monthlyChoice.addEventListener("click", function(){
-  switcher.checked = false;
-  monthlyChoice.classList.add("toggler--is-active");
-  yearlyChoice.classList.remove("toggler--is-active");
-  monthlySubs.classList.remove("hide");
-  yearlySubs.classList.add("hide");
-});
-
-yearlyChoice.addEventListener("click", function(){
-  switcher.checked = true;
-  yearlyChoice.classList.add("toggler--is-active");
-  monthlyChoice.classList.remove("toggler--is-active");
-  monthlySubs.classList.add("hide");
-  yearlySubs.classList.remove("hide");
-});
-
-switcher.addEventListener("click", function(){
-  yearlyChoice.classList.toggle("toggler--is-active");
-  monthlyChoice.classList.toggle("toggler--is-active");
-  monthlySubs.classList.toggle("hide");
-  yearlySubs.classList.toggle("hide");
-})
+// switcher.addEventListener("click", function(){
+//   yearlyChoice.classList.toggle("toggler--is-active");
+//   monthlyChoice.classList.toggle("toggler--is-active");
+//   monthlySubs.classList.toggle("hide");
+//   yearlySubs.classList.toggle("hide");
+// })
 
 
 

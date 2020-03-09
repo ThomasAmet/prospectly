@@ -5286,6 +5286,7 @@ input[type="button"].btn-block {
 
 .page-item.disabled .page-link {
   color: #8898aa;
+  opacity: 0.6;
   pointer-events: none;
   cursor: auto;
   background-color: #fff;

@@ -37,34 +37,47 @@ $(document).ready(function(){
 // Script that works with register.html to handle stripe (v2) Why this script not called?
 $(document).ready(function(){
     var stripe = null;
+    $.ajax({
+      type:'GET',
+      url: '/auth/stripe-public-key',
+      success: function(response) {
+        // alert(response['publicKey']);
+        stripe = Stripe(response['publicKey']); //pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
+      },
+      processData: false,
+      contentType: false,
+    });
 
-    // $.ajax({
-    //     type:'GET',
-    //     url: '/auth/stripe-public-key',
-    //     success: function(response) {
-    //       // alert(response['publicKey']);
-    //       stripe = Stripe(response['publicKey']); //pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
-    //     },
-    //     processData: false,
-    //     contentType: false,
-    // });
-
-    // $("#register-submit").click(function(){        
-    //     $("#register-form").submit(); // Submit the form
-    // });
+    $('#id-affiliate-stripe-btn').click(function(e){
+        var formData = new FormData();
+        formData.append("affiliation_json_str", $('#id-affiliation-data-str').val());
+        $.ajax({
+            type:'POST',
+            url: '/affiliation/subscription-stripe',
+            data: formData,
+            dataType: 'text',
+            processData: false,
+            contentType: false,
+        })
+        .done(function(data) { 
+            alert(data);
+            var stripe_session_id = data;
+            stripe.redirectToCheckout({
+                sessionId: stripe_session_id
+            })
+            .then(function (result) {
+                
+            });
+        })
+        .fail(function(jqXHR, textStatus, errorThrown){
+            location.href=jqXHR.responseText;
+        });
+    
+    });
 
     $(document).on('submit', '#register-form', function(e){
         e.preventDefault();
-        $.ajax({
-          type:'GET',
-          url: '/auth/stripe-public-key',
-          success: function(response) {
-            // alert(response['publicKey']);
-            stripe = Stripe(response['publicKey']); //pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5');
-          },
-          processData: false,
-          contentType: false,
-        });
+        
         var formData = new FormData(this);
         $.ajax({
             type:'POST',
@@ -96,7 +109,7 @@ $(document).ready(function(){
             // Public Key for production
             // var stripe = Stripe('pk_live_9Pr3WyeRB8zqyhkbR8cUdCYB00IPEwGuN5');
             stripe.redirectToCheckout({
-              sessionId: stripe_session_id
+                sessionId: stripe_session_id
             })
             .then(function (result) {
             });

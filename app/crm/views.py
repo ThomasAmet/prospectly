@@ -1,12 +1,16 @@
 from flask import render_template, redirect, url_for, request, session, jsonify, flash, Response
 from . import crm
 from .forms import EditOpportunityStageForm, AddOpportunityForm, AddProspectForm
-from app import db
+from app import db, app
 from ..models import User, Subscription, Lead, LeadRequest, Contact, Opportunity, CommercialStageStep, CommercialStage, Task, Status, Note
-from ..models import get_list_opportunities, get_list_prospects
+# from ..models import get_list_opportunities, get_list_prospects
 from app.auth.views import admin_login_required
 from flask_login import current_user, login_required
-from datetime import datetime
+from datetime import datetime, timedelta
+
+import stripe
+stripe.api_key = app.config.get('STRIPE_SECRET_KEY')
+
 
 def clear_session():
 	session.pop('note_content', None)
@@ -31,11 +35,32 @@ def index():
 	return render_template('base2.html')
 
 
-
 @crm.route('/dashboard')
 @login_required
 def home():
-	return render_template('dashboard.html')
+	if current_user.payment_type == 0:
+		last_month_end = datetime.today().replace(day=1, hour=23, minute=59, second=59) - timedelta(days=1)
+		last_month_start = last_month_end.replace(day=1, hour=0, minute=0, second=0)
+		charges = stripe.Charge.list(customer=current_user.stripe_customer_id, created={
+			'gte': int(last_month_start.timestamp()),
+			'lte': int(last_month_end.timestamp())
+		})
+
+		# calculate total amount of affiliation payments last month
+		aff_sum = 0
+		for charge in charges:
+			if charge['status'] == 'succeeded':
+				aff_sum += charge['amount']
+		aff_fee = aff_sum * 3.0 / 10
+
+		return render_template('dashboard.html', affiliation_data={
+			'fee': aff_fee,
+			'count': len(list(current_user.affiliations)),
+			'amount': aff_sum
+		})
+
+	else:
+		return render_template('dashboard.html')
 
 
 

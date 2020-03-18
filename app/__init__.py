@@ -10,7 +10,7 @@ from config import DevelopmentConfig, TestConfig, ProductionConfig
 
 
 app = Flask(__name__, static_folder = './static', template_folder='./layout')
-app.config.from_object(DevelopmentConfig) # Dont forget to switch stripe key in prospectly.js
+app.config.from_object(TestConfig) # Dont forget to switch stripe key in prospectly.js
 
 talisman = Talisman(app, 
 	content_security_policy=app.config['CSP'],
@@ -37,6 +37,8 @@ from .leads import leads as leads_blueprint
 app.register_blueprint(leads_blueprint)
 from .crm import crm as crm_blueprint
 app.register_blueprint(crm_blueprint)
+from .affiliation import affiliation as affiliation_blueprint
+app.register_blueprint(affiliation_blueprint)
 
 from .auth.views import *
 

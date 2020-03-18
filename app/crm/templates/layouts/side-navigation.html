@@ -107,11 +107,18 @@
               <a class="dropdown-item" href="#">Personnaliser le tunnel</a>
             </div>
           </li>
+          
           <li>
             <a class="nav-link" href="">
               <i class="ni ni-spaceship text-blue"></i> Leads Generator
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{url_for('affiliation.render_affiliation')}}">
+              <i class="ni ni-circle-08 text-green"></i> Affiliation
+            </a>
+          </li>
+          
           <li class="nav-item">
             <a class="nav-link" href="{{url_for('auth.profile')}}">
               <i class="ni ni-circle-08 text-green"></i> Profile

@@ -1,5 +1,5 @@
 from datetime import datetime 
-from flask import render_template, url_for, redirect, session, flash, request
+from flask import render_template, url_for, redirect, session, flash, request, jsonify, Response
 from . import main
 from app import app
 from threading import Thread
@@ -10,6 +10,13 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+from ..models import User, Subscription, Plan
+
+from app import auth, affiliation
+
+import stripe
+stripe.api_key = app.config.get('STRIPE_SECRET_KEY')
 
 
 @main.route('/')
@@ -84,3 +91,47 @@ def send_async_email(receiver_email, subject, html_text):
 	with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
 		server.login(username_email, password)
 		server.sendmail(sender_email, receiver_email, text)
+
+
+# @main.route('/on_stripe_event', methods=['POST'])
+# def on_stripe_event():
+# 	webhook_secret = app.config.get('STRIPE_WEBHOOK_SECRET')
+
+# 	if webhook_secret:
+# 		signature = request.headers.get('stripe-signature')
+# 		try:
+# 			event = stripe.Webhook.construct_event(
+# 				payload=request.data, sig_header=signature, secret=webhook_secret)
+# 			data = event['data']
+# 			event_type = event['type']
+# 		except Exception as e:
+# 			print(e)
+# 			return Response('Stripe error', 500)
+# 		# Get the type of webhook event sent - used to check the status of PaymentIntents.
+# 	else:
+# 		request_data = json.loads(request.data)
+# 		data = request_data['data']
+# 		event_type = request_data['type']
+
+# 	data_object = data['object']
+
+# 	if event_type == 'checkout.session.completed':
+# 	# if event_type == 'customer.subscription.created':
+# 		print('Data object:{}'.format(data_object))
+# 		if data_object['mode'] == 'subscription':
+# 			# Retrieve user from stripe customer id
+# 			user = User.query.filter_by(stripe_customer_id=data_object['customer']).first_or_404()
+
+# 			# Retrieve subscription data from subscription id
+# 			stripe_subscription_id = data_object['subscription']
+# 			stripe_subscription = stripe.Subscription.retrieve(stripe_subscription_id)
+# 			if stripe_subscription:
+# 				if stripe_subscription['metadata']['is_affiliation'] == 'False': # Subscription is created when registering
+# 					auth.views.setup_stripe_payment(user, data_object)
+# 				elif stripe_subscription['metadata']['is_affiliation'] == 'True':
+# 					affiliation.views.add_affiliation(user, data_object, stripe_subscription)
+
+# 				return Response('Success', 200)
+
+# 	print('Other web hook')
+# 	return jsonify({'status': 'success'})

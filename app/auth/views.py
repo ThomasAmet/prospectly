@@ -8,8 +8,9 @@ from flask_login import login_user, logout_user, login_required, current_user
 from flask_talisman import ALLOW_FROM
 from flask_admin import BaseView, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
+from sqlalchemy.exc import SQLAlchemyError
 
-from app import db, app
+from app import db, app, affiliation
 from . import auth
 from .forms import LoginForm, RegistrationForm, SetPasswordForm, RequestNewPasswordForm
 from ..models import User, Subscription, Plan
@@ -82,12 +83,12 @@ def signup():
 					receiver_email = user.email
 					subject = "Prospectly - Valider votre inscription"
 					html_text = render_template('email/welcome-validation.html', user=user, token=token)
-					Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
+					Thread(target=send_async_email, args=(receiver_email, 'hello@prospectly.fr', subject, html_text)).start()
 					flash('Utilisateur crée.')
 					# print('flash ready')
 					return Response(url_for('auth.signup'), 404)
 				else:
-					return Response(url_for('main.login'), 404)
+					return Response(url_for('auth.login'), 404)
 			else:
 				stripe_plan_id = get_stripe_plan_id(request.form.get('plan_name'))
 				user = User.query.filter_by(email=request.form['email']).first()
@@ -128,14 +129,18 @@ def signup():
 							'plan': stripe_plan_id,
 						}],
 						'trial_period_days':14,
-					}, # I think u r right.
+						'metadata': {
+							'is_affiliation': False,
+						}
+					},
 					success_url='%sauth/paiement-succes?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
 					cancel_url='%sauth/paiement-echec' %request.host_url,
 					locale='fr'
 				)
 				# session['stripe_session_id'] = stripe_session.id #load stripe session in cookie to allow only one time success message
 				return Response(stripe_session.id, status=200)
-		except:
+		except SQLAlchemyError as err:
+			print(err)
 			flash('Une erreur est survenue. Merci de contacter le support.')
 			print('User creation failed!')
 			db.session.rollback()
@@ -155,20 +160,68 @@ def signup():
 
 
 
-@auth.route('/verification-paiement', methods=['POST'])
-def session_completed_webhook():
+# @auth.route('/verification-paiement', methods=['POST'])
+# def session_completed_webhook():
 
+# 	webhook_secret = app.config.get('STRIPE_WEBHOOK_SECRET')
+
+# 	if webhook_secret:
+# 		signature = request.headers.get('stripe-signature')
+# 		try:
+# 			event = stripe.Webhook.construct_event(
+#                 payload=request.data, sig_header=signature, secret=webhook_secret)
+# 			data = event['data']
+# 			event_type = event['type']
+# 		except Exception as e:
+# 			return e
+# 		# Get the type of webhook event sent - used to check the status of PaymentIntents.
+# 	else:
+# 		request_data = json.loads(request.data)
+# 		data = request_data['data']
+# 		event_type = request_data['type']
+
+# 	data_object = data['object']
+
+# 	if event_type == 'checkout.session.completed':
+# 		print('Data object:{}'.format(data_object))
+# 		stripe_customer = stripe.Customer.retrieve(data_object['customer'])
+# 		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first_or_404()
+# 		# print('Stripe Subscription:{}'.format(stripe_customer.subscriptions.data[0].id))
+# 		data = {
+# 			'user_id': user.id,
+# 			'exp': time() + 7200			
+# 		}
+# 		token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256')
+# 		receiver_email = user.email
+# 		subject = "Prospectly - Valider votre inscription"
+# 		html_text=render_template('email/welcome-validation.html', user=user, token=token)
+# 		print(html_text)
+# 		# Thread(target=send_async_email, args=(receiver_email, 'hello@prospectly.fr', subject, html_text)).start()
+# 		# Create Subscription
+# 		plan_id, yearly = get_plan_details(data_object['display_items'][0]['plan']['id'])
+# 		sub = Subscription(user_id=user.id, plan_id=plan_id, yearly=yearly)
+# 		db.session.add(sub)
+# 		db.session.commit()
+# 		return Response('Success', 200)
+
+# 	print('Other web hook')
+# 	return jsonify({'status': 'success'})
+
+
+@auth.route('/on_stripe_event', methods=['POST'])
+def on_stripe_event():
 	webhook_secret = app.config.get('STRIPE_WEBHOOK_SECRET')
 
 	if webhook_secret:
 		signature = request.headers.get('stripe-signature')
 		try:
 			event = stripe.Webhook.construct_event(
-                payload=request.data, sig_header=signature, secret=webhook_secret)
+				payload=request.data, sig_header=signature, secret=webhook_secret)
 			data = event['data']
 			event_type = event['type']
 		except Exception as e:
-			return e
+			print(e)
+			return Response('Stripe error', 500)
 		# Get the type of webhook event sent - used to check the status of PaymentIntents.
 	else:
 		request_data = json.loads(request.data)
@@ -178,29 +231,30 @@ def session_completed_webhook():
 	data_object = data['object']
 
 	if event_type == 'checkout.session.completed':
+	# if event_type == 'customer.subscription.created':
 		print('Data object:{}'.format(data_object))
-		stripe_customer = stripe.Customer.retrieve(data_object['customer'])
-		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first_or_404()
-		# print('Stripe Subscription:{}'.format(stripe_customer.subscriptions.data[0].id))
-		data = {
-			'user_id': user.id,
-			'exp': time() + 7200			
-		}
-		token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256')
-		receiver_email = user.email
-		subject = "Prospectly - Valider votre inscription"
-		html_text=render_template('email/welcome-validation.html', user=user, token=token)
-		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
-		# Create Subscription
-		plan_id, yearly = get_plan_details(data_object['display_items'][0]['plan']['id'])
-		sub = Subscription(user_id=user.id, plan_id=plan_id, yearly=yearly)
-		db.session.add(sub)
-		db.session.commit()
-		return Response('Success', 200)
+		if data_object['mode'] == 'subscription':
+			# Retrieve user from stripe customer id
+			user = User.query.filter_by(stripe_customer_id=data_object['customer']).first_or_404()
+
+			# Retrieve subscription data from subscription id
+			stripe_subscription_id = data_object['subscription']
+			stripe_subscription = stripe.Subscription.retrieve(stripe_subscription_id)
+			if stripe_subscription:
+				if stripe_subscription['metadata']['is_affiliation'] == 'False': # Subscription is created when registering
+					auth.views.setup_stripe_payment(user, data_object)
+				elif stripe_subscription['metadata']['is_affiliation'] == 'True':
+					affiliation.views.add_affiliation(user, data_object, stripe_subscription)
+
+				return Response('Success', 200)
+
+	if event_type == 'invoice.payment_succeeded':
+		affiliation_invoice_succeeded(data_object)
+
+
 
 	print('Other web hook')
 	return jsonify({'status': 'success'})
-
 
 
 @auth.route('/validation-compte', methods=['GET', 'POST'])
@@ -252,7 +306,7 @@ def request_new_password():
 		receiver_email = user.email
 		subject = "Prospectly - Réinitialiser votre mot de passe"
 		html_text=render_template('email/reset-password.html', user=user, token=token)
-		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
+		Thread(target=send_async_email, args=(receiver_email, 'prospectly.test@gmail.com', subject, html_text)).start()
 		
 		flash("Un email de réinitialisation vient d'être envoyé à l'addresse indiquée.")
 		return redirect(url_for('auth.login'))
@@ -374,14 +428,13 @@ class  AdminModelView(ModelView):
 
 
 
-def send_async_email(receiver_email, subject, html_text):
+def send_async_email(receiver_email, sender_email, subject, html_text):
 	# print(receiver_email)
 	# print(html_text)
 
 	# username_email = 'prospectly.test@gmail.com'
     # sender_email = 'prospectly.test@gmail.com'
 	username_email = 'thomas@prospectly.fr'
-	sender_email = 'hello@prospectly.fr'
 
 	password = app.config.get('MAIL_PASSWORD')
 	# password = 'Freelance2020#'
@@ -427,3 +480,21 @@ def get_plan_details(stripe_plan_id):
 # token = jwt.encode({'user_id':1, 'exp':time()+600}, 'secret', algorithm='HS256')
 # jwt.deconde(token)
 # secret = User.query.get(jwt.decode(token, verify=False)['user_id']).password_hash
+
+
+def setup_stripe_payment(user, stripe_data):
+	data = {
+		'user_id': user.id,
+		'exp': time() + 7200			
+	}
+	token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256')
+	receiver_email = user.email
+	subject = "Prospectly - Valider votre inscription"
+	html_text=render_template('email/welcome-validation.html', user=user, token=token)
+	print(html_text)
+	# Thread(target=send_async_email, args=(receiver_email, 'hello@prospectly.fr', subject, html_text)).start()
+	# Create Subscription
+	plan_id, yearly = get_plan_details(stripe_data['display_items'][0]['plan']['id'])
+	sub = Subscription(user_id=user.id, plan_id=plan_id, yearly=yearly)
+	db.session.add(sub)
+	db.session.commit()

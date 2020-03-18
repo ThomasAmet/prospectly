@@ -27,7 +27,7 @@ CLOUDSQL_CONNECTION_NAME = 'prospectly-app:europe-west1:mysql-instance'
 
 class BaseConfig():
 	# Mail Settings
-	MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+	MAIL_PASSWORD = 'fsdafsdafsda' # os.getenv('MAIL_PASSWORD')
 	MAIL_SERVER = 'smtp.gmail.com'
 	MAIL_PORT = 587
 	MAIL_USE_TLS = True
@@ -36,7 +36,7 @@ class BaseConfig():
 	# MAIL_USE_TLS = False
 	# MAIL_USE_SSL = True
 
-	SECRET_KEY = os.getenv('SECRET_KEY')
+	SECRET_KEY = 'jkfdsahfdaskfsdhajryeuwiqrwe' # os.getenv('SECRET_KEY')
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 	MAX_CONTENT_LENGTH = 0.2 * 1024 * 1024 # limit size of uploaded file to 200kb
 	UPLOAD_FOLDER = 'csv/uploads/'
@@ -71,18 +71,15 @@ class TestConfig(BaseConfig):
 	DEBUG = True
 
 	# Stripe config
-	STRIPE_SECRET_KEY = 'sk_test_jezU1v6w8mAaxIQMvWOs2JxD00Ps2BSFcQ'
-	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
-	PLAN_MONTHLY_BASIC = 'plan_GggQmCKZATWq0c'
-	PLAN_YEARLY_BASIC = 'plan_GggP03CwhdtuYk'
+	STRIPE_SECRET_KEY = 'sk_test_PcmufV05dGf1rbLdX6OI0gGR004eeFnN0f' # 'sk_test_jezU1v6w8mAaxIQMvWOs2JxD00Ps2BSFcQ'
+	STRIPE_PUBLISHABLE_KEY = 'pk_test_XCfpt98WiLdSEzZXt6kLNXt100qrbBwYpT' # 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
+	PLAN_MONTHLY_BASIC = 'plan_GsviAqGyiH9S5n' #'plan_GggQmCKZATWq0c'
+	PLAN_YEARLY_BASIC = 'plan_GsvhvcHbQ95fmT' #'plan_GggP03CwhdtuYk'
 	# stripe login
 	# stripe listen --forward-to localhost:9191/auth/paiement-reussi
-	STRIPE_WEBHOOK_SECRET = 'whsec_jouz3Ee2M3Mqzc7xKj8ViZDhy8Zfr10E'
-
-
-	SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test-config.db')
-
-   
+	STRIPE_WEBHOOK_SECRET = 'whsec_fEK3NvlhhkDeA9jP893CsIYxg3BWf5qD' # 'whsec_jouz3Ee2M3Mqzc7xKj8ViZDhy8Zfr10E'
+	# SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test-config.db')
+	SQLALCHEMY_DATABASE_URI = ('mysql+pymysql://{user}@127.0.0.1:3306/{database}').format(user='root', database='prospectly_database')
 
 
 class DevelopmentConfig(BaseConfig):
@@ -130,9 +127,6 @@ class ProductionConfig(BaseConfig):
 	PLAN_MONTHLY_BASIC = os.getenv('PLAN_MONTHLY_BASIC')
 	PLAN_YEARLY_BASIC = os.getenv('PLAN_YEARLY_BASIC')
 
-	
-	
-	
 	# CloudSQL & SQLAlchemy configuration
 	CLOUDSQL_DATABASE = 'prospectly_production_database'
 	CLOUDSQL_USER = os.getenv('CLOUDSQL_USER')

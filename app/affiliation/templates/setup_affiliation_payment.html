@@ -1,0 +1,77 @@
+{% extends 'main_base.html' %}
+<!--header start-->
+{% block header_attribs %} id="site-header" class="header header-2"{% endblock header_attribs %}
+
+
+<!--navbar start-->
+{% block navbar %}
+{{super()}}
+{% endblock navbar %}
+
+
+
+{% block top_content %}
+
+<section id="service" class="pos-r o-hidden text-center pb-0">
+    <div class="container mt-4 pt-5">
+
+    <div class="row text-center">
+        <div class="col-lg-8 col-md-12 ml-auto mr-auto">
+            <div class="section-title">
+                <div class="bg-animation">
+                    <img class="zoom-fade" src="{{url_for('static', filename='images/pattern/03.png')}}" alt="">
+                </div>
+                <div class="title-effect">
+                    <div class="bar bar-top"></div>
+                    <div class="bar bar-right"></div>
+                    <div class="bar bar-bottom"></div>
+                    <div class="bar bar-left"></div>
+                </div>
+                <h6>You are affiliated by {{ data.user_name }}</h6>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock top_content %}
+
+<!--page title end-->
+
+
+<!--body content start-->
+{% block main_content %}
+<div class="page-content">
+    <section class="register pos-r o-hidden pt-0 pb-4 my-0">
+        <div class="bg-animation">
+            <img class="zoom-fade" src="{{url_for('static', filename='images/pattern/03.png')}}" alt="">
+        </div>
+        <div class="form container text-center">
+            <div class="col-lg-8 col-md-10 ml-auto mr-auto">
+                <div class="pricing card-group flex-column flex-md-row mb-3">
+                    <div class="card card-pricing border-0 text-center mb-4">
+                        <div class="card-header bg-transparent">
+                            <h4 class="text-uppercase ls-1 text-primary py-3 mb-0">Bravo pack</h4>
+                        </div>
+                        <div class="card-body px-lg-7">
+                            <div class="display-2">$49</div>
+                            <span class="text-muted">per application</span>
+                            <div class="row">
+                                <div class="col-md-12 align-items-center mt-3">
+                                    <input type="hidden" id="id-affiliation-data-str" value="{{data.affiliation_json_str}}">
+                                    <button id="id-affiliate-stripe-btn" type="button" class="btn btn-info mb-3">Stripe</button>
+                                    <button id="id-affiliate-paypal-btn" type="button" class="btn btn-primary mb-3">Paypal</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock main_content %}
+
+{% block scripts %}
+{{ super() }}
+{% endblock scripts %}
+

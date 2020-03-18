@@ -1,0 +1,196 @@
+{% macro render_edit_modal(edit_form, current_user, opportunity, latest_step) %}
+
+  {% from 'macros/task-and-note.html' import render_task_and_note %}
+
+  <div class="modal fade" tabindex="-1" role="form" id="editOpportunityModal_{{opportunity.id}}">
+    <div class="modal-dialog modal-lg" role="document">
+      <!-- Modal Body -->
+      <div class="card bg-secondary modal-content">
+
+          <!-- Start card header -->
+          <div class="card-header bg-white border-0 py-3">
+            <div class="row align-items-center">
+              <div class="col-8">
+                <h3 class="mb-0"><span class='text-capitalize'>édition</span> de l'opportunitié</h3>
+              </div>
+              <div class="col-4 text-right">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <a href="{{url_for('crm.view_opportunities_list')}}">
+                    <span aria-hidden="true">&times;</span>
+                  </a>
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- End card header -->
+
+          <!-- Start form -->
+          <form action="{{url_for('crm.edit_opportunity', id='opportunity.id')}}" method="post" id='editOpportunityStepForm'>
+            {{ edit_form.csrf_token }}
+            <!-- start card body -->
+            <div class="card-body">
+
+              <!-- #start 1st block# -->
+              <div id='headingOne' class='form-collapse-header mb-2 mt-3 ' data-toggle='collapse' data-target='#collapseOne' aria-expanded="false" aria-controls="collapseOne">
+                <h6 class="heading-small text-muted mb-2">Détails de l'opportunité
+                  <i class='ni ni-bold-down my-auto'></i>
+                </h6>
+              </div>
+              <div class=pl-2>
+                <!-- start 1st row -->
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne"> 
+                  <div class="row">
+                    <div class="col-lg-3">
+                    <div class="form-group mb-3">
+                        <!-- Opportunite -->
+                        <label class="form-control-label" for="input-opportunity-name">Nom de l'opportunité</label>
+                        <!-- <input type="text" name="opportunity" class="form-control form-control-alternative" value="{{opportunity.name}}" disabled> -->
+                        {{ edit_form.name(class="form-control form-control-alternative", value=opportunity.name) }}
+                    </div>
+                    </div>
+                    <div class="col-lg-5">
+                    <div class="form-group mb-3">
+                        <!-- Opportunite -->
+                        <label class="form-control-label" for="">Entreprise</label>
+                        {{ edit_form.company(class="form-control form-control-alternative", value=opportunity.company) }}
+                    </div>
+                    </div>
+                    <div class="col-lg-2">
+                    <div class="form-group mb-3 ">
+                      <label class="form-control-label" for="input-country">Montant en € </label>
+                      <!-- <input type="text" id="input-postal-code" class="form-control form-control-alternative" placeholder="Montant en €" value="{{opportunity}}" disabled> -->
+                      {{ edit_form.euros_value(class="form-control form-control-alternative", value=opportunity.euros_value) }}
+                    </div>
+                    </div>
+                    <div class="col-lg-2">
+                    <div class="form-group mb-3 ">
+                      <label class="form-control-label" for="input-country">Succès (%) </label>
+                      <input type="text" id="input-postal-code" class="form-control form-control-alternative"  value="{{ latest_step.commercial_stage.closing_perc * 100 }}" disabled>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- end 1st block -->
+
+              <hr class="my-2" />
+
+              <!-- start 2nd block -->
+              <div id='headingTwo' class='form-collapse-header mb-2 mt-3 ' data-toggle='collapse' data-target='#collapseTwo' aria-expanded="true" aria-controls="collapseTwo">
+                <h6 class="heading-small text-muted mb-2">
+                  étapes commerciale & status
+                  <i class='ni ni-bold-down my-auto'></i>
+                </h6>
+              </div>
+              <div class=pl-2>
+                <!-- collapse target -->
+                <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo">
+                  <div class="row">
+                    <!-- 1st half of the row -->
+                    <div class="col-lg-8">
+                      <div class='row'>
+                        <!-- Name of Step's Stage  -->
+                        <div class="col-lg-7">
+                        <div class="form-group mb-3">
+                          <label class="form-control-label" for="input-city">
+                            <span class="text-capitalize">étape </span>commerciale</label>
+                          {% set f = edit_form.stage.process_data(latest_step.commercial_stage.name)%}
+                          {{edit_form.stage(class="form-control form-control-alternative")}}
+                        </div>
+                        </div>
+                        <!-- Name of Status -->
+                        <div class="col-lg-5">
+                        <div class="form-group mb-3">
+                          <label class="form-control-label" for="input-country">Status</label>
+                          {% set f = edit_form.status.process_data(latest_step.status.name)%}
+                          {{edit_form.status(class="form-control form-control-alternative status-field-edit-form", id="edit-form-status")}}
+                        </div>
+                        </div>
+                      </div>                      
+                    </div>
+                    <div class='col-lg-3 ml-auto'>
+                      <label class='form-control-label'>Dernière modification</label>
+                      <input type="text" class="form-control form-control-alternative" value={{opportunity.last_update}} disabled>
+                    </div>
+                    <!-- end 2ndrow -->
+                  </div>
+                </div>
+              </div>
+              <!-- #end 1st block# -->
+
+              <hr class="my-2" />
+
+              <!-- Paste Task and Note between here.... -->
+              {{ render_task_and_note(form=edit_form, latest_step=latest_step) }}
+              <!-- ...and here -->
+
+              <hr class="my-2" />
+
+              <!-- start 3rd block -->
+              <div class="row mx-0 mb-2 mt-3">
+                <h6 id='headingThree' data-toggle='collapse' class="heading-small text-muted mb-2 form-collapse-header" data-target='#collapseThree' aria-expanded="false" aria-controls="collapseThree"style="position: relative; top:50%;
+                    ">
+                  Informations à  propos de l'entreprise
+                  <i class='ni ni-bold-down my-auto'></i>
+                </h6>
+                <a id="collapseThree" class='ml-2 collapse' style='position: relative; top:50%;' href="#">
+                    <i class='fas fa-pencil-alt' id='toggle-company-fields'></i>
+                </a>
+              </div>  
+              <div class='pl-2'>
+                <!-- collapse target -->
+                <div id="collapseThree" class="collapse" aria-labelledby="headingThree">
+                  <div class="row">
+                    <div class="col-lg-7">
+                      <div class='row'>
+                        <div class="col-lg-7">
+                        <div class="form-group mb-3">
+                            <label class="form-control-label" for="input-company-email">Email</label>
+                            <input type="email" id="input-company-email" class="form-control form-control-alternative company-field" name="company-email"
+                            placeholder="Email" value="{{ opportunity.company.email }}" disabled>
+                        </div>
+                        </div>
+                        <div class="col-lg-5">
+                        <div class="form-group mb-3">
+                            <label class="form-control-label" for="input-company-phone">Téléphone</label>
+                            <input type="text" id="input-company-phone" class="form-control company-field form-control-alternative" name="company-phone" value="{{ opportunity.company.phone }}" placeholder='Téléphone' disabled>
+                        </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-lg-5">
+                    <div class="form-group mb-3">
+                        <label class="form-control-label" for="input-company-phone">Domaine d'activité</label>
+                        <input type="text" id="input-company-phone" class="form-control company-field form-control-alternative"  name="company-activity" value="{{ opportunity.company.activity_field }}" palceholder="Domaine d'activité" disabled>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- end of 3rd block -->
+
+              <hr class="my-2" />
+
+              <!-- end card body -->
+            </div>
+            <!--  -->
+            <input name="initial_step_id" type="hidden" value="{{latest_step.id}}">
+            <input name="initial_stage" type="hidden" value="{{latest_step.commercial_stage.name}}">
+            <input name="initial_status" type="hidden" value="{{latest_step.status.name}}">
+            <input name="company_id" type="hidden" value="{{opportunity.company.id}}">
+            <input name="opportunity_id" type="hidden" value="{{opportunity.id}}">
+            <!-- Modal Footer -->
+            <div class="modal-footer pt-0">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+              <button type="submit  "class="btn btn-primary" style="box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);">Sauver les modifications</button>
+            </div>
+            <!-- end Footer -->
+
+          </form>
+          <!-- end form -->
+
+      </div>
+    </div>
+  </div>
+
+{% endmacro %}

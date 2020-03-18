@@ -1,0 +1,192 @@
+<div class="modal fade" tabindex="-1" role="form" id="addContactModal">
+  <div class="modal-dialog modal-lg" role="document">
+
+      <!-- Modal Body -->
+        <div class="card bg-secondary modal-content">
+
+            <!-- Start card header -->
+            <div class="card-header bg-white border-0 py-3">
+              <div class="row align-items-center">
+                <div class="col-8">
+                  <h3 class="mb-0">Nouveau Contact</h3>
+                </div>
+                <div class="col-4 text-right">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <a href="{{url_for('crm.view_contacts_list')}}">
+                      <span aria-hidden="true">&times;</span>
+                    </a>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- End card header -->
+
+
+            {% for field, errors in form.errors.items() %}
+              <!-- <div class="alert alert-error"> -->
+                  {{ form[field].label }}: {{ ', '.join(errors) }}
+              <!-- </div> -->
+            {% endfor %}
+
+            <!-- Start form -->
+            <form action="{{url_for('crm.add_contact')}}" method="post" id='addContactForm'>
+              {{ form.csrf_token }}
+              <!-- start card body -->
+              <div class="card-body">
+                <div class="pl-lg-2">
+
+                  <!-- start 1st block -->
+                  <h6 class="heading-small text-muted mb-2">Informations Générales</h6>
+                    <div class="row">
+                      <div class='col-lg-3'>
+                      <div class="form-group mb-3">
+                          <!-- Company Name -->
+                          <label class="form-control-label" for="input-comapny-name">Prénom</label>
+                          {{form.first_name(class='form-control form-control-alternative')}}
+                      </div>  
+                      </div>
+                      <div class='col-lg-3'>
+                      <div class="form-group mb-3">
+                          <!-- Company Name -->
+                          <label class="form-control-label" for="input-comapny-name">Nom</label>
+                          {{form.last_name(class='form-control form-control-alternative')}}
+                      </div>  
+                      </div>   
+                    </div>
+                    <div class='row'>                 
+                      <div class='col-lg-5'>
+                      <div class="form-group mb-3">
+                          <!-- Company Name -->
+                          <label class="form-control-label" for="input-comapny-name">Entreprise associée</label>
+                          {{form.company_id(class='form-control form-control-alternative')}}
+                      </div>  
+                      </div>
+                      <div class='col-lg-4'>
+                      <div class="form-group mb-3">
+                          <!-- Company Name -->
+                          <label class="form-control-label" for="input-comapny-name">Rôle dans l'entreprise</label>
+                          {{form.position(class='form-control form-control-alternative')}}
+                      </div>  
+                      </div>
+                    </div>
+                    <!-- end 1st block -->
+
+                  <hr class="my-2" />
+
+                  <!--  start 2nd block -->
+                  <div id='headingTwo' class='form-collapse-header mb-2 mt-3 ' data-toggle='collapse' data-target='#collapseTwo' aria-expanded="false" aria-controls="collapseOne">
+                    <h6 class="heading-small text-muted my-auto">Coordonnées & Réseaux Sociaux
+                      <i class='ni ni-bold-down my-auto'></i>
+                    </h6>
+                  </div>
+                  
+
+                  <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo">
+                    <!-- start 1st row -->
+                    <div class='row'>
+                      <div class=col-lg-6>
+                        <div class="row">
+                          <div class="col-lg-8">
+                          <div class="form-group">
+                              <label class="form-control-label" for="input-comapny-name">Email</label>
+                              {{form.email(class='form-control form-control-alternative')}}
+                          </div>   
+                          </div>
+                          <div class="col-lg-4 mr-auto">
+                            <label class="form-control-label d-block mb-2">Type d'email</label>
+                            <div class="custom-control custom-radio mr-3">
+                              <input type="radio" id="customRadio1" name="is_email_main" class="custom-control-input" value='True' checked>
+                              <label class="custom-control-label" for="customRadio1">Principal</label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                              <input type="radio" id="customRadio2" name="is_email_main" class="custom-control-input" value='False'>
+                              <label class="custom-control-label" for="customRadio2">Secondaire</label>
+                            </div>   
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-lg-4 mx-auto">
+                      <div class="form-group">
+                          <label class="form-control-label" for="input-comapny-name">Téléphone</label>
+                          {{form.phone(class='form-control form-control-alternative')}}
+                      </div>   
+                      </div>                     
+                    </div>  
+                    <!-- end 1st row -->
+                    <!-- 2nd row  -->
+                    <div class='row'>                
+                      <div class='col-lg-4'>
+                      <div class="form-group mb-3">
+                        <label class="form-control-label" for="input-comapny-name">
+                          <i class='fab fa-linkedin mr-2'></i>
+                          LinkedIn
+                        </label>
+                        {{form.linkedin(class='form-control form-control-alternative')}}
+                      </div>   
+                      </div>                    
+                      <div class='col-lg-4'>
+                      <div class="form-group mb-3">
+                        <label class="form-control-label" for="input-comapny-name">
+                          <i class='fab fa-instagram mr-2'></i>
+                          Instagram
+                        </label>
+                        {{form.instagram(class='form-control form-control-alternative')}}
+                      </div>   
+                      </div>                    
+                      <div class='col-lg-4'>
+                      <div class="form-group mb-3">
+                        <label class="form-control-label" for="input-comapny-name">
+                          <i class='fab fa-facebook mr-2'></i>
+                          Facebook
+                        </label>
+                        {{form.facebook(class='form-control form-control-alternative')}}
+                      </div>   
+                      </div>
+                    </div>
+                    <!-- end 2nd block --> 
+                  </div>         
+                  
+                  <hr class="my-3" />
+
+                 <!-- start 3rd block -->
+                  <div id='headingThree' class='form-collapse-header mb-2 mt-3 ' data-toggle='collapse' data-target='#collapseThree' aria-expanded="false" aria-controls="collapseThree">
+                    <h6 class="heading-small text-muted my-auto">Notes 
+                      <i class='ni ni-bold-down my-auto'></i>
+                    </h6>
+                  </div>
+
+                  <div id="collapseThree" class="collapse" aria-labelledby="headingThree">
+                    <div class='row note-form-group'>
+                      <!-- Note description -->
+                      <div class='col'>
+                      <div class="form-group mb-3">
+                        <label class="form-control-label">Note</label>
+                        <!-- <textarea rows="4" class="form-control form-control-alternative">Une petite note concernant l'etape commerciale en cours ...</textarea> -->
+                        {{form.note_content(class="form-control form-control-alternative", placeholder='Ici, on note tout ce qui peut etre necessaire...')}}
+                      </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- end 3rd block# -->
+                  
+                  <hr class="my-3" />
+
+                </div>
+              </div>
+              <!-- end card body -->
+
+              <!-- Modal Footer -->
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-primary">Créer</button>
+              </div>
+              <!-- end Footer -->
+            </form>
+            <!-- end form -->
+          </div>
+        </div>
+      </div>
+
+
+
+

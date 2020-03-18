@@ -42,7 +42,7 @@ class BaseConfig():
 	UPLOAD_FOLDER = 'csv/uploads/'
 	CSP = {
     # Fonts from fonts.google.com
-    'font-src': '\'self\' themes.googleusercontent.com *.gstatic.com static/fonts/',
+    'font-src': '\'self\' themes.googleusercontent.com *.gstatic.com static/fonts/ data: *',
     # <iframe> based embedding for Maps and Youtube.
     'frame-src': '\'self\' www.google.com www.youtube.com https://js.stripe.com https://hooks.stripe.com', 
     # Assorted Google-hosted Libraries/APIs.
@@ -52,9 +52,11 @@ class BaseConfig():
     'style-src': ['\'self\'', 'ajax.googleapis.com', 'fonts.googleapis.com', '\'unsafe-inline\'',
                  '*.gstatic.com stackpath.bootstrapcdn.com'],
     'default-src': '\'self\' *.gstatic.com https://js.stripe.com/',
-    'connect-src': '\'self\' https://api.stripe.com'
+    'connect-src': '\'self\' https://api.stripe.com',
+    'img-src':'\'self\'  data: *'
 	}
-	
+
+	SESSION_COOKIE_SAMESITE='Strict'
 
 	# MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
 	# MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))

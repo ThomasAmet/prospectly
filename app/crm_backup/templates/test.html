@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+{% for message in get_flashed_messages() %}
+{{message}}
+{% endfor %}
+
+{% if opportunities %}
+
+Opp: {{opportunities}}</br>
+
+  <ul>
+  {% for opportunity in opportunities %}
+    <a href="{{url_for('crm.edit_opportunity_stage', id=opportunity.id)}}">
+      <li>{{opportunity.name}}</li>
+      <li>{{opportunity.creation_date}}</li>
+      <li>{{opportunity.euros_value}}</li>
+    </a>
+  {% else %}
+    <li>No results found</li>
+  {% endfor %}
+  </ul>
+
+  <br>
+  Latest Steps: {{latest_steps}}</br>
+  <ul>
+  {% for step in latest_steps %}
+    <li>{{step.status.title}}</li>
+    <li>{{step.commercial_stage.name}}</li>
+    <li>{{step.opportunity.contact.company_name}}</li>
+  {% else %}
+    <li>No books found</li>
+    {% endfor %}
+  </ul>
+  <br>
+
+
+  {% for key, value in opportunities.items() %}
+    {{value[0].id}}
+  {% endfor %}
+
+  
+  cursor: {{cursor}}
+  previous_page_token: {{previous_page_token}}
+  next_page_token: {{next_page_token}}
+
+{% endif %}
+
+  
+
+{{current_user.id}}
+
+</body>
+</html>
+
+
+
+<!-- Test 1 -->
+<!-- <div class="modal fade" tabindex="-1" role="dialog" id="editOpportunityModalKeep">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Modal title</h2>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Modal body text goes here.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary">Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- Test 2 -->
+<!-- <div class="modal fade" id="editOpportunityModalKeep2" role='dialog'>
+    <div class="modal-dialog modal-lg" role="document" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Editer l'etape</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+             </div>
+         <div class="modal-body">
+            <form class="border-light">
+                <h4>Name of the opportunity</h4>
+                <input type="text" id="defaultContactFormName" class="form-control mb-4" placeholder="Name">
+                <input type="text" id="defaultContactFormEmail" class="form-control mb-4" placeholder="E-mail">
+                <label for="defaultSelect">Subject</label>
+                <select id="defaultSelect" class="browser-default custom-select mb-4">
+                    <option value="" disabled="">Choose option</option>
+                    <option value="1" selected="">Feedback</option>
+                    <option value="2">Report a bug</option>
+                    <option value="3">Feature request</option>
+                    <option value="4">Feature request</option>
+                </select>
+                <textarea class="form-control rounded-0" id="exampleFormControlTextarea2" rows="3" placeholder="Message"></textarea>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+            <button type="button" class="btn btn-primary">Sauvegarder</button>
+        </div>
+    </div>
+  </div>
+</div> -->

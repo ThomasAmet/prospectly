@@ -1,113 +1,120 @@
-<div class="modal fade" tabindex="-1" role="form" id="addOpportunityModal">
-  <div class="modal-dialog modal-lg" role="document">
+{% macro render_add_modal(add_opportunity_form, current_user, latest_step) %}
+
+  {% from 'macros/task-and-note.html' import render_task_and_note %}
+
+  <div class="modal fade" tabindex="-1" role="form" id="addOpportunityModal">
+    <div class="modal-dialog modal-lg" role="document">
 
       <!-- Modal Body -->
-        <div class="card bg-secondary modal-content">
+      <div class="card bg-secondary modal-content">
 
-            <!-- Start card header -->
-            <div class="card-header bg-white border-0">
-              <div class="row align-items-center">
-                <div class="col-8">
-                  <h3 class="mb-0">Nouvelle Oportunitié</h3>
-                </div>
-                <div class="col-4 text-right">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <a href="{{url_for('crm.view_opportunities_list')}}">
-                      <span aria-hidden="true">&times;</span>
-                    </a>
-                  </button>
-                </div>
-              </div>
+        <!-- Start card header -->
+        <div class="card-header bg-white border-0 py-3">
+          <div class="row align-items-center">
+            <div class="col-8">
+              <h3 class="mb-0">Nouvelle Opportunitié</h3>
             </div>
-            <!-- End card header -->
-
-            <!-- Start form -->
-            <form action="{{url_for('crm.add_opportunity')}}" method="post" id=addOpportunityForm>
-              {{ form.csrf_token }}
-              <!-- start card body -->
-              <div class="card-body">
-                <!-- #start 1st block# -->
-                <h6 class="heading-small text-muted mb-2">Détails de l'opportunité</h6>
-                <div class="pl-lg-2">
-                  <!-- start 1st row -->
-                  <div class="row">
-                    <div class="col-lg-6">
-                    <div class="form-group">
-                        <!-- Opportunity Name -->
-                        <label class="form-control-label" for="input-comapny-name">Entreprise</label>
-                        <!-- <input type="text" class="form-control form-control-alternative" placeholder="Nom de l'entreprise" value="" disabled> -->
-                        {{form.contact(class='form-control form-control-alternative')}}
-                    </div>
-                    </div>
-                    <div class="col-lg-6">
-                    <div class="form-group">
-                        <!-- Opportunite -->
-                        <label class="form-control-label" for="input-opportunity-name">Nom de l'opportunite</label>
-                        <!-- <input type="email" id="input-company-email" class="form-control form-control-alternative" placeholder="Email" value="" disabled> -->
-                        {{form.name(class='form-control form-control-alternative')}}
-                    </div>
-                    </div>
-                  </div>
-                  <!-- end 1st row -->
-                  <!-- start 2nd row -->
-                  <div class="row">
-                    <!-- 1st half of the row -->
-                    <div class="col-lg-4">
-                      <div class='row'>
-                        <!-- Opportunity Amount -->
-                        <div class="col">
-                        <div class="form-group">
-                          <label class="form-control-label" for="input-country">Montant - € </label>
-                          <!-- <input type="text" id="input-postal-code" class="form-control form-control-alternative" placeholder="Montant en €" value='' disabled> -->
-                          {{form.euros_value(class="form-control form-control-alternative")}}
-                        </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-lg-8">
-                      <div class='row'>
-                        <!-- Name of Step's Stage  -->
-                        <div class="col-lg-7">
-                        <div class="form-group">
-                          <label class="form-control-label" for="input-city">Etape commerciale</label>
-                          {{form.stage(class="form-control form-control-alternative")}}
-                        </div>
-                        </div>
-                        <!-- Name of Status -->
-                        <div class="col-lg-5">
-                        <div class="form-group">
-                          <label class="form-control-label" for="input-country">Status</label>
-                          <!-- <select id="input-status" class="form-control form-control-alternative" placeholder="Nom du status"><option></option></select> -->
-                          {{form.status(id="status-value", class="form-control form-control-alternative")}}
-                        </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- end 2nd half of the row -->
-                  </div>
-                  <!-- end 2nd row -->
-                </div>
-                <!-- #end 1st block# -->
-
-                <!-- Paste Task and Note between here.... -->
-                {% include "layouts/task-and-note-form.html" %}
-                <!-- ...and here -->
-
-                <hr class="my-2" />
-              </div>
-              <!-- end card body -->
-
-              <!-- Modal Footer -->
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                <button type="submit  " class="btn btn-primary">Créer</button>
-              </div>
-              <!-- end Footer -->
-            </form>
-            <!-- end form -->
+            <div class="col-4 text-right">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <a href="{{url_for('crm.view_opportunities_list')}}">
+                  <span aria-hidden="true">&times;</span>
+                </a>
+              </button>
+            </div>
           </div>
         </div>
+        <!-- End card header -->
+
+        <!-- Start form -->
+        <form action="{{url_for('crm.add_opportunity')}}" method="post" id='addOpportunityForm'>
+          {{ add_opportunity_form.csrf_token }}
+          <!-- start card body -->
+          <div class="card-body">
+            <!-- #start 1st block# -->
+            <h6 class="heading-small text-muted mb-2">Détails de l'opportunité</h6>
+            <div class="pl-lg-2">
+              <!-- start 1st row -->
+              <div class="row">
+                <div class="col-lg-6">
+                <div class="form-group mb-3">
+                    <!-- Opportunity Name -->
+                    <label class="form-control-label" for="input-comapny-name">Entreprise</label>
+                    <!-- <input type="text" class="form-control form-control-alternative" placeholder="Nom de l'entreprise" value="" disabled> -->
+                    {{add_opportunity_form.company(class='form-control form-control-alternative' )}}
+                </div>
+                </div>
+                <div class="col-lg-6">
+                <div class="form-group mb-3">
+                    <!-- Opportunite -->
+                    <label class="form-control-label" for="input-opportunity-name">Nom de l'opportunite</label>
+                    <!-- <input type="email" id="input-company-email" class="form-control form-control-alternative" placeholder="Email" value="" disabled> -->
+                    {{add_opportunity_form.name(class='form-control form-control-alternative')}}
+                </div>
+                </div>
+              </div>
+              <!-- end 1st row -->
+              <!-- start 2nd row -->
+              <div class="row">
+                <!-- 1st half of the row -->
+                <div class="col-lg-4">
+                  <div class='row'>
+                    <!-- Opportunity Amount -->
+                    <div class="col">
+                    <div class="form-group mb-3 ">
+                      <label class="form-control-label" for="input-country">Montant - € </label>
+                      <!-- <input type="text" id="input-postal-code" class="form-control form-control-alternative" placeholder="Montant en €" value='' disabled> -->
+                      {{add_opportunity_form.euros_value(class="form-control form-control-alternative")}}
+                    </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-8">
+                  <div class='row'>
+                    <!-- Name of Step's Stage  -->
+                    <div class="col-lg-7">
+                    <div class="form-group mb-3">
+                      <label class="form-control-label" for="input-city">
+                        <span class="text-capitalize">étape </span>commerciale</label>
+                      {{add_opportunity_form.stage(class="form-control form-control-alternative")}}
+                    </div>
+                    </div>
+                    <!-- Name of Status -->
+                    <div class="col-lg-5">
+                    <div class="form-group mb-3">
+                      <label class="form-control-label" for="input-country">Status</label>
+                      <!-- <select id="input-status" class="form-control form-control-alternative" placeholder="Nom du status"><option></option></select> -->
+
+                      {{add_opportunity_form.status(class="form-control form-control-alternative status-field")}}
+                    </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- end 2nd half of the row -->
+              </div>
+              <!-- end 2nd row -->
+            </div>
+            <!-- #end 1st block# -->
+            <hr class="my-2" />
+            <!-- Paste Task and Note between here.... -->
+            {{ render_task_and_note(form=add_opportunity_form, latest_step=latest_step) }}
+            <!-- ...and here -->
+            <hr class="my-2" />
+          </div>
+          <!-- end card body -->
+
+          <!-- Modal Footer -->
+          <div class="modal-footer pt-0">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+            <button type="submit  " class="btn btn-primary">Créer</button>
+          </div>
+          <!-- end Footer -->
+        </form>
+        <!-- end form -->
       </div>
+    </div>
+  </div>
+{% endmacro %}
+
 
 
 

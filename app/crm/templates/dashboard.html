@@ -1,23 +1,11 @@
-{% extends "index.html" %}
+{% extends "app_base.html" %}
 
-{% block title %} Dashboard {% endblock title %}
-
-{% block stylesheets %}
-  {{ super() }}
-{% endblock stylesheets %}
-
-
-{% block top_navigation %}
-  {{ super() }}
-{% endblock top_navigation %}
-
-
-{% block header%}
-  {% include "layouts/stats-header.html" %}
-{% endblock header %}
+{% block header_content%}
+	{% include "dashboard-header.html" %}
+{% endblock header_content %}
 
 {% block main_content %}
-<div class="container-fluid mt--7">
+  <div class="container-fluid mt--6">
   <div class="row">
     <div class="col-xl-8 mb-5 mb-xl-0">
       <div class="card bg-gradient-default shadow">
@@ -67,7 +55,7 @@
         <div class="card-body">
           <!-- Chart -->
           <div class="chart">
-            <canvas id="chart-orders" class="chart-canvas"></canvas>
+            <canvas id="chart-bars" class="chart-canvas"></canvas>
           </div>
         </div>
       </div>
@@ -293,8 +281,6 @@
     </div>
   </div>
 </div>
-
-
 {% endblock main_content %}
 
 {% block javascripts %}

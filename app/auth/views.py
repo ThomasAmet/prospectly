@@ -11,7 +11,7 @@ from flask_admin.contrib.sqla import ModelView
 
 from app import db, app
 from . import auth
-from .forms import LoginForm, RegistrationForm, SetPasswordForm, RequestNewPasswordForm
+from .forms import LoginForm, RegistrationForm, SetPasswordForm, RequestNewPasswordForm, EmailSupportForm
 from ..models import User, Subscription, Plan
 
 import stripe
@@ -178,7 +178,7 @@ def session_completed_webhook():
 	data_object = data['object']
 
 	if event_type == 'checkout.session.completed':
-		print('Data object:{}'.format(data_object))
+		print('Data object:{}'.format(data_object)) # stripe object with multiple informations
 		stripe_customer = stripe.Customer.retrieve(data_object['customer'])
 		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first_or_404()
 		# print('Stripe Subscription:{}'.format(stripe_customer.subscriptions.data[0].id))
@@ -242,8 +242,8 @@ def request_new_password():
 
 	form = RequestNewPasswordForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(email=form.email.data).first()
-		if user is None:
+		user = User.query.filter_by(email=form.email.data).first_or_404()
+		if user is None or user.password_hash is None:
 			flash("Un email de réinitialisation vient d'être envoyé à l'addresse indiquée.")
 			return redirect(url_for('auth.login'))
 		data = {'user_id':user.id,
@@ -297,7 +297,7 @@ def on_fail_payment():
 
 
 
-@auth.route('/paiement-succes')
+@auth.route('/paiement-reussi')
 def on_success_payment():
 	return render_template('payment-succeeded.html')
 	# request_stripe_session = request.args.get('session_id')
@@ -353,6 +353,28 @@ def logout():
 def profile():
 	return render_template('profile.html')
 
+
+@auth.route('email-support', methods=['POST', 'GET'])
+@admin_login_required
+def email_support():
+	form = EmailSupportForm()
+
+	if form.validate_on_submit():
+		email = form.email.data
+		user = User.query.filter_by(email=email).first_or_404()
+		
+		data = {
+			'user_id': user.id,
+			'exp': time() + 7200			
+		}
+		token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256')
+		receiver_email = user.email
+		subject = "Prospectly - Valider votre inscription"
+		html_text = render_template('email/welcome-validation.html', user=user, token=token)
+		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
+		flash('Password validation email has been sent.')
+
+	return render_template('email-support.html', form=form)
 
 
 class AdminMyIndexView(AdminIndexView):

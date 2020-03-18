@@ -15,7 +15,35 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-:root {
+/* Personnal Adds */
+
+.form-collapse-header {
+    padding: auto;
+}
+
+.form-collapse-header h6 {
+    display: inline;
+}
+
+@media (prefers-reduced-motion: reduce)
+{
+    .form-collapse-header:after
+    {
+        transition: none;
+    }
+}
+
+.form-collapse-header[aria-expanded='true'] h6 i
+{
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+/* End Personnal font-size-adjust: */
+:root
+{
     --blue: #5e72e4;
     --indigo: #5603ad;
     --purple: #8965e0;
@@ -20302,10 +20330,10 @@ textarea[resize='horizontal']
 
 .has-success:after
 {
-/*    content: '\ea26';
+    content: '\ea26';
 
     color: #1d8357;
-    background-color: #69deac;*/
+    background-color: #69deac;
 }
 
 .has-success .form-control
@@ -20323,10 +20351,10 @@ textarea[resize='horizontal']
 
 .has-danger:after
 {
-/*    content: '\ea53';
+    content: '\ea53';
 
     color: #db2d05;
-    background-color: #fda08b;*/
+    background-color: #fda08b;
 }
 
 .has-danger .form-control

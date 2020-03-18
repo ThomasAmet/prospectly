@@ -14,6 +14,13 @@ class RequestNewPasswordForm(FlaskForm):
 									Email(message="Oups... Ce n'est pas un format valide.")])
 	submit = SubmitField('Se connecter')
 
+
+class EmailSupportForm(FlaskForm):
+	email = StringField('Email:',
+						validators=[DataRequired(message="Il faut un email pour se connecter."),
+									Email(message="Oups... Ce n'est pas un format valide.")])
+	submit = SubmitField()
+
 class SetPasswordForm(FlaskForm):
 	password = PasswordField('Mot de passe:', validators=[DataRequired()])
 	password_confirmation = PasswordField('Confirmez le mot de passe', validators=[DataRequired(), EqualTo('password', message='Les mots de passse ne correspondent pas.')])

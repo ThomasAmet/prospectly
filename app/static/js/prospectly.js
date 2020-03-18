@@ -1,16 +1,36 @@
 // Script to delete multiple row in opportunities view page
 $(document).ready(function(){
 
+  // Jquery to edit Comapny attributes directly from the OpportunityEditForm
+  $('#toggle-company-fields').click(function(){
+    
+    $.each($("[class*='company-field']"), function(){
+      $(this).prop('disabled', function (_, val) { return ! val; });
+    });
+  });
+
+  // Jquery to activate sorting in tables
+  $("#opportunitiesTable").tablesorter();
+  $('#companiesTable').tablesorter();
+  $('#contactsTable').tablesorter();
+  $("div.tablesorter-header-inner").css('display','inline');
+
+  
+
+  // $('#contactsTable .entreprise-cell').each(function(){
+  //   // 
+  // });
+
   $("#selectAll").click(function(){
         $("input[type=checkbox]").prop('checked', $(this).prop('checked'));// $(this).prop('checked') equals True or False depending on state of master checkbox
   });
 
-  $('#deleteAll').click(function(){
+  $('#deleteAllOpportunities').click(function(){
+
     var rowIds = [];
     $.each($('#opportunitiesTable').find("input[name='checkbox[]']:checked"), function(){
                 rowIds.push($(this).val());
             });
-    // alert(rowIds);
 
     data = JSON.stringify({'opp_ids':rowIds})
     
@@ -32,7 +52,64 @@ $(document).ready(function(){
       location.href = '/app/opportunites/liste';
     });
   });
+  
+  //  delete All Companies
+  $('#deleteAllCompanies').click(function(){
+    var rowIds = [];
+    $.each($('#companiesTable').find("input[name='checkbox[]']:checked"), function(){
+              rowIds.push($(this).val());
+            });
+    
+    data = JSON.stringify({'companies_ids':rowIds})
+
+    $.ajax({
+      type: 'POST',
+      // url: '/app/oppportunites/suppression-multiple',
+      url: '/app/entreprises/suppression',
+      data: data,
+      dataType: 'json',
+      contentType: 'application/json',
+      async: false,
+    })
+    .done(function(data){
+      // location.href = '/app/opportunites/liste';
+      location.href = '/app/dashboard';
+    })
+    .fail(function(jqXHR, textStatus, errorThrown){
+      location.href = '/app/entreprises/liste';
+    });
+  });
+
+  // delete All Contacts
+  $('#deleteAllContacts').click(function(){
+    var rowIds = [];
+    $.each($('#contactsTable').find("input[name='checkbox[]']:checked"), function(){
+                rowIds.push($(this).val());
+            });
+    data = JSON.stringify({'contacts_ids':rowIds})
+
+    $.ajax({
+      type: 'POST',
+      // url: '/app/oppportunites/suppression-multiple',
+      url: '/app/contacts/suppression',
+      data: data,
+      dataType: 'json',
+      contentType: 'application/json',
+      async: false,
+    })
+    .done(function(data){
+      // location.href = '/app/opportunites/liste';
+      location.href = '/app/dashboard';
+    })
+    .fail(function(jqXHR, textStatus, errorThrown){
+      location.href = '/app/contacts/liste';
+    });
+  });
+
 });
+
+
+
 
 // Script that works with register.html to handle stripe (v2) Why this script not called?
 $(document).ready(function(){
@@ -133,9 +210,19 @@ $(document).ready(function(){
     });
   }
 
-  // 
-  // JQuery for Displaying part of the OpportunityStageEdition form
-  if ($("#status-value").val()=='A faire'){
+  // Jquery to send True/False when checkbox from task and note form is clicked/uncliked
+  if($('#checkbox-task-done').prop('checked')){
+    $('#checkbox-hidden-task-done').val('True');
+  }
+    $('#checkbox-task-done').change(function(){
+      if($(this).prop('checked')){
+        $('#checkbox-hidden-task-done').val('True');
+      }
+    });
+
+  
+  // JQuery for displaying task module or note moduel within EditOpportunityForm
+  if ($(".status-field-edit-form").val()=='A faire'){
       $("[class*='note-form-group']").hide();
       $("[class*='task-form-group']").show();
     }
@@ -144,8 +231,9 @@ $(document).ready(function(){
       $("[class*='task-form-group']").hide();      
     }
 
-  $("#status-value").change(function(){
-    if ($("#status-value").val()=='A faire'){
+  $('.status-field-edit-form').change(function(){
+    // alert($(this).val());
+    if ($(".status-field-edit-form").val()=='A faire'){
       $("[class*='note-form-group']").hide();
       $("[class*='task-form-group']").show();
     }
@@ -155,9 +243,8 @@ $(document).ready(function(){
     }
   });
 
-  // 
-  // JQuery for Displaying part of the OpportunityAdd form
-  if ($("#addOpportunityForm #status-value").val()=='A faire'){ 
+  // JQuery for displaying task module or note moduel within AddOppportunityForm 
+  if ($(".status-field-add-form").val()=='A faire'){
       $("[class*='note-form-group']").hide();
       $("[class*='task-form-group']").show();
     }
@@ -165,9 +252,10 @@ $(document).ready(function(){
       $("[class*='note-form-group']").show();
       $("[class*='task-form-group']").hide();      
     }
-    
-  $("#status-value").change(function(){
-    if ($("#addOpportunityForm #status-value").val()=='A faire'){
+
+  $('.status-field-add-form').change(function(){
+    // alert($(this).val());
+    if ($(".status-field-add-form").val()=='A faire'){
       $("[class*='note-form-group']").hide();
       $("[class*='task-form-group']").show();
     }
@@ -177,7 +265,8 @@ $(document).ready(function(){
     }
   });
 
-  // 
+ 
+
   // Jquery to make the entire row of a table clickable
   $(".clickable-row").click(function() {
     window.location = $(this).data("href");

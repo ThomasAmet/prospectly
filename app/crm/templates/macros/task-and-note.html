@@ -1,0 +1,113 @@
+{% macro render_task_and_note(form, latest_step) %}
+  
+  <div id='headingNotes' class='form-collapse-header mb-2 mt-3 ' data-toggle='collapse' data-target='#collapseNotes' aria-expanded="true" aria-controls="collapseNotes">
+  <!-- #start of Note block# -->
+    <h6 class="heading-small text-muted mb-2 mt-3">
+      Notes & Tâches
+      <i class='ni  ni-bold-down my-auto'></i>
+    </h6>
+  </div>
+  <div class="pl-2">
+
+    <div id="collapseNotes" class='collapse show' aria-labelledby="headingNotes">
+      <!-- Display note if status is not 'to-do' -->
+      <!-- start 1st row -->
+      <div class='row note-form-group'>
+        <!-- Note description -->
+        <div class='col'>
+        <div class="form-group- mb-3">
+          <label class="form-control-label">Note</label>
+          <!-- <textarea rows="4" class="form-control form-control-alternative">Une petite note concernant l'etape commerciale en cours ...</textarea> -->
+          {% if latest_step %}
+          {% set f = form.note_content.process_data(latest_step.notes.first().content) %}
+          {{form.note_content(class="form-control form-control-alternative")}}
+          {% else %}
+          {{form.note_content(class="form-control form-control-alternative", placeholder='Ici, on note tout ce qui peut etre necessaire...')}}
+          {% endif %}
+        </div>
+        </div>
+      </div>
+      <!-- end 1st row -->
+      <!-- Display task if status is 'to-do' -->
+      <!-- start 1st row -->
+      <div class="row justify-between task-form-group">
+        <!-- Task title -->
+        <div class="col-lg-4">
+        <div class="form-group">
+          <label class="form-control-label">Tâches</label>
+          <!-- <input type="text" id="input-task-title" class="form-control form-control-alternative" placeholder="Nom de la tache" value=""> -->
+          {{form.task_title(class="form-control form-control-alternative", placeholder="Nom de la tache")}}
+        </div>
+        </div>
+        <!-- Task priority -->
+        <div class="col-lg-4">
+        <div class="form-group" >
+            <label class="form-control-label" for="input-city">Priorité</label>
+            <!-- <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="Importance" value="Haute"> -->
+            {% if latest_step %}
+            {{form.task_priority(class="form-control form-control-alternative",value=latest_step.tasks.first().priority)}}
+            {% else %}
+            {{form.task_priority(class="form-control form-control-alternative", placeholder="Niveau de priorite")}}
+            {% endif %}
+        </div>
+        </div>
+        <!-- Due date -->
+        <div class="col-lg-4">
+        <div class="form-group" >
+          <label class="form-control-label" for="input-country">Date limite</label>
+          <div class="input-group input-group-alternative">
+              <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="ni ni-calendar-grid-58"></i></span>
+              </div>
+              <input class="datepicker form-control" id='due-date-datepicker' placeholder="Déterminez une date" value="{{session['task_due_date']}}" name='task-due-date' autocomplete="off">
+          </div>
+        </div>
+        </div>
+      </div>
+      <!-- end 1st row -->
+      <!-- start 2nd row -->
+      <div class='row task-form-group'>
+        <!-- Task description -->
+        <div class='col'>
+        <div class="form-group">
+          <label class="form-control-label">Descriptif</label>
+          {% if latest_step %}  
+            {% set f = form.task_content.process_data(latest_step.tasks.first().content) %}
+            {{ form.task_content(class="form-control form-control-alternative task-form-group") }}         
+          {% else %}  
+            {{ form.task_content(class="form-control form-control-alternative task-form-group", placeholder='Descriptif de la tache a effectuer...') }}
+          {% endif %}
+        </div>
+        </div>
+      </div>
+      <!-- end 2nd row -->
+      <!-- start 3rd row -->
+      <div class='row task-form-group'>
+        <!-- Task done ? -->
+        <div class='col'>
+          <div class='form-group mb-2'>
+            <div class="custom-control custom-checkbox mb-3">
+              
+              <input id="checkbox-hidden-task-done" name='task-done' type="hidden" value=False>
+
+            {% if latest_step %}
+              {% if latest_step.tasks.first().done %}
+              <input class="custom-control-input" id="checkbox-task-done" type="checkbox" checked>
+              <label class="custom-control-label" for="checkbox-task-done">Bien joué! Cette tâche est accomplie.</label>
+              {% else %}
+              <input class="custom-control-input" id="checkbox-task-done" type="checkbox" unchecked>
+              <label class="custom-control-label" for="checkbox-task-done">Avez-vous terminé la tâche?</label>
+              {% endif %}
+            {% else %}
+              <input class="custom-control-input" id="checkbox-task-done" type="checkbox" unchecked>
+              <label class="custom-control-label" for="checkbox-task-done">Avez-vous terminé la tâche?</label>
+            {% endif %}          
+            </div>     
+          </div>               
+        </div>
+      </div>
+    </div>
+    <!-- #end 2nd block# -->
+  </div>  
+  
+{% endmacro %}

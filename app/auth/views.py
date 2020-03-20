@@ -55,91 +55,91 @@ def signup():
 	# POST method part
 	if form.validate_on_submit():	
 		print(dict(request.form))
-		try:
-			# When user is created by admin, subscription is Beta by default
-			if current_user.is_authenticated:
-				print('Authenticated')
-				if current_user.is_admin():
-					print('Admin')
-					# Create user
-					user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
-						email=form.email.data.lower(), stripe_customer_id=None)	
-					user.set_username()
-					db.session.add(user)
-					db.session.flash()
-					# Create Subscription
-					plan_id, yearly = get_plan_details('Beta')
-					sub = Subscription(user_id=user.id, plan_id=plan_id, yearly=yearly)
-					db.session.add(sub)
-					db.session.commit()
-					# Send confirmation email
-					data = {
-						'user_id': user.id,
-						'exp': time() + 7200
-					}
-					# print(data)
-					token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-					receiver_email = user.email
-					subject = "Prospectly - Valider votre inscription"
-					html_text = render_template('email/welcome-validation.html', user=user, token=token)
-					Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
-					flash('Utilisateur crée.')
-					# print('flash ready')
-					return Response(url_for('auth.signup'), 404)
-				else:
-					return Response(url_for('main.login'), 404)
-			else:
-				stripe_plan_id = get_stripe_plan_id(request.form.get('plan_name'))
-				user = User.query.filter_by(email=request.form['email']).first()
-				# Case to handle custome who enter email but didn't pay
-				if user:
-					print('Exisiting User')
-					# If user password exists, it means customer paid so we redirect to login
-					if user.last_token:
-						print('password_hash')
-						flash('Oups... Cet email est utilisé. Connectez-vous ou choisissez un autre email.')
-						return Response(url_for('auth.signup', plan_name=request.form.get('plan_name')), 404)
-					# Else retrieve user and update info
-					else:
-						user.first_name = request.form['first_name'].capitalize()
-						user.last_name = request.form['last_name'].capitalize()
-						user.set_username()
-						customer = stripe.Customer.retrieve(user.stripe_customer_id)
-						customer.name = request.form['first_name'].capitalize() + ' ' + request.form['last_name'].capitalize()		
-				# If not user, create a new one		
-				else:
-					print('New User !')
-					customer = stripe.Customer.create(
-						name = request.form['first_name'].capitalize() + ' ' + request.form['last_name'].capitalize(),
-						email=request.form['email'].lower()
-					)
-					user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
-								email=form.email.data.lower(), stripe_customer_id=customer.id)
-					db.session.add(user)
-
+		# try:
+		# When user is created by admin, subscription is Beta by default
+		if current_user.is_authenticated:
+			print('Authenticated')
+			if current_user.is_admin():
+				print('Admin')
+				# Create user
+				user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
+					email=form.email.data.lower(), stripe_customer_id=None)	
+				user.set_username()
+				db.session.add(user)
+				db.session.flush()
+				# Create Subscription
+				plan_id, yearly = get_plan_details('Beta')
+				sub = Subscription(user_id=user.id, plan_id=plan_id, yearly=yearly)
+				db.session.add(sub)
 				db.session.commit()
-				print('Commit Succeeded!')
-				stripe_session = stripe.checkout.Session.create(
-					customer = customer.id,
-					# customer_email = customer.email,
-					payment_method_types=['card'],
-					subscription_data={
-						'items': [{
-							'plan': stripe_plan_id,
-						}],
-						'trial_period_days':14,
-					}, # I think u r right.
-					success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
-					cancel_url='%sauth/paiement-echec' %request.host_url,
-					locale='fr'
+				# Send confirmation email
+				data = {
+					'user_id': user.id,
+					'exp': time() + 7200
+				}
+				# print(data)
+				token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+				receiver_email = user.email
+				subject = "Prospectly - Valider votre inscription"
+				html_text = render_template('email/welcome-validation.html', user=user, token=token)
+				Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
+				flash('Utilisateur crée.')
+				# print('flash ready')
+				return Response(url_for('auth.signup'), 404)
+			else:
+				return Response(url_for('main.login'), 404)
+		else:
+			stripe_plan_id = get_stripe_plan_id(request.form.get('plan_name'))
+			user = User.query.filter_by(email=request.form['email']).first()
+			# Case to handle custome who enter email but didn't pay
+			if user:
+				print('Exisiting User')
+				# If user password exists, it means customer paid so we redirect to login
+				if user.last_token:
+					print('password_hash')
+					flash('Oups... Cet email est utilisé. Connectez-vous ou choisissez un autre email.')
+					return Response(url_for('auth.signup', plan_name=request.form.get('plan_name')), 404)
+				# Else retrieve user and update info
+				else:
+					user.first_name = request.form['first_name'].capitalize()
+					user.last_name = request.form['last_name'].capitalize()
+					user.set_username()
+					customer = stripe.Customer.retrieve(user.stripe_customer_id)
+					customer.name = request.form['first_name'].capitalize() + ' ' + request.form['last_name'].capitalize()		
+			# If not user, create a new one		
+			else:
+				print('New User !')
+				customer = stripe.Customer.create(
+					name = request.form['first_name'].capitalize() + ' ' + request.form['last_name'].capitalize(),
+					email=request.form['email'].lower()
 				)
-				# session['stripe_session_id'] = stripe_session.id #load stripe session in cookie to allow only one time success message
-				return Response(stripe_session.id, status=200)
-		except:
-			flash('Une erreur est survenue. Merci de contacter le support.')
-			print('User creation failed!')
-			db.session.rollback()
-			return Response(url_for('main.home'), status=404)
+				user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
+							email=form.email.data.lower(), stripe_customer_id=customer.id)
+				db.session.add(user)
+
+			db.session.commit()
+			print('Commit Succeeded!')
+			stripe_session = stripe.checkout.Session.create(
+				customer = customer.id,
+				# customer_email = customer.email,
+				payment_method_types=['card'],
+				subscription_data={
+					'items': [{
+						'plan': stripe_plan_id,
+					}],
+					'trial_period_days':14,
+				}, # I think u r right.
+				success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
+				cancel_url='%sauth/paiement-echec' %request.host_url,
+				locale='fr'
+			)
+			# session['stripe_session_id'] = stripe_session.id #load stripe session in cookie to allow only one time success message
+			return Response(stripe_session.id, status=200)
+		# except:
+		# 	flash('Une erreur est survenue. Merci de contacter le support.')
+		# 	print('User creation failed!')
+		# 	db.session.rollback()
+		# 	return Response(url_for('main.home'), status=404)
 	# GET method part			
 	else:		
 		if not current_user.is_authenticated:

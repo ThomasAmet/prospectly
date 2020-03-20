@@ -3,7 +3,8 @@ from flask_login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
-from datetime import datetime, timedelta, date
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 # from db import Column, String, Integer, Boolean, DateTime, ForeignKey, relationship, backref
 
 
@@ -26,17 +27,17 @@ class Subscription(db.Model):
 
 	def set_next_payment(self):
 		if Plan.query.get(self.plan_id).plan_name == 'Beta':
-			self.next_payment = datetime.utcnow() + timedelta(year=4)
+			self.next_payment = datetime.utcnow() + relativedelta(years=4) # relativedelta accepts months and years
 
 		if self.next_payment is None:
 			try:
-				self.next_payment = datetime.utcnow()+timedelta(days=14)
+				self.next_payment = datetime.utcnow()+timedelta(days=14) # timedelta only accepts days
 			except ValueError:
 				self.next_payment = datetime.utcnow()+timedelta(days=15)
 
 	def update_next_payment(self):
 		if Plan.query.get(self.plan_id).plan_name == 'Beta':
-			self.next_payment = datetime.utcnow() + timedelta(year=4)
+			self.next_payment = datetime.utcnow() + relativedelta(years=4)
 			
 		if self.yearly:
 			try:

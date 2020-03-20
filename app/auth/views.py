@@ -95,7 +95,7 @@ def signup():
 				if user:
 					print('Exisiting User')
 					# If user password exists, it means customer paid so we redirect to login
-					if user.password_hash:
+					if user.last_token:
 						print('password_hash')
 						flash('Oups... Cet email est utilisé. Connectez-vous ou choisissez un autre email.')
 						return Response(url_for('auth.signup', plan_name=request.form.get('plan_name')), 404)
@@ -198,6 +198,7 @@ def session_completed_webhook():
 		# Create Subscription
 		plan_id, yearly = get_plan_details(data_object['display_items'][0]['plan']['id'])
 		sub = Subscription(user_id=user.id, plan_id=plan_id, yearly=yearly)
+		user.last_token = stripe_customer.id
 		db.session.add(sub)
 		db.session.commit()
 		return Response('Success', 200)

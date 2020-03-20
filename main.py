@@ -9,4 +9,4 @@ def configure_shell_context():
 
 
 if __name__ == '__main__':
-	app.run(debug=True, port=9191)
+	app.run(debug=app.config['DEBUG'], port=9191)

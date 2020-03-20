@@ -23,7 +23,7 @@ migrate = Migrate(app, db)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'# set the endpoint for the login page
-login_manager.login_message = 'Vous devez etre connectés pour voir cette page.'
+login_manager.login_message = 'Vous devez etre connecté pour voir cette page.'
 
 
 from .models import *

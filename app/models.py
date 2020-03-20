@@ -319,7 +319,7 @@ class Task(db.Model):
 	done = db.Column(db.Boolean, default=False)
 
 	def __repr__(self):
-		return "<Task: {}. Stage: {}>".format(self.task_title, self.stage_step)
+		return "<Task: {}>".format(self.task_title)
 
 
 

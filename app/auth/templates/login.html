@@ -24,17 +24,17 @@
       {% endif %}
       {% if current_user.is_authenticated %}
       <li class='nav-item'>
-        <a id='logout-btn' class="btn btn-theme btn-circle btn-md" href="{{url_for('auth.logout')}}" data-text="Se déconnecter">
-          <span>D</span><span>é</span><span>c</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span>
+        <a id='logout-btn' class="btn btn-theme btn-circle btn-md" href="{{url_for('auth.logout')}}" data-text="SE DÉCONNECTER">
+          <span>D</span><span>É</span><span>C</span><span>O</span><span>N</span><span>N</span><span>E</span><span>X</span><span>I</span><span>O</span><span>N</span>
         </a>
         <a id='logout-btn-collapse' class="nav-link" href="{{url_for('auth.logout')}}" data-text="Se déconnecter">
-          DECONNEXION
+          DÉCONNEXION
         </a>
       </li>
       {% else %}
       <li class='nav-item'>
-        <a id='free-trial-btn' class="btn btn-theme  btn-circle btn-md px-5" href="{{url_for('main.pricing')}}" data-text="Essai Gratuit">
-          <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
+        <a id='free-trial-btn' class="btn btn-theme  btn-circle btn-md px-5" href="{{url_for('main.pricing')}}" data-text="ESSAI GRATUIT">
+          <span>E</span><span>S</span><span>S</span><span>A</span><span>Y</span><span>E</span><span>R</span>
         </a>
         <a id='free-trial-btn-collapse' class="nav-link" href="{{url_for('main.pricing')}}">ESSAI GRATUIT</a>
       </li>

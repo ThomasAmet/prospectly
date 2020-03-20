@@ -129,7 +129,7 @@ def signup():
 						}],
 						'trial_period_days':14,
 					}, # I think u r right.
-					success_url='%sauth/paiement-succes?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
+					success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
 					cancel_url='%sauth/paiement-echec' %request.host_url,
 					locale='fr'
 				)
@@ -155,7 +155,7 @@ def signup():
 
 
 
-@auth.route('/verification-paiement', methods=['POST'])
+@auth.route('/verification-paiement', methods=['GET','POST'])
 def session_completed_webhook():
 
 	webhook_secret = app.config.get('STRIPE_WEBHOOK_SECRET')
@@ -168,6 +168,10 @@ def session_completed_webhook():
 			data = event['data']
 			event_type = event['type']
 		except Exception as e:
+			print('error')
+			print('data: {}'.format(data))
+			print('event: {}'.format(event))
+			print('event_type: {}'.format(event_type))
 			return e
 		# Get the type of webhook event sent - used to check the status of PaymentIntents.
 	else:

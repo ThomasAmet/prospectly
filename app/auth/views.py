@@ -164,17 +164,17 @@ def session_completed_webhook():
 
 	if webhook_secret:
 		signature = request.headers.get('stripe-signature')
-		try:
-			event = stripe.Webhook.construct_event(
-                payload=request.data, sig_header=signature, secret=webhook_secret)
-			data = event['data']
-			event_type = event['type']
-		except Exception as e:
-			print('error')
-			print('data: {}'.format(data))
-			print('event: {}'.format(event))
-			print('event_type: {}'.format(event_type))
-			return e
+		# try:
+		event = stripe.Webhook.construct_event(
+            payload=request.data, sig_header=signature, secret=webhook_secret)
+		data = event['data']
+		event_type = event['type']
+		# except Exception as e:
+		# 	print('error')
+		# 	print('data: {}'.format(data))
+		# 	print('event: {}'.format(event))
+		# 	print('event_type: {}'.format(event_type))
+		# 	return e
 		# Get the type of webhook event sent - used to check the status of PaymentIntents.
 	else:
 		request_data = json.loads(request.data)
@@ -240,6 +240,7 @@ def confirm_account():
 			flash('Une erreur est survenue. Merci de contacter le support.')
 			return redirect( url_for('main.home'))
 	return render_template('password-set.html', form=form)
+
 
 
 @auth.route('/oubli-mot-de-passe', methods=['GET','POST'])

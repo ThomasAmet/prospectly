@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
-from datetime import datetime, date
+from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
 # from db import Column, String, Integer, Boolean, DateTime, ForeignKey, relationship, backref
 

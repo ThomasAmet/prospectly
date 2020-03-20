@@ -71,6 +71,9 @@ Opp: {{opportunities}}</br>
 {% for contact in contacts %}
   {{contact.first_name}}
   {{contact.lead}}
+  {% for email in contact.emails%}
+  {{email}}
+  {% endfor %}
 {% endfor %}
 
 {% endif %}

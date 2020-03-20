@@ -1,4 +1,7 @@
 {% extends 'app_base.html' %}
+<!-- The context of a template is rendered in and is not passed to imports unless instructed to do so.  -->
+{% from 'macros/add-company.html' import render_add_modal with context%}
+{% from 'macros/edit-company.html' import render_edit_modal with context%}
 
 {% block stylesheets %}
   {{ super() }}
@@ -30,7 +33,7 @@
                         <span class="btn-inner--text">Actions</span>
                       </button>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="" id='deleteAllCompanies'>Tous supprimer</a>
+                        <a class="dropdown-item" href="" id='deleteAllCompanies'>Supprimer la selection</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addCompanyModal">Importer un fichier .csv</a>      
                       </div>
@@ -87,6 +90,9 @@
               <!-- Table Body -->
               <tbody>
               {% for company in companies %}
+                <!--  Modal editCompany -->
+                {{ render_edit_modal(edit_form=form, company=company) }}
+                <!-- End Modal editCompany -->
                 <tr>
                   <td>
                     <span class="custom-control custom-checkbox px-0">
@@ -94,30 +100,31 @@
                       <!-- <label for="checkbox{{key}}"></label> -->
                     </span>
                   </td>
-                  <td class='clickable-row name' data-href="">
+                  <td data-toggle="modal" data-target='#editCompanyModal_{{company.id}}'>
+                  <!-- <td class='clickable-row name' data-href=""> -->
                     <div class="media align-items-center">
                       <div class="media-body">
                         <span class="mb-0 text-sm">{{company.name}}</span>
                       </div>
                     </div>
                   </td>
-                  <td class='clickable-row email' data-href="">
+                  <td data-toggle='modal' data-target='#editCompanyModal_{{company.id}}'>
                     {{company.email}}
                   </td>
-                  <td class='clickable-row phone' data-href="">
+                  <td data-toggle='modal' data-target='#editCompanyModal_{{company.id}}'>
                     {{company.phone}}
                   </td>
-                  <td class='clickable-row address' data-href="">
+                  <td data-toggle='modal' data-target='#editCompanyModal_{{company.id}}'>
                     {{company.address}}
                   </td>
-                  <td class='clickable-row city' data-href="">
+                  <td data-toggle='modal' data-target='#editCompanyModal_{{company.id}}'>
                     {{company.city}}
                   </td>
-                  <td class='clickable-row activity_field' data-href="">
+                  <td data-toggle='modal' data-target='#editCompanyModal_{{company.id}}'>
                     {{company.activity_field}}
                   </td>
-                  <td class='clickable-row creation_date' data-href="">
-                    {{company.creation_date.date() }}
+                  <td data-toggle='modal' data-target='#editCompanyModal_{{company.id}}'>
+                    {{company.creation_date.date()}}
                   </td>
                   <td class="text-right">
                     <div class="dropdown">
@@ -194,11 +201,9 @@
   </div>      
 
   <!--  Modal addCompany -->
-  {% include 'modals/add-company.html' %}
+  {{ render_add_modal(add_form=form) }}
   <!-- End Modal addContact -->
 
-  <!--  Modal editCompany -->
-  <!-- End Modal editOpportunity -->
   
 {% endblock main_content %}
 

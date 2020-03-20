@@ -113,5 +113,42 @@
 }
 
 
-
+.btn-pricing{
+  color: #6551ff!important;
+    border-color: white!important;
+    background-color: white!important;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);
+}
+.btn-pricing:hover
+{
+    color: #6551ff;
+    border-color: white; 
+    background-color: white;
+}
+.btn-pricing:focus,
+.btn-pricing.focus
+{
+    box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08), 0 0 0 0 rgba(255, 255, 255, .5);
+}
+.btn-pricing.disabled,
+.btn-pricing:disabled
+{
+    color: #212529;
+    border-color: #fff; 
+    background-color: #fff;
+}
+.btn-pricing:not(:disabled):not(.disabled):active,
+.btn-pricing:not(:disabled):not(.disabled).active,
+.show > .btn-pricing.dropdown-toggle
+{
+    color: #212529;
+    border-color: white; 
+    background-color: #e6e6e6;
+}
+.btn-pricing:not(:disabled):not(.disabled):active:focus,
+.btn-pricing:not(:disabled):not(.disabled).active:focus,
+.show > .btn-pricing.dropdown-toggle:focus
+{
+    box-shadow: none, 0 0 0 0 rgba(255, 255, 255, .5);
+}
 

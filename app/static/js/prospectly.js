@@ -61,7 +61,6 @@ $(document).ready(function(){
             });
     
     data = JSON.stringify({'companies_ids':rowIds})
-
     $.ajax({
       type: 'POST',
       // url: '/app/oppportunites/suppression-multiple',
@@ -87,7 +86,7 @@ $(document).ready(function(){
                 rowIds.push($(this).val());
             });
     data = JSON.stringify({'contacts_ids':rowIds})
-
+    alert(data);
     $.ajax({
       type: 'POST',
       // url: '/app/oppportunites/suppression-multiple',

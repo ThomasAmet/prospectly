@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, request, session, jsonify, flash, Response
 from . import crm
-from .forms import AddOpportunityForm, AddCompanyForm, AddContactForm, EditOpportunityStepForm
+from .forms import CompanyForm, AddContactForm, EditContactForm, AddOpportunityForm, EditOpportunityForm
 from app import db
 from ..models import User, Subscription, Company, Contact, ContactsEmail, Opportunity, OpportunityStep, CommercialStage, Status, Task, Note
 from ..models import get_list_opportunities, get_list_companies, get_list_contacts
@@ -27,12 +27,7 @@ def clear_session():
 @login_required
 @admin_login_required
 def test():
-	contact = Contact.query.filter_by(first_name='Thomas').first()
-	if contact:
-		company = contact.company
 	contacts, next_page, previous_page = get_list_contacts(current_user.id, limit=25, cursor=None)
-
-	print(contacts)
 	return render_template('test.html', contacts=contacts)
 
 
@@ -54,7 +49,7 @@ def home():
 @crm.route('/entreprises/liste')
 @login_required
 def view_companies_list():
-	form = AddCompanyForm()
+	form = CompanyForm()
 	token = request.args.get('page_token', None)
 	if token:
 		token = token.encode('utf-8')
@@ -72,7 +67,7 @@ def add_company():
 		return redirect(url_for('crm.home'))
 
 	try:
-		form = AddCompanyForm(request.form)
+		form = CompanyForm(request.form)
 		data = request.form.to_dict(flat=True)
 		data['user_id'] = current_user.id
 		note_content = data['note_content']
@@ -80,7 +75,12 @@ def add_company():
 		data.pop('csrf_token')
 		company = Company(**data)
 		db.session.add(company)
+		# db.session.flash()
 
+		if note_content!='':
+			note = Note(company_id=compnany.id, content=note_content)
+			db.session.add(note)
+			
 		db.session.commit()
 		# flash('Entreprise ajoutée avec succès.')
 	except:
@@ -111,23 +111,46 @@ def delete_company():
 
 
 
+@crm.route('/entreprise/<id>/edition', methods=['GET','POST'])
+def edit_company(id):			
+	company = Company.query.get(id)
+	data = request.form.to_dict(flat=True)
+
+	# Return to list if the user attempt to edit an opportunity that doesnt belong to hin or if request is GET
+	if not company.user_id == current_user.id or request.method=='GET':
+		return redirect(url_for('crm.view_companies_list'))
+	
+	try:
+		# Edit the company
+		for k,v in data.items():
+			print('{}:{}'.format(k,v))
+			setattr(company, k, v)
+		db.session.commit()	
+	except:
+		db.session.rollback
+	return redirect(url_for('crm.view_companies_list'))
+
+
+
+
 @crm.route('/contacts/liste', methods=['GET'])
 def view_contacts_list():
-	form = AddContactForm()
-	# token = request.args.get('page_token', None)
-	# if token:
-	# 	token = token.encode('utf-8')
+	add_contact_form = AddContactForm()
+	edit_contact_form = EditContactForm()
+	token = request.args.get('page_token', None)
+	if token:
+		token = token.encode('utf-8')
 
-	contacts,next_page, previous_page = get_list_contacts(current_user.id, limit=25, cursor=None)
+	contacts, next_page, previous_page = get_list_contacts(current_user.id, limit=25, cursor=None)
+	print([contact.firm for contact in contacts])
+	return render_template('contacts-list.html', contacts=contacts, next_page=next_page,
+							previous_page=previous_page, add_form=add_contact_form, edit_form=edit_contact_form)
 
-	return render_template('contacts-list.html', contacts=contacts, next_page=next_page, previous_page=previous_page, form=form)
 
 
 
-
-@crm.route('/contacts/ajout', methods=['GET', 'POST'])
+@crm.route('/contacts/ajout', methods=['POST'])
 def add_contact():
-	form = AddContactForm(formdata=None)
 
 	if request.method == 'POST':
 		# Get input from the form
@@ -136,7 +159,7 @@ def add_contact():
 
 		# Prepare input data for to create Contact object
 		email = data['email']
-		is_main = data['is_email_main']
+		is_main = True if data['is_email_main']=='True' else False
 		note_content = data['note_content']	
 
 		if data['company_id'] == '__None':
@@ -170,8 +193,9 @@ def add_contact():
 
 
 
-@crm.route('/contact/suppression', methods=['POST'])
+@crm.route('/contacts/suppression', methods=['POST'])
 def delete_contact():
+
 	if request.form.get('contact_id'):
 		contacts_ids = [request.form.get('contact_id')]
 	else:
@@ -182,9 +206,28 @@ def delete_contact():
 		contact = Contact.query.get(contact_id)
 		db.session.delete(contact)
 
+	# try:
+	db.session.commit()
+		# flash('Contact supprimé avec succès.')
+	# except:
+		# db.session.rollback()
+
+	return redirect(url_for('crm.view_contacts_list'))
+
+
+
+@crm.route('/contact/<id>/edition', methods=['POST'])
+def edit_contact(id):
+	contact = Contact.query.get(id)
+
+	if request.method=='GET' or not contact.user_id==current_user.id:
+		return redirect(url_for('crm.view_contacts_list'))
+	data = request.form.to_dict(flat=True)
+	print(data)
+	for k,v in data.items():
+		setattr(contact, k, v)
 	try:
 		db.session.commit()
-		# flash('Contact supprimé avec succès.')
 	except:
 		db.session.rollback()
 
@@ -196,7 +239,7 @@ def delete_contact():
 @login_required
 def view_opportunities_list():	
 	add_opportunity_form = AddOpportunityForm()
-	edit_opportunity_form = EditOpportunityStepForm()
+	edit_opportunity_form = EditOpportunityForm()
 	
 	token = request.args.get('page_token', None)
 	if token:
@@ -208,9 +251,9 @@ def view_opportunities_list():
 	# opportunities = dict(zip(ids,list(zip(opportunities, latest_steps)))) #dict of list: key is an integer, value is a list. Each list is compose of an opportunity and its latest stage. 
 	opportunities = dict(zip(range(len(opportunities)),list(zip(opportunities, latest_steps)))) #dict of list: key is an integer, value is a list. Each list is compose of an opportunity and its latest stage. 
 	
-	return render_template('opportunities-list.html', add_opportunity_form=add_opportunity_form, edit_opportunity_form=edit_opportunity_form,
-						   opportunities=opportunities, next_page_token=next_page, previous_page_token=previous_page)
-
+	return render_template('opportunities-list.html', opportunities=opportunities,
+						    add_form=add_opportunity_form, edit_form= edit_opportunity_form,			
+							next_page_token=next_page, previous_page_token=previous_page)
 
 
 @crm.route('/opportunites/ajout', methods=['GET','POST'])
@@ -294,12 +337,18 @@ def delete_opportunity():
 
 @crm.route('/opportunites/<id>/edition', methods=['POST'])
 def edit_opportunity(id):
-	print(request.form.to_dict(flat=True))
+	# print(request.form.to_dict(flat=True))
 	data = request.form.to_dict(flat=True)
 	
+	opportunity = Opportunity.query.get(id)
+	company = Company.query.get(data.get('company_id'))
 	initial_step = OpportunityStep.query.get(int(data.get('initial_step_id')))
 	new_stage_id = CommercialStage.query.filter_by(name=data.get('stage')).first().id
 	new_status_id = Status.query.filter_by(name=data.get('status')).first().id
+
+	# Condition to verify that the user that request the page is the owner of the requested opportunity
+	if not opprtunity.user_id == current_user.id:
+		return redirect(url_for('crm.view_opportunities_list'))
 
 	# No change in step status nor commercial stage so we only edit Note or Task
 	if data.get('initial_stage') == data.get('stage') and data.get('initial_status') == data.get('status'):
@@ -344,8 +393,6 @@ def edit_opportunity(id):
 							content=data.get('note_content'))
 
 	# Edit the company associated to that opportunity if the customer clicked on the pencil in the form
-	company = Company.query.get(data.get('company_id'))
-	print(company)
 	company.email = data.get('company-email') if data.get('company-email') else company.email
 	company.phone = data.get('company-phone') if data.get('company-phone')else company.phone
 	company.activity_field = data.get('company-activity') if data.get('company-activity') else company.activity_field
@@ -356,6 +403,9 @@ def edit_opportunity(id):
 		db.session.rollback()
 
 	return redirect(url_for('crm.view_opportunities_list'))
+
+
+
 
 
 

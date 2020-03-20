@@ -1,4 +1,4 @@
-{% macro render_edit_modal(edit_form, current_user, opportunity, latest_step) %}
+{% macro render_edit_modal(edit_form, opportunity, latest_step) %}
 
   {% from 'macros/task-and-note.html' import render_task_and_note %}
 
@@ -52,7 +52,7 @@
                     <div class="form-group mb-3">
                         <!-- Opportunite -->
                         <label class="form-control-label" for="">Entreprise</label>
-                        {{ edit_form.company(class="form-control form-control-alternative", value=opportunity.company) }}
+                        {{ edit_form.company(class="form-control form-control-alternative") }}
                     </div>
                     </div>
                     <div class="col-lg-2">
@@ -94,7 +94,7 @@
                         <div class="form-group mb-3">
                           <label class="form-control-label" for="input-city">
                             <span class="text-capitalize">étape </span>commerciale</label>
-                          {% set f = edit_form.stage.process_data(latest_step.commercial_stage.name)%}
+                          {% set f = edit_form.stage.process_data(latest_step.commercial_stage.name) %}
                           {{edit_form.stage(class="form-control form-control-alternative")}}
                         </div>
                         </div>
@@ -102,7 +102,7 @@
                         <div class="col-lg-5">
                         <div class="form-group mb-3">
                           <label class="form-control-label" for="input-country">Status</label>
-                          {% set f = edit_form.status.process_data(latest_step.status.name)%}
+                          {% set f = edit_form.status.process_data(latest_step.status.name) %}
                           {{edit_form.status(class="form-control form-control-alternative status-field-edit-form", id="edit-form-status")}}
                         </div>
                         </div>
@@ -171,9 +171,9 @@
 
               <hr class="my-2" />
 
-              <!-- end card body -->
+            <!-- end card body -->
             </div>
-            <!--  -->
+            <!--  Hidden input -->
             <input name="initial_step_id" type="hidden" value="{{latest_step.id}}">
             <input name="initial_stage" type="hidden" value="{{latest_step.commercial_stage.name}}">
             <input name="initial_status" type="hidden" value="{{latest_step.status.name}}">

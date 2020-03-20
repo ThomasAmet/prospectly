@@ -1,5 +1,8 @@
 {% extends 'app_base.html' %}
 
+{% from 'macros/add-contact.html' import render_add_modal with context%}
+{% from 'macros/edit-contact.html' import render_edit_modal with context %}
+
 {% block stylesheets %}
   {{ super() }}
   <style type="text/css">
@@ -30,7 +33,7 @@
                         <span class="btn-inner--text">Actions</span>
                       </button>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="" id='deleteAllContacts'>Tous supprimer</a>
+                        <a class="dropdown-item" href="" id='deleteAllContacts'>Supprimer la selection</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addContactModal">Importer un ficher (.csv)</a>      
                       </div>
@@ -86,34 +89,41 @@
               <!-- Table Body -->
               <tbody>
               {% for contact in contacts %}
-                  <tr>
+                <!--  Modal editContact -->
+                {{ render_edit_modal(edit_form=edit_form, contact=contact) }}
+                <!-- end Modal -->
+                <tr>
                   <td>
                     <span class="custom-control custom-checkbox px-0">
                       <input type="checkbox" name="checkbox[]" value="{{contact.id}}">
                       <!-- <label for="checkbox{{key}}"></label> -->
                     </span>
                   </td>
-                  <td class='clickable-row' data-href="">
+                  <!-- <td class='clickable-row' data-href=""> -->
+                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
                     <div class="media align-items-center">
                       <div class="media-body">
                         <span class="mb-0 text-sm first_name">{{contact.first_name}}</span>
                       </div>
                     </div>
                   </td>
-                  <td class='clickable-row last_name' data-href="">
+                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
                     {{contact.last_name}}
                   </td>
-                  <td class='clickable-row company' data-href="">
+                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
                     <!-- span is used to retrieve value with jquery and hide if val == None -->
                     <span class="entreprise-cell">{{contact.firm}}</span>
                   </td>
-                  <td class='clickable-row email' data-href="">
-                    {{contact.email}}
+                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
+                    <!-- email -->
+                    {% for email in  contact.emails %}
+                      {{ email.email }}
+                    {% endfor %}
                   </td>
-                  <td class='clickable-row phone' data-href="">
+                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
                     {{contact.phone}}
                   </td>
-                  <td class='clickable-row creation_date' data-href="">
+                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
                     {{ contact.creation_date.date() }}
                   </td>
                   <td class="text-right">
@@ -191,7 +201,7 @@
   </div>      
 
   <!--  Modal addContact -->
-  {% include 'modals/add-contact.html' %}
+  {{ render_add_modal(add_form=add_form) }}
   <!-- End Modal addContact -->
 
   <!--  Modal editContact -->

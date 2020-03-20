@@ -31,15 +31,15 @@
                       <span>D</span><span>é</span><span>c</span><span>o</span><span>n</span><span>n</span><span>e</span><span>x</span><span>i</span><span>o</span><span>n</span>
                     </a>
                     <a id='logout-btn-collapse' class="nav-link" href="{{url_for('auth.logout')}}" data-text="Se déconnecter">
-                      DECONNEXION
+                      DÉCONNEXION
                     </a>
                   </li>
                   {% else %}
                   <li class='nav-item'>
-                    <a id='free-trial-btn' class="btn btn-theme btn-md btn-circle px-5" href="{{url_for('main.pricing')}}" data-text="Essai Gratuit">
-                      <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
+                    <a id='free-trial-btn' class="btn btn-theme btn-md btn-circle px-5 text-uppercase " href="{{url_for('main.pricing')}}" data-text="ESSAI GRATUIT">
+                      <span>E</span><span>S</span><span>S</span><span>A</span><span>Y</span><span>E</span><span>R</span>
                     </a>
-                    <a id='free-trial-btn-collapse' class="nav-link" href="{{url_for('main.pricing')}}">ESSAI GRATUIT</a>
+                    <a id='free-trial-btn-collapse' class="nav-link text-uppercase" href="{{url_for('main.pricing')}}">ESSAI GRATUIT</a>
                   </li>
                   {% endif %}
                 </ul>
@@ -64,30 +64,35 @@
     <div class="container">
       <div class="row align-items-center">
         <div class="col-lg-5 col-md-12 md-mt-5 ml-auto">
-          <h2 class="mb-4 font-weight-normal wow fadeInUp" data-wow-duration="1.5s">Adoptez la <span class="font-weight-bold"> Prospection</span> Nouvelle Génération</h2>
-          <p class="lead mb-4 wow fadeInUp" data-wow-duration="2s" data-wow-delay="0.3s">La première plateforme <strong>CRM</strong><br> qui propose un <strong>générateur de prospect</strong></p>
+          <h2 class="mb-4 font-weight-normal wow fadeInUp" data-wow-duration="1.5s"> <span class="font-weight-bold">Adoptez la Prospection Nouvelle Génération</span></h2>
+          <p class="lead mb-3 wow fadeInUp" data-wow-duration="2s" data-wow-delay="0.3s">La première plateforme qui offre ensembles<br> un <strong>CRM</strong> et un <strong>Générateur de Prospect</strong>.<br>
+          Collectez et gérez vos prospects en un temps record.
+          </p>
           <div class='row'>
             <div class="col-lg-12">
-            <a class="btn btn-theme wow fadeInUp px-10" data-wow-duration="3s" data-wow-delay="0.5s" href="{{url_for('main.pricing')}}" data-text="Essai Gratuit"> 
+            <a class="btn btn-theme wow fadeInUp px-10" data-wow-duration="3s" data-wow-delay="0.5s" href="{{url_for('main.pricing')}}" data-text="Obtenir mon essai GRATUIT"> 
               <!--  <span>E</span><span>s</span><span>s</span><span>a</span><span>i</span>
               <span> </span><span>G</span><span>r</span><span>a</span><span>t</span><span>u</span><span>i</span><span>t</span> -->
-              <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
+              <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>z</span>
             </a>
-          </div>  
+            
+            <!-- Extra Button -->
+            <a class="btn btn-dark wow fadeInUp play-btn popup-youtube" href="" data-wow-duration="3s" data-wow-delay="0.5s" href="#" data-text="Découvrir"> 
+              <span>V</span><span>o</span><span>i</span><span>r</span>
+              <span>l</span><span>a</span> <span>v</span><span>i</span><span>d</span><span>é</span><span>o</span>
+                <i class="la la-play"></i>  
+            </a>
+
+            </div>  
           </div>
-         <!-- Extra Button -->
-         <!--  <a class="btn btn-dark wow fadeInUp" data-wow-duration="3s" data-wow-delay="0.5s" href="#" data-text="Ici tu peux rajouter le texte pour un 2eme boutton"> <span>L</span><span>e</span><span>a</span><span>r</span><span>n</span>
-            <span> </span><span>M</span><span>o</span><span>r</span><span>e</span>
-          </a> -->
-        </div>
-          <div class="video-box">
+<!--           <div class="video-box">
             <div class="video-btn heartbeat"> <a class="play-btn popup-youtube" href=""><i class="la la-play"></i></a>
               <div class="spinner-eff">
                 <div class="spinner-circle circle-1"></div>
                 <div class="spinner-circle circle-2"></div>
               </div>
             </div>
-          </div>
+          </div> -->
       </div>
     </div>
   </div>
@@ -128,7 +133,7 @@
               <h5>Gérez vos prospects et vos offres</h5>
             </div>
             <div class="featured-desc">
-              <p>Profitez de notre CRM intégré qui facilitera la gestion de vos prospects. Efficace et intuitive, notre CRM a été créé dans le but de faciliter votre travail.</p>
+              <p>Profitez d'un CRM hyper intuitif qui facilitera la gestion de vos prospects et de vos contrats. Gérez efficacement votre processus de vente en accédant de toutes les informations essentiels en un coup d'oeil.</p>
             </div>
           </div>
         </div>
@@ -138,10 +143,10 @@
               <img class="img-center" src="static/images/feature/03.png" alt="">
             </div>
             <div class="featured-title">
-              <h5>Nous trouvons vos prospects</h5>
+              <h5>Gagnez du temps et de l'argent</h5>
             </div>
             <div class="featured-desc">
-              <p>Collectez vos prospects en seulement quelques secondes et gérer l'ensemble du processus de vente en un temps-record.</p>
+              <p>Chaque minutes perdues à prospecter est une minute pendant laquelle vous ne vous occupez pas de vos clients. Economisez votre temps pour générer plus de revenus.</p>
             </div>
           </div>
         </div>
@@ -298,13 +303,14 @@
             <div class="title-effect title-effect-2">
               <div class="ellipse"></div> <i class="la la-rocket"></i>
             </div>
-            <h2 class="title">Prêt à faire passer votre prospection à un niveau supérieur</h2>
-            <p>Prospectly est plus qu'un simple logiciel - notre plateforme est la seule à comprendre la génération de prospects et CRM</p>
+            <h2 class="title">Faites passer votre entreprise à un niveau supérieur.</h2>
+            <p>Chaque journée sans Prospectly représente une perte de revenus pour votre entreprise. C'est plus qu'un simple logiciel - notre plateforme est la seule à proposer un moteur de génération de prospects.<br>
+              Voyez donc ça par vous même, essayez vous même.</p>
           </div>
         </div>
       </div>
       <center>
-        <a class="btn btn-theme wow fadeInUp px-10" data-wow-duration="2s" data-wow-delay="0.0  s" href="{{ url_for('main.pricing')}}" data-text="Essai Gratuit">
+        <a class="btn btn-theme wow fadeInUp px-10" data-wow-duration="2s" data-wow-delay="0.0  s" href="{{ url_for('main.pricing')}}" data-text="Obtenir mon essai GRATUIT">
           <span>E</span><span>s</span><span>s</span><span>a</span><span>y</span><span>e</span><span>r</span>
         </a>
       </center>

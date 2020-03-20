@@ -1,8 +1,8 @@
   {% extends 'app_base.html' %}
 
   {% from 'macros/task-and-note.html' import render_task_and_note %}
-  {% from 'macros/edit-opportunity.html' import render_edit_modal %}
-  {% from 'macros/add-opportunity.html' import render_add_modal %}
+  {% from 'macros/edit-opportunity.html' import render_edit_modal with context %}
+  {% from 'macros/add-opportunity.html' import render_add_modal with context %}
 
 
   {% block stylesheets %}
@@ -63,7 +63,7 @@
   {% block main_content %}
 
     <!--  Modal addOpportunity -->
-    {{ render_add_modal(add_opportunity_form, current_user) }}
+    {{ render_add_modal(add_form) }}
     <!-- End Modal addOpportunity -->
 
     <div class="container-fluid mt--8">
@@ -101,7 +101,7 @@
                   <tbody class='list'>
                   {% for key, value in opportunities.items() %}
 
-                    {{ render_edit_modal(edit_opportunity_form, current_user, opportunity=value[0], latest_step=value[1]) }}
+                    {{ render_edit_modal(edit_form=edit_form, opportunity=value[0], latest_step=value[1]) }}
                     
                     <!-- value is a list of type [opportunity, latest_step associated]  -->
                     <tr>

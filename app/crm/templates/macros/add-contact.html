@@ -1,3 +1,4 @@
+{% macro render_add_modal(add_form) %}
 <div class="modal fade" tabindex="-1" role="form" id="addContactModal">
   <div class="modal-dialog modal-lg" role="document">
 
@@ -22,15 +23,15 @@
             <!-- End card header -->
 
 
-            {% for field, errors in form.errors.items() %}
+            {% for field, errors in add_form.errors.items() %}
               <!-- <div class="alert alert-error"> -->
-                  {{ form[field].label }}: {{ ', '.join(errors) }}
+              {{ add_form[field].label }}: {{ ', '.join(errors) }}
               <!-- </div> -->
             {% endfor %}
 
             <!-- Start form -->
             <form action="{{url_for('crm.add_contact')}}" method="post" id='addContactForm'>
-              {{ form.csrf_token }}
+              {{ add_form.csrf_token }}
               <!-- start card body -->
               <div class="card-body">
                 <div class="pl-lg-2">
@@ -42,14 +43,14 @@
                       <div class="form-group mb-3">
                           <!-- Company Name -->
                           <label class="form-control-label" for="input-comapny-name">Prénom</label>
-                          {{form.first_name(class='form-control form-control-alternative')}}
+                          {{add_form.first_name(class='form-control form-control-alternative')}}
                       </div>  
                       </div>
                       <div class='col-lg-3'>
                       <div class="form-group mb-3">
                           <!-- Company Name -->
                           <label class="form-control-label" for="input-comapny-name">Nom</label>
-                          {{form.last_name(class='form-control form-control-alternative')}}
+                          {{add_form.last_name(class='form-control form-control-alternative')}}
                       </div>  
                       </div>   
                     </div>
@@ -58,14 +59,14 @@
                       <div class="form-group mb-3">
                           <!-- Company Name -->
                           <label class="form-control-label" for="input-comapny-name">Entreprise associée</label>
-                          {{form.company_id(class='form-control form-control-alternative')}}
+                          {{add_form.company_id(class='form-control form-control-alternative')}}
                       </div>  
                       </div>
                       <div class='col-lg-4'>
                       <div class="form-group mb-3">
                           <!-- Company Name -->
                           <label class="form-control-label" for="input-comapny-name">Rôle dans l'entreprise</label>
-                          {{form.position(class='form-control form-control-alternative')}}
+                          {{add_form.position(class='form-control form-control-alternative')}}
                       </div>  
                       </div>
                     </div>
@@ -89,10 +90,10 @@
                           <div class="col-lg-8">
                           <div class="form-group">
                               <label class="form-control-label" for="input-comapny-name">Email</label>
-                              {{form.email(class='form-control form-control-alternative')}}
+                              {{add_form.email(class='form-control form-control-alternative')}}
                           </div>   
                           </div>
-                          <div class="col-lg-4 mr-auto">
+                          <!-- <div class="col-lg-4 mr-auto">
                             <label class="form-control-label d-block mb-2">Type d'email</label>
                             <div class="custom-control custom-radio mr-3">
                               <input type="radio" id="customRadio1" name="is_email_main" class="custom-control-input" value='True' checked>
@@ -102,13 +103,14 @@
                               <input type="radio" id="customRadio2" name="is_email_main" class="custom-control-input" value='False'>
                               <label class="custom-control-label" for="customRadio2">Secondaire</label>
                             </div>   
-                          </div>
+                          </div> -->
+                          <input  name="is_email_main" value="True" type='hidden'>
                         </div>
                       </div>
                       <div class="col-lg-4 mx-auto">
                       <div class="form-group">
                           <label class="form-control-label" for="input-comapny-name">Téléphone</label>
-                          {{form.phone(class='form-control form-control-alternative')}}
+                          {{add_form.phone(class='form-control form-control-alternative')}}
                       </div>   
                       </div>                     
                     </div>  
@@ -121,7 +123,7 @@
                           <i class='fab fa-linkedin mr-2'></i>
                           LinkedIn
                         </label>
-                        {{form.linkedin(class='form-control form-control-alternative')}}
+                        {{add_form.linkedin(class='form-control form-control-alternative')}}
                       </div>   
                       </div>                    
                       <div class='col-lg-4'>
@@ -130,7 +132,7 @@
                           <i class='fab fa-instagram mr-2'></i>
                           Instagram
                         </label>
-                        {{form.instagram(class='form-control form-control-alternative')}}
+                        {{add_form.instagram(class='form-control form-control-alternative')}}
                       </div>   
                       </div>                    
                       <div class='col-lg-4'>
@@ -139,7 +141,7 @@
                           <i class='fab fa-facebook mr-2'></i>
                           Facebook
                         </label>
-                        {{form.facebook(class='form-control form-control-alternative')}}
+                        {{add_form.facebook(class='form-control form-control-alternative')}}
                       </div>   
                       </div>
                     </div>
@@ -162,7 +164,7 @@
                       <div class="form-group mb-3">
                         <label class="form-control-label">Note</label>
                         <!-- <textarea rows="4" class="form-control form-control-alternative">Une petite note concernant l'etape commerciale en cours ...</textarea> -->
-                        {{form.note_content(class="form-control form-control-alternative", placeholder='Ici, on note tout ce qui peut etre necessaire...')}}
+                        {{add_form.note_content(class="form-control form-control-alternative", placeholder='Ici, on note tout ce qui peut etre necessaire...')}}
                       </div>
                       </div>
                     </div>
@@ -186,6 +188,7 @@
           </div>
         </div>
       </div>
+{% endmacro %}
 
 
 

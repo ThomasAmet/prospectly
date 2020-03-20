@@ -1,0 +1,206 @@
+{% macro render_add_modal(add_form) %}
+
+<div class="modal fade" tabindex="-1" role="form" id="addCompanyModal">
+  <div class="modal-dialog modal-lg" role="document">
+
+    <!-- Modal Body -->
+    <div class="card bg-secondary modal-content">
+
+      <!-- Start card header -->
+      <div class="card-header bg-white border-0 py-3">
+        <div class="row align-items-center">
+          <div class="col-8">
+            <h3 class="mb-0">Nouvelle Entreprise</h3>
+          </div>
+          <div class="col-4 text-right">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <a href="{{url_for('crm.view_companies_list')}}">
+                <span aria-hidden="true">&times;</span>
+              </a>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- End card header -->
+
+      <!-- Start form -->
+      <form action="{{url_for('crm.add_company')}}" method="post" id='addCompanyForm'>
+        {{ add_form.csrf_token }}
+        <!-- start card body -->
+        <div class="card-body">
+
+          <!-- #start 1st block# -->
+          <h6 class="heading-small text-muted mb-2">Informations Générales</h6>
+          <div class="pl-lg-2">
+            <!-- start 1st row -->
+            <div class="row">
+              <div class="col-lg-6 mr-auto">
+                <div class='row'>
+                  <div class='col'>
+                  <div class="form-group mb-3">
+                  <!-- Company Name -->
+                  <label class="form-control-label" for="input-comapny-name">Nom de l'entreprise</label>
+                  <!-- <input type="text" class="form-control form-control-alternative" placeholder="Nom de l'entreprise" value="" disabled> -->
+                  {{add_form.name(class='form-control form-control-alternative')}}
+                  </div>  
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 ml-auto">
+                <div class='row'>
+                  <div class='col-8 mr-auto'>
+                  <div class="form-group mb-3">
+                  <!-- Company Name -->
+                  <label class="form-control-label" for="input-comapny-name">Domaine d'activité</label>
+                  <!-- <input type="text" class="form-control form-control-alternative" placeholder="Nom de l'entreprise" value="" disabled> -->
+                  {{add_form.activity_field(class='form-control form-control-alternative')}}
+                  </div>  
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- #end 1st  block# -->
+
+          <hr class="my-2" />
+
+          <!-- #start 2nd block# -->
+          <div id='headingTwo' class='form-collapse-header mb-2 mt-3 ' data-toggle='collapse' data-target='#collapseTwo' aria-expanded="false" aria-controls="collapseOne">
+            <h6 class="heading-small text-muted my-auto">Coordonnées
+              <i class='ni ni-bold-down my-auto'></i>
+            </h6>
+          </div>
+          <div class="pl-lg-2">
+            <!-- collapisble target -->
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo">
+              <div class='row'>
+                <div class='col-lg-5'>
+                <div class="form-group mb-3">
+                  <!-- Opportunite -->
+                  <label class="form-control-label" for="input-opportunity-name">Adresse</label>
+                  {{add_form.address(class='form-control form-control-alternative')}}
+                </div>
+                </div>
+                <div class='col-lg-3'>
+                <div class="form-group mb-3">
+                  <!-- Opportunite -->
+                  <label class="form-control-label" for="input-opportunity-name">Code postal</label>
+                  {{add_form.postal_code(class='form-control form-control-alternative')}}
+                </div>
+                </div>
+                <div class='col-lg-4'>
+                <div class="form-group mb-3">
+                  <!-- Opportunite -->
+                  <label class="form-control-label" for="input-opportunity-name">Ville</label>
+                  {{add_form.city(class='form-control form-control-alternative')}}
+                </div>
+                </div>
+              </div>
+              <div class='row'>
+                <div class='col-lg-4'>
+                <div class="form-group mb-3">
+                  <!-- Opportunite -->
+                  <label class="form-control-label" for="input-opportunity-name">Email de contact</label>
+                  {{add_form.email(class='form-control form-control-alternative')}}
+                </div>
+                </div>
+                <div class='col-lg-4 mr-auto'>
+                <div class="form-group mb-3">
+                  <!-- Opportunite -->
+                  <label class="form-control-label" for="input-opportunity-name">Téléphone de contact</label>
+                  {{add_form.phone(class='form-control form-control-alternative')}}
+                </div>
+                </div>
+              </div>                  
+            </div>
+          </div>
+          <!-- #end 2nd  block# -->
+          
+          <hr class='my-3 ' />
+
+          <!-- #start 3rd block# -->
+          <div id='headingThree' class='form-collapse-header mb-2 mt-3 ' data-toggle='collapse' data-target='#collapseThree' aria-expanded="false" aria-controls="collapseThree">
+            <h6 class="heading-small text-muted my-auto">Notes & Réseaux Sociaux
+              <i class='ni ni-bold-down my-auto'></i>
+            </h6>
+          </div>
+          <div class='pl-2'>
+            <!-- collapisble target -->
+            <div id="collapseThree" class="collapse" aria-labelledby="headingThree">                 
+              <div class='row'>
+                <div class='col-lg-3'>
+                <div class="form-group mb-3">
+                  <!-- Opportunite -->
+                  <label class="form-control-label" for="input-opportunity-name">
+                    <i class='ni ni-world-2 mr-2'></i>
+                    Site web
+                  </label>
+                  {{add_form.website(class='form-control form-control-alternative')}}
+                </div>
+                </div>
+                <div class='col-lg-3'>
+                <div class="form-group mb-3">
+                  <!-- Opportunite -->
+                  <label class="form-control-label" for="input-opportunity-name">
+                    <i class="fab fa-linkedin mr-2"></i>
+                    LinkedIn
+                  </label>
+                  {{add_form.linkedin(class='form-control form-control-alternative')}}
+                </div>
+                </div>
+                <div class='col-lg-3'>
+                <div class="form-group mb-3">
+                  <!-- Opportunite -->
+                  <label class="form-control-label" for="input-opportunity-name">
+                    <i class="fab fa-facebook"></i>
+                    Facebook
+                  </label>
+                  {{add_form.facebook(class='form-control form-control-alternative')}}
+                </div>
+                </div>
+                <div class='col-lg-3'>
+                <div class="form-group mb-3">
+                  <!-- Opportunite -->
+                  <label class="form-control-label" for="input-opportunity-name">
+                    <i class="fab fa-instagram"></i>
+                    Instgram
+                  </label>
+                  {{add_form.instagram(class='form-control form-control-alternative')}}
+                </div>
+                </div>
+              </div>
+              <div class='row'>
+                <div class='col'>
+                <div class="form-group mb-3">
+                  <!-- Opportunite -->
+                  <label class="form-control-label" for="input-opportunity-name">Note</label>
+                  {{add_form.note_content(class="form-control form-control-alternative", placeholder='Ici, on note tout ce qui peut etre né cessaire...')}}
+                </div>
+                </div>
+              </div> 
+            </div>
+          </div>
+          <!-- #end 3rd  block# -->                    
+
+          <hr class='my-3 ' />
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+          <button type="submit  " class="btn btn-primary">Créer</button>
+        </div>
+        <!-- end Footer -->
+      </form>
+      <!-- end form -->
+    </div>
+    <!-- end card body -->
+  </div>
+</div>
+
+{% endmacro %}
+
+
+
+

@@ -207,7 +207,7 @@ class Contact(db.Model):
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	first_name = db.Column(db.String(120), index=True, unique=False, nullable=True)
 	last_name = db.Column(db.String(120), index=True, unique=False, nullable=True)
-	company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), default=None)
+	company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), default=None) 
 	position = db.Column(db.String(120), index=True, unique=False, nullable=True)
 	linkedin = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	instagram = db.Column(db.String(120), index=False, unique=False, nullable=True)
@@ -258,7 +258,8 @@ class ContactsEmail(db.Model):
 	
 	#  Create a function that change all emails to secondary if a new email is set as main
 	def __repr__(self):
-		return "{} email's is {}".format(self.contact.name, self.email)
+		# return "{} email's is {}".format(self.contact.first_name+' '+self.contact.last_name, self.email)
+		return "email principal: {}".format(self.email) if self.is_main else "Mail secondaire: {}".format(self.email)
 
 
 
@@ -408,7 +409,8 @@ def get_list_contacts(user_id, limit, cursor):
 			.order_by(Contact.last_name, Contact.creation_date.desc())
 			.offset(cursor)
 			.limit(limit+1) )
-	contacts = list(map(from_sql, query.all()))
+	# contacts = list(map(from_sql, query.all())) # return a list of dict, we loose relationship
+	contacts = list(query.all())
 	next_page = cursor + limit if len(contacts) > limit else None
 	previous_page = cursor - limit if cursor >= limit else None
 	return (contacts[:limit], next_page, previous_page)

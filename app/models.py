@@ -329,7 +329,7 @@ class Note(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	opportunity_step_id = db.Column(db.Integer, db.ForeignKey('opportunity_steps.id'), default=None)
 	contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'), default=None)
-	comapny_id = db.Column(db.Integer, db.ForeignKey('companies.id'), default=None)
+	company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), default=None)
 	content = db.Column(db.String(240), default='')
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 

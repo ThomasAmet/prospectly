@@ -66,26 +66,27 @@ def add_company():
 	if not request.method=='POST':
 		return redirect(url_for('crm.home'))
 
-	try:
-		form = CompanyForm(request.form)
-		data = request.form.to_dict(flat=True)
-		data['user_id'] = current_user.id
-		note_content = data['note_content']
-		data.pop('note_content')
-		data.pop('csrf_token')
-		company = Company(**data)
-		db.session.add(company)
-		# db.session.flash()
+	# try:
+	form = CompanyForm(request.form)
+	data = request.form.to_dict(flat=True)
+	print(data)
+	data['user_id'] = current_user.id
+	note_content = data['note_content']
+	data.pop('note_content')
+	data.pop('csrf_token')
+	company = Company(**data) # This method only works if data only contains key that are attributes of Company. Otherwise use setattr(company, k, v) looped over company.items()
+	db.session.add(company)
+	db.session.flush()
 
-		if note_content!='':
-			note = Note(company_id=company.id, content=note_content)
-			db.session.add(note)
-			
-		db.session.commit()
+	# if note_content!='':
+	note = Note(company_id=company.id, content=note_content)
+	db.session.add(note)
+		
+	db.session.commit()
 		# flash('Entreprise ajoutée avec succès.')
-	except:
-		db.session.rollback()
-		flash("Une erreur s'est produite. Veuillez réessayer ou contactez le support.")
+	# except:
+		# db.session.rollback()
+		# flash("Une erreur s'est produite. Veuillez réessayer ou contactez le support.")
 	return redirect(url_for('crm.view_companies_list'))
 
 
@@ -206,11 +207,11 @@ def delete_contact():
 		contact = Contact.query.get(contact_id)
 		db.session.delete(contact)
 
-	# try:
-	db.session.commit()
+	try:
+		db.session.commit()
 		# flash('Contact supprimé avec succès.')
-	# except:
-		# db.session.rollback()
+	except:
+		db.session.rollback()
 
 	return redirect(url_for('crm.view_contacts_list'))
 
@@ -224,7 +225,7 @@ def edit_contact(id):
 		return redirect(url_for('crm.view_contacts_list'))
 	
 	data = request.form.to_dict(flat=True)
-	
+
 	# Remove company id if none
 	if data['company_id'] == '__None':
 			data.pop('company_id')

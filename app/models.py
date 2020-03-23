@@ -71,7 +71,7 @@ class Plan(db.Model):
 	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.plan_id], backref=db.backref('plan', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
 
 	def __repr__(self):
-		return "[{}]".format(self.plan_name)
+		return "<{}>".format(self.plan_name)
 
 
 
@@ -320,7 +320,7 @@ class Task(db.Model):
 	done = db.Column(db.Boolean, default=False)
 
 	def __repr__(self):
-		return "<Task: {}>".format(self.task_title)
+		return "<Task: {}>".format(self.title)
 
 
 
@@ -346,8 +346,10 @@ def load_user(user_id):
 
 
 def distinct_priority_values():
-	values = ["",'Haute', 'Moyenne', 'Basse']
-	labels = ["---",'Haute', 'Moyenne', 'Basse']
+	values = ['Haute', 'Moyenne', 'Basse']
+	# values = ["",'Haute', 'Moyenne', 'Basse']
+	labels = ['Haute', 'Moyenne', 'Basse']
+	# labels = ["---",'Haute', 'Moyenne', 'Basse']
 	return zip(values, labels)
 
 

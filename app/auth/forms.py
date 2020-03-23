@@ -40,10 +40,13 @@ class LoginForm(FlaskForm):
 
 
 class RegistrationForm(FlaskForm):
-	first_name = StringField('Prenom', validators=[DataRequired(message="Merci de remplir votre prenom"), Regexp('^[A-Za-z][A-Za-z]*$', 0,
-		'Les prenoms peuvent seulement contenir des lettres')])
-	last_name = StringField('Nom', validators=[DataRequired(message="Merci de remplir votre nom"), Regexp('^[A-Za-z][A-Za-z]*$', 0,
-    	'Les noms peuvent seulement contenir des lettres')])
+	# first_name = StringField('Prenom', validators=[DataRequired(message="Merci de remplir votre prenom"), Regexp('^[A-Za-z][A-Za-z]*$', 0,
+	# 	'Les prenoms peuvent seulement contenir des lettres')])
+	# last_name = StringField('Nom', validators=[DataRequired(message="Merci de remplir votre nom"), Regexp('^[A-Za-z][A-Za-z]*$', 0,
+ #    	'Les noms peuvent seulement contenir des lettres')])
+	first_name = StringField('Prenom', validators=[DataRequired(message="Merci de remplir votre prenom")])
+	last_name = StringField('Nom', validators=[DataRequired(message="Merci de remplir votre nom")])
+	
 	email = StringField('Email', validators=[DataRequired("Il faut un email pour s'inscrire."), Email(message='Oups... Cet email est invalide.')])
 	# password = PasswordField('Password', validators=[DataRequired("Aucun mot de passe detecte.")])
 	# password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password', message='Les mots de passse ne correspondent pas.')])

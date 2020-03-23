@@ -78,7 +78,7 @@ def add_company():
 		# db.session.flash()
 
 		if note_content!='':
-			note = Note(company_id=compnany.id, content=note_content)
+			note = Note(company_id=company.id, content=note_content)
 			db.session.add(note)
 			
 		db.session.commit()
@@ -240,6 +240,7 @@ def edit_contact(id):
 def view_opportunities_list():	
 	add_opportunity_form = AddOpportunityForm()
 	edit_opportunity_form = EditOpportunityForm()
+	edit_opportunity_form.company.render_kw = {'disabled': 'disabled'}
 	
 	token = request.args.get('page_token', None)
 	if token:
@@ -250,7 +251,7 @@ def view_opportunities_list():
 	# ids = [opp.id for opp in opportunities]
 	# opportunities = dict(zip(ids,list(zip(opportunities, latest_steps)))) #dict of list: key is an integer, value is a list. Each list is compose of an opportunity and its latest stage. 
 	opportunities = dict(zip(range(len(opportunities)),list(zip(opportunities, latest_steps)))) #dict of list: key is an integer, value is a list. Each list is compose of an opportunity and its latest stage. 
-	
+	# print(opportunities[0][1].tasks.first())
 	return render_template('opportunities-list.html', opportunities=opportunities,
 						    add_form=add_opportunity_form, edit_form= edit_opportunity_form,			
 							next_page_token=next_page, previous_page_token=previous_page)
@@ -269,44 +270,47 @@ def add_opportunity():
 		flash('Une erreur est survenue. Veuillez réessayer.')
 		return redirect(url_for('crm.view_opportunities_list'))
 	
-	# try:
-	opportunity = Opportunity(user_id=current_user.id,
-						 	  company_id=form.company.data.id,
-						  	  name=form.name.data,
-						  	  euros_value=form.euros_value.data)
-	db.session.add(opportunity)
-	db.session.flush()	
+	try:
+		opportunity = Opportunity(user_id=current_user.id,
+							 	  company_id=form.company.data.id,
+							  	  name=form.name.data,
+							  	  euros_value=form.euros_value.data)
+		db.session.add(opportunity)
+		db.session.flush()	
+		print(request.form)
+		stage = CommercialStage.query.filter_by(name=request.form.get('stage')).first_or_404()
+		status = Status.query.filter_by(name=request.form.get('status')).first_or_404()
+		opportunity_step = OpportunityStep(opportunity_id=opportunity.id,
+										  stage_id=stage.id,
+										  status_id=status.id)
+		db.session.add(opportunity_step)
+		db.session.flush()
 
-	stage = CommercialStage.query.filter_by(name=request.form.get('stage')).first_or_404()
-	status = Status.query.filter_by(name=request.form.get('status')).first_or_404()
-	opportunity_step = OpportunityStep(opportunity_id=opportunity.id,
-									  stage_id=stage.id,
-									  status_id=status.id)
-	db.session.add(opportunity_step)
-	db.session.flush()
+		if form.status.data=='A faire':
+			task_done = True if request.form.get('task_done') else False
+			due_date = request.form.get('task_due_date')
+			print('due_date before process: {}'.format(due_date))
+			due_date = datetime(year=int(due_date[-4:]), month=int(due_date[:2].replace('0','')), day=int(due_date[3:-5].replace('0',''))) if due_date else None # Parse due from mm/dd/yyyy to dd/mm/yyyy if exists
+			print('due_date after process: {}'.format(due_date))
 
-	if form.status.data=='A faire':
-		due_date = request.form.get('due-date-value')
-		due_date = datetime(year=int(due_date[-4:]), month=int(due_date[:2].replace('0','')), day=int(due_date[3:-5].replace('0',''))) if due_date else None # Parse due from mm/dd/yyyy to dd/mm/yyyy if exists
+			task = Task(user_id=current_user.id,
+						opportunity_step_id=opportunity_step.id,
+						title=request.form.get('task_title'),
+						content=request.form.get('task_content'), 
+						priority=request.form.get('task_priority'), 
+						due_date=due_date,
+						done=task_done)
+			db.session.add(task)
+			
+		else:
+			note = Note(content=request.form.get('note_content'),
+						opportunity_step_id	=opportunity_step.id)
+			db.session.add(note)
+			
 
-		task = Task(user_id=current_user.id,
-					opportunity_step_id=opportunity_step.id,
-					title=request.form.get('task_title'),
-					content=request.form.get('task_content'), 
-					priority=request.form.get('task_priority'), 
-					due_date=due_date,
-					done=request.form.get('task-done-value'))
-		db.session.add(task)
-		
-	else:
-		note = Note(content=request.form.get('note_content'),
-					opportunity_step_id	=opportunity_step.id)
-		db.session.add(note)
-		
-
-	db.session.commit()
-	# except:
-	# 	db.session.rollback()
+		db.session.commit()
+	except:
+		db.session.rollback()
 
 	return redirect(url_for('crm.view_opportunities_list'))	
 	
@@ -337,57 +341,62 @@ def delete_opportunity():
 
 @crm.route('/opportunites/<id>/edition', methods=['POST'])
 def edit_opportunity(id):
-	# print(request.form.to_dict(flat=True))
 	data = request.form.to_dict(flat=True)
+
+	print(data)	
 	
+	# Query some object from the form's input
 	opportunity = Opportunity.query.get(id)
 	company = Company.query.get(data.get('company_id'))
 	initial_step = OpportunityStep.query.get(int(data.get('initial_step_id')))
 	new_stage_id = CommercialStage.query.filter_by(name=data.get('stage')).first().id
 	new_status_id = Status.query.filter_by(name=data.get('status')).first().id
 
+	# Parse some input
+	due_date = request.form.get('task_due_date')
+	due_date = datetime(year=int(due_date[-4:]), month=int(due_date[:2].replace('0','')), day=int(due_date[3:-5].replace('0',''))) if due_date else None # Parse the task's due-date from mm/dd/yyyy to dd/mm/yyyy if exists
+	task_done = True if request.form.get('task_done') else False
+
 	# Condition to verify that the user that request the page is the owner of the requested opportunity
-	if not opprtunity.user_id == current_user.id:
+	if not opportunity.user_id == current_user.id:
 		return redirect(url_for('crm.view_opportunities_list'))
 
 	# No change in step status nor commercial stage so we only edit Note or Task
 	if data.get('initial_stage') == data.get('stage') and data.get('initial_status') == data.get('status'):
 		latest_note = Note.query.filter_by(opportunity_step_id=int(data.get('initial_step_id'))).first()
 		latest_task = Task.query.filter_by(opportunity_step_id=int(data.get('initial_step_id'))).first()
-		
 		# If true, update the task associated to the step
 		if data.get('status') == 'A faire':
+
 			latest_task.title = data.get('task_title')
 			latest_task.priority = data.get('task_priority')
 			latest_task.content = data.get('task_content')
-			latest_task.due_date = data.get('task_due_date')
-			latest_task.done = data.get('task_done')
+			latest_task.due_date = due_date
+			latest_task.done = task_done
 		# Else update the note associated to the step 
 		else:
 			latest_note.content = data.get('note_content')
-	# Else check if an opportunity' step for with the required stage and status already exists		
+	# Else check if an opportunity'step with the required stage and status already exists		
 	else:
 		new_latest_step = OpportunityStep.query.filter_by(opportunity_id=data.get('opportunity_id'),
-										  commercial_stage_id=new_stage_id,
-										  status_id=new_status_id)
+										  stage_id=new_stage_id,
+										  status_id=new_status_id).first()
 		# If not, create a new step
 		if not new_latest_step:
 			new_latest_step = OpportunityStep(opportunity_id=data.get('opportunity_id'),
-											  commercial_stage_id=new_stage_id,
+											  stage_id=new_stage_id,
 											  status_id=new_status_id)
 			db.session.add(new_latest_step)
 			db.session.flush() # get new_opp id
 		
 		# Then create a task or note
 		if data.get('status') == 'A faire':
-			due_date = request.form.get('task-due-date')
-			due_date = datetime(year=int(due_date[-4:]), month=int(due_date[:2].replace('0','')), day=int(due_date[3:-5].replace('0',''))) if due_date else None # Parse the task's due-date from mm/dd/yyyy to dd/mm/yyyy if exists
 			new_task = Task(opportunity_step_id=new_latest_step.id,
 							title=data.get('task_title'),
 							content=data.get('task_content'),
 							priority=data.get('task_priority'),
 							due_date=due_date,
-							done=task)
+							done=task_done)
 		else:
 			new_note = Note(opportunity_step_id=new_latest_step.id,
 							content=data.get('note_content'))
@@ -403,7 +412,6 @@ def edit_opportunity(id):
 		db.session.rollback()
 
 	return redirect(url_for('crm.view_opportunities_list'))
-
 
 
 
@@ -487,6 +495,8 @@ def edit_opportunity_step(id):
 	db.session.commit()
 	clear_session()
 	return redirect(url_for('crm.view_opportunities_list'))
+
+
 
 
 @crm.route('/opportunites/<id>/etape')

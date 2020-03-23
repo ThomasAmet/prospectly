@@ -33,7 +33,7 @@
                         <span class="btn-inner--text">Actions</span>
                       </button>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="" id='deleteAllContacts'>Supprimer la selection</a>
+                        <a class="dropdown-item" href="" id='deleteAllContacts'>Supprimer la sélection</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addContactModal">Importer un ficher (.csv)</a>      
                       </div>
@@ -132,8 +132,8 @@
                           <i class="fas fa-ellipsis-v"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                          <a class="dropdown-item" href="">
-                            <span class="text-capitalize">éditer</span> le contact
+                          <a data-toggle='modal' data-target='#editContactModal_{{contact.id}}'>
+                            <span class='dropdown-item'><span class="text-capitalize drop">éditer</span> le contact</span>
                           </a>
                           <form method="post" action="{{url_for('crm.delete_contact')}}">
                             <input name='contact_id' value="{{contact.id}}" type='hidden'>

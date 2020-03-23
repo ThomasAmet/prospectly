@@ -11,7 +11,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fas fa-search"></i></span>
                 </div>
-                <input class="form-control" placeholder="Search" type="text">
+                <input class="form-control" placeholder="Recherche" type="text">
               </div>
             </div>
             <button type="button" class="close" data-action="search-close" data-target="#navbar-search-main" aria-label="Close">
@@ -75,7 +75,7 @@
                   </a> -->
                 <!-- View all -->
                 <a href="#!" class="dropdown-item text-center text-primary font-weight-bold py-3">
-                  Afficher tous 
+                  Afficher tout
                 </a>
               </div>
             </li>
@@ -132,7 +132,7 @@
               <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div class="media align-items-center">
                   <span class="avatar avatar-sm rounded-circle">
-                    <img alt="Image placeholder" src="{{url_for('static', filename='images/theme/team-4.jpg')}}">
+                    <img alt="Image placeholder" src="{{url_for('static', filename='images/theme/team-1.jpg')}}">
                   </span>
                   <div class="media-body ml-2 d-none d-lg-block">
                     <span class="mb-0 text-sm  font-weight-bold">{{ current_user.username }}</span>
@@ -143,9 +143,9 @@
                 <div class="dropdown-header noti-title">
                   <h6 class="text-overflow m-0">Bonjour {{ current_user.first_name }}</h6>
                 </div>
-                <a href="#!" class="dropdown-item">
+                <a href="{{url_for('auth.profile')}}" class="dropdown-item">
                   <i class="ni ni-single-02"></i>
-                  <span>Mon profile</span>
+                  <span>Mon profil</span>
                 </a>
                 <a href="#!" class="dropdown-item">
                   <i class="ni ni-settings-gear-65"></i>

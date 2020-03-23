@@ -25,7 +25,7 @@
           <!-- End card header -->
 
           <!-- Start form -->
-          <form action="{{url_for('crm.edit_opportunity', id='opportunity.id')}}" method="post" id='editOpportunityStepForm'>
+          <form action="{{url_for('crm.edit_opportunity', id=opportunity.id)}}" method="post" id='editOpportunityStepForm'>
             {{ edit_form.csrf_token }}
             <!-- start card body -->
             <div class="card-body">
@@ -52,7 +52,7 @@
                     <div class="form-group mb-3">
                         <!-- Opportunite -->
                         <label class="form-control-label" for="">Entreprise</label>
-                        {{ edit_form.company(class="form-control form-control-alternative") }}
+                        {{ edit_form.company(class="form-control form-control-alternative", disabled_="disabled") }}
                     </div>
                     </div>
                     <div class="col-lg-2">
@@ -78,7 +78,7 @@
               <!-- start 2nd block -->
               <div id='headingTwo' class='form-collapse-header mb-2 mt-3 ' data-toggle='collapse' data-target='#collapseTwo' aria-expanded="true" aria-controls="collapseTwo">
                 <h6 class="heading-small text-muted mb-2">
-                  étapes commerciale & status
+                  étapes commerciale & statut
                   <i class='ni ni-bold-down my-auto'></i>
                 </h6>
               </div>
@@ -101,9 +101,9 @@
                         <!-- Name of Status -->
                         <div class="col-lg-5">
                         <div class="form-group mb-3">
-                          <label class="form-control-label" for="input-country">Status</label>
+                          <label class="form-control-label" for="input-country">Statut</label>
                           {% set f = edit_form.status.process_data(latest_step.status.name) %}
-                          {{edit_form.status(class="form-control form-control-alternative status-field-edit-form", id="edit-form-status")}}
+                          {{edit_form.status(class="form-control form-control-alternative status-field-edit-form", id="status-field-edit-form")}}
                         </div>
                         </div>
                       </div>                      
@@ -175,9 +175,9 @@
             </div>
             <!--  Hidden input -->
             <input name="initial_step_id" type="hidden" value="{{latest_step.id}}">
+            <input name="company_id" type="hidden" value="{{opportunity.company_id}}">
             <input name="initial_stage" type="hidden" value="{{latest_step.commercial_stage.name}}">
             <input name="initial_status" type="hidden" value="{{latest_step.status.name}}">
-            <input name="company_id" type="hidden" value="{{opportunity.company.id}}">
             <input name="opportunity_id" type="hidden" value="{{opportunity.id}}">
             <!-- Modal Footer -->
             <div class="modal-footer pt-0">

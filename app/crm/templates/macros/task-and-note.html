@@ -1,4 +1,6 @@
 {% macro render_task_and_note(form, latest_step) %}
+
+
   
   <div id='headingNotes' class='form-collapse-header mb-2 mt-3 ' data-toggle='collapse' data-target='#collapseNotes' aria-expanded="true" aria-controls="collapseNotes">
   <!-- #start of Note block# -->
@@ -20,9 +22,9 @@
           <!-- <textarea rows="4" class="form-control form-control-alternative">Une petite note concernant l'etape commerciale en cours ...</textarea> -->
           {% if latest_step %}
           {% set f = form.note_content.process_data(latest_step.notes.first().content) %}
-          {{form.note_content(class="form-control form-control-alternative")}}
+          {{form.note_content(class="form-control form-control-alternative note-form-group")}}
           {% else %}
-          {{form.note_content(class="form-control form-control-alternative", placeholder='Ici, on note tout ce qui peut etre necessaire...')}}
+          {{form.note_content(class="form-control form-control-alternative note-form-group", placeholder='Ici, on note tout ce qui peut etre nécessaire...')}}
           {% endif %}
         </div>
         </div>
@@ -34,9 +36,13 @@
         <!-- Task title -->
         <div class="col-lg-4">
         <div class="form-group">
-          <label class="form-control-label">Tâches</label>
+          <label class="form-control-label">Tâche</label>
           <!-- <input type="text" id="input-task-title" class="form-control form-control-alternative" placeholder="Nom de la tache" value=""> -->
-          {{form.task_title(class="form-control form-control-alternative", placeholder="Nom de la tache")}}
+          {% if latest_step %}
+            {{ form.task_title(class="form-control form-control-alternative task-form-group", value=latest_step.tasks.first().title, placeholder="Nom de la tâche") }}
+          {% else %}
+            {{ form.task_title(class="form-control form-control-alternative task-form-group", placeholder="Nom de la tâche") }}
+          {% endif %}
         </div>
         </div>
         <!-- Task priority -->
@@ -45,21 +51,33 @@
             <label class="form-control-label" for="input-city">Priorité</label>
             <!-- <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="Importance" value="Haute"> -->
             {% if latest_step %}
-            {{form.task_priority(class="form-control form-control-alternative",value=latest_step.tasks.first().priority)}}
+            {{form.task_priority(class="form-control  form-control-alternative task-form-group", value=latest_step.tasks.first().priority, placeholder="Niveau de priorite")}}
             {% else %}
-            {{form.task_priority(class="form-control form-control-alternative", placeholder="Niveau de priorite")}}
+            {{form.task_priority(class="form-control form-control-alternative task-form-group", placeholder="Niveau de priorite")}}
             {% endif %}
         </div>
         </div>
         <!-- Due date -->
         <div class="col-lg-4">
         <div class="form-group" >
-          <label class="form-control-label" for="input-country">Date limite</label>
+          <label class="form-control-label" for="input-country">Date limite (Mois/Jour/Année)</label>
           <div class="input-group input-group-alternative">
               <div class="input-group-prepend">
                   <span class="input-group-text"><i class="ni ni-calendar-grid-58"></i></span>
               </div>
-              <input class="datepicker form-control" id='due-date-datepicker' placeholder="Déterminez une date" value="{{session['task_due_date']}}" name='task-due-date' autocomplete="off">
+              {% if latest_step %}
+                <!-- Keep the following.. powerful -->
+                {#% for field in latest_step.tasks.first().__table__.columns._data.keys() %#}
+                  <!-- <h1> {{ field }} :: {{ latest_step[field] }} </h1> -->
+                {#% endfor %#}
+                {% if latest_step.tasks.first() %}
+                  <input class="datepicker form-control task-form-group" id='due-date-datepicker' placeholder="Déterminez une date" value="{{latest_step.tasks.first().due_date.strftime('%m/%d/%Y')}}" name='task_due_date' autocomplete="off">
+                {% else %}
+                  <input class="datepicker form-control task-form-group" id='due-date-datepicker' placeholder="Déterminez une date"  name='task_due_date' autocomplete="off">
+                {% endif %}
+              {% else %}
+                <input class="datepicker form-control task-form-group" id='due-date-datepicker' placeholder="Déterminez une date"  name='task_due_date' autocomplete="off">
+              {% endif %}
           </div>
         </div>
         </div>
@@ -73,39 +91,39 @@
           <label class="form-control-label">Descriptif</label>
           {% if latest_step %}  
             {% set f = form.task_content.process_data(latest_step.tasks.first().content) %}
-            {{ form.task_content(class="form-control form-control-alternative task-form-group") }}         
+            {{ form.task_content(class="form-control form-control-alternative") }}         
           {% else %}  
-            {{ form.task_content(class="form-control form-control-alternative task-form-group", placeholder='Descriptif de la tache a effectuer...') }}
+            {{ form.task_content(class="form-control form-control-alternative", placeholder='Descriptif de la tache a effectuer...') }}
           {% endif %}
         </div>
         </div>
       </div>
       <!-- end 2nd row -->
       <!-- start 3rd row -->
-      <div class='row task-form-group'>
-        <!-- Task done ? -->
-        <div class='col'>
-          <div class='form-group mb-2'>
-            <div class="custom-control custom-checkbox mb-3">
-              
-              <input id="checkbox-hidden-task-done" name='task-done' type="hidden" value=False>
-
-            {% if latest_step %}
-              {% if latest_step.tasks.first().done %}
-              <input class="custom-control-input" id="checkbox-task-done" type="checkbox" checked>
-              <label class="custom-control-label" for="checkbox-task-done">Bien joué! Cette tâche est accomplie.</label>
-              {% else %}
-              <input class="custom-control-input" id="checkbox-task-done" type="checkbox" unchecked>
-              <label class="custom-control-label" for="checkbox-task-done">Avez-vous terminé la tâche?</label>
-              {% endif %}
-            {% else %}
-              <input class="custom-control-input" id="checkbox-task-done" type="checkbox" unchecked>
-              <label class="custom-control-label" for="checkbox-task-done">Avez-vous terminé la tâche?</label>
-            {% endif %}          
-            </div>     
-          </div>               
+      <div class='row task-form-group mb-2'>
+        <div class="col">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span>
+                <!-- <input type="hidden" name="task_done" class="checkbox-hidden-task-done-hidden"> -->
+                {% if latest_step %}
+                  {% if latest_step.tasks.first().done %}
+                    <input type="checkbox" class="checkbox-task-done"  name='task_done' checked>
+                    <label class="ml-1 my-auto" for="checkbox-task-done"><h5>Bien joué! Cette tâche est accomplie.</h5></label> 
+                  {% else %}
+                    <input type="checkbox" class="checkbox-task-done" name='task_done' unchecked>
+                    <label class="ml-1 my-auto"><h5>Avez-vous terminé la tâche?</h5></label> 
+                  {% endif %}
+                {% else %}
+                <input type="checkbox" class="checkbox-task-done"  name='task_done' unchecked>
+                <label class="ml-1 my-auto"><h5>Avez-vous terminé la tâche?</h5></label> 
+                {% endif %}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
+
     </div>
     <!-- #end 2nd block# -->
   </div>  

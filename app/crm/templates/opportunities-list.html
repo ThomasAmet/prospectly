@@ -33,7 +33,7 @@
                         <span class="btn-inner--text">Actions</span>
                       </button>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="" id='deleteAllOpportunities'>Tous supprimer</a>
+                        <a class="dropdown-item" href="" id='deleteAllOpportunities'>Supprimer la sélection</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">
                         <span class='text-capitalize'>éditer</span> les étapes
@@ -91,7 +91,7 @@
                       <th scope="col" data-sort="name">Entreprise</th>
                       <th scope="col" data-sort="amount">Montant</th>
                       <th scope="col" data-sort="stage">étape</th>
-                      <th scope="col" data-sort="status">Status</th>
+                      <th scope="col" data-sort="status">Statut</th>
                       <th scope="col" data-sort="last_update">Dérnière Modification</th>
                       <th scope="col"></th>
                     </tr>
@@ -112,24 +112,24 @@
                         </span>
                       </td>
                       <!-- <td class='clickable-row' data-href="{{url_for('crm.view_opportunity_step', id=value[0].id)}}"> -->
-                      <td  data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
+                      <td  class='clickable-cell' data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
                         <div class="media align-items-center">
                               <div class="media-body">
                             <span class="mb-0 text-sm name">{{value[0].name}}</span>
                           </div>
                         </div>
                       </td>
-                      <td  data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
+                      <td  class='clickable-cell' data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
                         <div class="media align-items-center">
                               <div class="media-body">
                             <span class="mb-0 text-sm name">{{value[0].company.name}}</span>
                           </div>
                         </div>
                       </td>
-                      <td data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
+                      <td class='clickable-cell' data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
                         {{value[0].euros_value}} €
                       </td>
-                      <td data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
+                      <td class='clickable-cell' data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
                         <div class="progress-wrapper pt-0">
                           <div class="progress-info">
                               <span>{{value[1].commercial_stage.name}}</span>
@@ -137,23 +137,23 @@
                           <div class="d-flex align-items-center">
                             <div>
                               <div class="progress">
-                                <div class="progress-bar bg-danger" role="progressbar" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100" style="width: {{value[1].commercial_stage.closing_perc*100}}%;">
+                                <div class="progress-bar bg-info" role="progressbar" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100" style="width: {{value[1].commercial_stage.closing_perc*100}}%;">
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
+                      <td class='clickable-cell' data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
                         <span class="badge badge-dot mr-4">
                           <i class="bg-warning"></i>
                           {{value[1].status.name}}
                         </span>
                       </td>
-                      <td data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
+                      <td class='clickable-cell' data-toggle="modal" data-target="#editOpportunityModal_{{value[0].id}}">
                         {{value[0].last_update.date()}}
                       </td>
-                      <td class="text-left">
+                      <td lass="text-left">
                         <div class="dropdown">
                             <a class="btn btn-sm btn-icon-only text-light" href="" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                               <i class="fas fa-ellipsis-v"></i>

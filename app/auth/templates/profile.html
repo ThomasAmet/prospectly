@@ -1,4 +1,4 @@
-  {% extends 'index.html' %}
+  {% extends 'app_base.html' %}
 
   {% block stylesheets %}
     {{ super() }}
@@ -15,9 +15,9 @@
         <div class="col-lg-7 col-md-10">
             <h1 class="display-2 text-white">Hello {{ current_user.first_name }}</h1>
             <p class="text-white mt-0 mb-5">
-                This is your profile page. 
+                Ceci est votre page de profil. 
               </p>
-            <a href="#!" class="btn btn-info">Edit profile</a>
+            <a href="#!" class="btn btn-info">Editer le profil</a>
         </div>
         </div>
     </div>
@@ -34,18 +34,11 @@
         <div class="row">
             <div class="col-xl-4 order-xl-2 mb-5 mb-xl-0">
             <div class="card card-profile shadow">
-                <div class="row justify-content-center">
-                <div class="col-lg-3 order-lg-2">
-                    <div class="card-profile-image">
-                    <a href="#">
-                        <img src="{{url_for('static', filename='images/theme/team-4-800x800.jpg')}}" class="rounded-circle">
-                    </a>
-                    </div>
-                </div>
-                </div>
+                
                 <div class="card-header text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                 <div class="d-flex justify-content-between">
-                    <a href="#" class="btn btn-sm btn-info mr-4">Connect</a>
+                    <h3 class="mb-0">Mes Affiliations</h3>
+                    <!-- <a href="#" class="btn btn-sm btn-info mr-4">Connect</a> -->
                     <a href="#" class="btn btn-sm btn-default float-right">Message</a>
                 </div>
                 </div>
@@ -54,16 +47,16 @@
                     <div class="col">
                     <div class="card-profile-stats d-flex justify-content-center mt-md-5">
                         <div>
-                        <span class="heading">22</span>
-                        <span class="description">Friends</span>
+                        <span class="heading">0</span>
+                        <span class="description">Affiliés</span>
                         </div>
                         <div>
-                        <span class="heading">10</span>
-                        <span class="description">Photos</span>
+                        <span class="heading">0 €</span>
+                        <span class="description">Ce mois</span>
                         </div>
                         <div>
-                        <span class="heading">89</span>
-                        <span class="description">Comments</span>
+                        <span class="heading">0 €</span>
+                        <span class="description">Total</span>
                         </div>
                     </div>
                     </div>
@@ -91,14 +84,23 @@
             <div class="col-xl-8 order-xl-1">
             <div class="card bg-secondary shadow">
                 <div class="card-header bg-white border-0">
-                <div class="row align-items-center">
-                    <div class="col-8">
-                    <h3 class="mb-0">My account</h3>
+                    <div class="row justify-content-center">
+                        <div class="col-lg-3 order-lg-2">
+                            <div class="card-profile-image">
+                            <a href="#">
+                                <img src="{{url_for('static', filename='images/theme/team-1.jpg')}}" class="rounded-circle">
+                            </a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-4 text-right">
-                    <a href="#!" class="btn btn-sm btn-primary">Settings</a>
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                        <h3 class="mb-0">Mes Informations</h3>
+                        </div>
+                        <div class="col-4 text-right">
+                        <a href="#!" class="btn btn-sm btn-primary">Settings</a>
+                        </div>
                     </div>
-                </div>
                 </div>
                 <div class="card-body">
                 <form>

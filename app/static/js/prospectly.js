@@ -3,7 +3,6 @@ $(document).ready(function(){
 
   // Jquery to edit Comapny attributes directly from the OpportunityEditForm
   $('#toggle-company-fields').click(function(){
-    
     $.each($("[class*='company-field']"), function(){
       $(this).prop('disabled', function (_, val) { return ! val; });
     });
@@ -17,12 +16,8 @@ $(document).ready(function(){
 
   
 
-  // $('#contactsTable .entreprise-cell').each(function(){
-  //   // 
-  // });
-
   $("#selectAll").click(function(){
-        $("input[type=checkbox]").prop('checked', $(this).prop('checked'));// $(this).prop('checked') equals True or False depending on state of master checkbox
+        $("input[name='checkbox[]']").prop('checked', $(this).prop('checked'));// $(this).prop('checked') equals True or False depending on state of master checkbox
   });
 
   $('#deleteAllOpportunities').click(function(){
@@ -209,60 +204,94 @@ $(document).ready(function(){
     });
   }
 
-  // Jquery to send True/False when checkbox from task and note form is clicked/uncliked
-  if($('#checkbox-task-done').prop('checked')){
-    $('#checkbox-hidden-task-done').val('True');
-  }
-    $('#checkbox-task-done').change(function(){
-      if($(this).prop('checked')){
-        $('#checkbox-hidden-task-done').val('True');
-      }
-    });
+
+  // Jquery to send True/False when the checkbox from task and note form is clicked/uncliked
+  // var task_done = $('input.checkbox-task-done:checkbox');
+  // var task_done_field = $('input.checkbox-task-done-hidden:checkbox');
+  // task_done_field.val(task_done.is(':checked'));
+  // task_done.change(function(){
+  //   // alert(task_done.is(':checked'));  
+  //   task_done_field.val(task_done.is(':checked'));
+  // });
 
   
   // JQuery for displaying task module or note moduel within EditOpportunityForm
-  if ($(".status-field-edit-form").val()=='A faire'){
+  var loadEditTaskAndNote = function(){
+    if ($("#status-field-edit-form").val()=='A faire'){
       $("[class*='note-form-group']").hide();
       $("[class*='task-form-group']").show();
+      $.each($("input.task-form-group"), function(){
+        $(this).prop('required',true);
+      });
     }
     else{
       $("[class*='note-form-group']").show();
-      $("[class*='task-form-group']").hide();      
+      $("[class*='task-form-group']").hide();   
+      $.each($("input.task-form-group"), function(){
+        $(this).removeAttr('required');
+      });
     }
-
-  $('.status-field-edit-form').change(function(){
-    // alert($(this).val());
-    if ($(".status-field-edit-form").val()=='A faire'){
-      $("[class*='note-form-group']").hide();
-      $("[class*='task-form-group']").show();
-    }
-    else{
-      $("[class*='note-form-group']").show();
-      $("[class*='task-form-group']").hide();      
-    }
+  }
+  $(".clickable-cell").click(function() {
+    loadEditTaskAndNote();  
   });
+  $('#status-field-edit-form').change(function(){
+      // alert($(this).val());
+      if ($("#status-field-edit-form").val()=='A faire'){
+        $("[class*='note-form-group']").hide();
+        $("[class*='task-form-group']").show();
+        $.each($("input.task-form-group"), function(){
+          $(this).prop('required',true);
+        });
+      }
+      else{
+        $("[class*='note-form-group']").show();
+        $("[class*='task-form-group']").hide();
+        $.each($("input.task-form-group"), function(){
+          $(this).removeAttr('required');
+      });      
+      }
+    });
+
+
 
   // JQuery for displaying task module or note moduel within AddOppportunityForm 
-  if ($(".status-field-add-form").val()=='A faire'){
-      $("[class*='note-form-group']").hide();
-      $("[class*='task-form-group']").show();
+  var loadAddTaskAndNote = function(){
+    if ($("#status-field-add-form").val()=='A faire'){
+        $("[class*='note-form-group']").hide();
+        $("[class*='task-form-group']").show();
+        $.each($("input.task-form-group"), function(){
+        $(this).prop('required',true);
+      });
     }
     else{
-      $("[class*='note-form-group']").show();
-      $("[class*='task-form-group']").hide();      
+        $("[class*='note-form-group']").show();
+        $("[class*='task-form-group']").hide();
+        $.each($("input.task-form-group"), function(){
+        $(this).prop('required',false);
+      });       
     }
-
-  $('.status-field-add-form').change(function(){
-    // alert($(this).val());
-    if ($(".status-field-add-form").val()=='A faire'){
-      $("[class*='note-form-group']").hide();
-      $("[class*='task-form-group']").show();
-    }
-    else{
-      $("[class*='note-form-group']").show();
-      $("[class*='task-form-group']").hide();      
-    }
+  }
+  $("#addOpportunityBtn").click(function(){
+    loadAddTaskAndNote();
   });
+  $('#status-field-add-form').change(function(){
+      // alert($(this).val());
+      if ($("#status-field-add-form").val()=='A faire'){
+        $("[class*='note-form-group']").hide();
+        $("[class*='task-form-group']").show();
+        $.each($("input.task-form-group"), function(){
+        $(this).prop('required',true);
+      });
+      }
+      else{
+        $("[class*='note-form-group']").show();
+        $("[class*='task-form-group']").hide();
+        $.each($("input.task-form-group"), function(){
+        $(this).prop('required',false);
+      });      
+      }
+    });
 
  
 

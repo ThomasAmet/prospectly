@@ -93,7 +93,7 @@ class EditOpportunityForm(FlaskForm):
 	note_content = TextAreaField('Note', validators=[Optional(), Length(max=200)], default=None)
 	task_title = StringField('Nom de la tâche', validators=[Optional()], default=None)
 	task_content = TextAreaField('Descriptif', validators=[Optional(), Length(max=200)], default=None)
-	task_priority = SelectField('Priorité', choices=distinct_priority_values(), validators=[Optional()], default=None)
+	task_priority = SelectField('Priorité', choices=distinct_priority_values(), validators=[Optional()])
 	# task_due_date = DateField('A faire pour:', format='%Y-%m-%d')
 	# submit = SubmitField('Valider')
 

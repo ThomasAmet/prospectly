@@ -50,8 +50,7 @@ def get_publishable_key():
 @auth.route('/inscription', methods=['GET', 'POST']) 
 def signup():
 	
-	form = RegistrationForm()
-
+	form = RegistrationForm()	
 	# POST method part
 	if form.validate_on_submit():	
 		print(dict(request.form))
@@ -110,10 +109,11 @@ def signup():
 				else:
 					print('New User !')
 					customer = stripe.Customer.create(
-						name = request.form['first_name'].capitalize() + ' ' + request.form['last_name'].capitalize(),
+						name = request.form.get('first_name').capitalize() + ' ' + request.form['last_name'].capitalize(),
 						email=request.form['email'].lower()
 					)
-					user = User(first_name=form.first_name.data.capitalize(), last_name=form.last_name.data.capitalize(),
+					user = User(first_name=request.first_name.data.capitalize(),
+								last_name=form.last_name.data.capitalize(),
 								email=form.email.data.lower(), stripe_customer_id=customer.id)
 					db.session.add(user)
 
@@ -262,7 +262,7 @@ def request_new_password():
 		html_text=render_template('email/reset-password.html', user=user, token=token)
 		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
 		
-		flash("Un email de réinitialisation vient d'être envoyé à l'addresse indiquée.")
+		flash("Un email de réinitialisation vient d'être envoyé à l'adresse indiquée.")
 		return redirect(url_for('auth.login'))
 	return render_template('new-password-request.html', form=form)
 
@@ -276,7 +276,7 @@ def reset_password():
 		if current_user.is_admin:
 			render_template('password-set.html', form=form)
 		else:
-			flash("Déconnectez vous avant de changer votre mot de passe.")
+			flash("Déconnectez-vous avant de changer votre mot de passe.")
 			redirect( url_for('main.home'))
 
 	token = request.args.get('token')
@@ -351,12 +351,12 @@ def login():
 @login_required
 def logout():
 	logout_user()
-	flash('Vous êtes maintenant deconnecté.')
+	flash('Vous êtes maintenant déconnecté.')
 	return redirect(url_for('main.home'))
 
 
 
-@auth.route('/profile')
+@auth.route('/profil')
 @login_required
 def profile():
 	return render_template('profile.html')

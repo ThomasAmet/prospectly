@@ -1,4 +1,4 @@
-{% macro render_add_modal(add_opportunity_form, latest_step) %}
+{% macro render_add_modal(add_opportunity_form) %}
 
   {% from 'macros/task-and-note.html' import render_task_and_note %}
 
@@ -12,7 +12,7 @@
         <div class="card-header bg-white border-0 py-3">
           <div class="row align-items-center">
             <div class="col-8">
-              <h3 class="mb-0">Nouvelle Opportunitié</h3>
+              <h3 class="mb-0">Nouvelle Opportunité</h3>
             </div>
             <div class="col-4 text-right">
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -81,10 +81,10 @@
                     <!-- Name of Status -->
                     <div class="col-lg-5">
                     <div class="form-group mb-3">
-                      <label class="form-control-label" for="input-country">Status</label>
+                      <label class="form-control-label" for="input-country">Statut</label>
                       <!-- <select id="input-status" class="form-control form-control-alternative" placeholder="Nom du status"><option></option></select> -->
 
-                      {{add_opportunity_form.status(class="form-control form-control-alternative status-field-add-form", id="add-form-status")}}
+                      {{add_opportunity_form.status(class="form-control form-control-alternative status-field-add-form", id="status-field-add-form")}}
                     </div>
                     </div>
                   </div>
@@ -96,7 +96,7 @@
             <!-- #end 1st block# -->
             <hr class="my-2" />
             <!-- Paste Task and Note between here.... -->
-            {{ render_task_and_note(form=add_opportunity_form, latest_step=latest_step) }}
+            {{ render_task_and_note(form=add_opportunity_form) }}
             <!-- ...and here -->
             <hr class="my-2" />
           </div>

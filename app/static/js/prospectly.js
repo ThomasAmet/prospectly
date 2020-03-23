@@ -81,7 +81,7 @@ $(document).ready(function(){
                 rowIds.push($(this).val());
             });
     data = JSON.stringify({'contacts_ids':rowIds})
-    alert(data);
+    // alert(data);
     $.ajax({
       type: 'POST',
       // url: '/app/oppportunites/suppression-multiple',

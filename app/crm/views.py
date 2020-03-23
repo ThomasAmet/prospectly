@@ -157,7 +157,7 @@ def add_contact():
 		data = request.form.to_dict(flat=True) 	
 		print(data)
 
-		# Prepare input data for to create Contact object
+		# Prepare input data to create Emails and Notes 
 		email = data['email']
 		is_main = True if data['is_email_main']=='True' else False
 		note_content = data['note_content']	
@@ -175,12 +175,12 @@ def add_contact():
 		db.session.add(contact)
 		db.session.flush()
 		
-		if not note_content == '':
-			note = Note(note_content=note_content, contact_id=contact.id)
-			db.session.add(note)
-		if not email == '':
-			contactsemail = ContactsEmail(contact_id=contact.id, email=email, is_main=is_main)
-			db.session.add(contactsemail)
+		# if not note_content == '':
+		note = Note(content=note_content, contact_id=contact.id)
+		db.session.add(note)
+		# if not email == '':
+		contactsemail = ContactsEmail(contact_id=contact.id, email=email, is_main=is_main)
+		db.session.add(contactsemail)
 
 		try:
 			db.session.commit()
@@ -219,13 +219,24 @@ def delete_contact():
 @crm.route('/contact/<id>/edition', methods=['POST'])
 def edit_contact(id):
 	contact = Contact.query.get(id)
-
+	# Return to list of contact for GET request or when trying to edit someone else contact
 	if request.method=='GET' or not contact.user_id==current_user.id:
 		return redirect(url_for('crm.view_contacts_list'))
+	
 	data = request.form.to_dict(flat=True)
+	
+	# Remove company id if none
+	if data['company_id'] == '__None':
+			data.pop('company_id')
 	print(data)
 	for k,v in data.items():
 		setattr(contact, k, v)
+
+	if data.get('note_content'):
+		contact.notes.first().content = data.get('note_content')
+	if data.get('email'):
+		contact.emails.first().email = data.get('email')
+
 	try:
 		db.session.commit()
 	except:

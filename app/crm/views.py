@@ -126,6 +126,9 @@ def edit_company(id):
 		for k,v in data.items():
 			print('{}:{}'.format(k,v))
 			setattr(company, k, v)
+
+		if data.get('note_content'):
+			company.notes.first().content = data.get('note_content')
 		db.session.commit()	
 	except:
 		db.session.rollback

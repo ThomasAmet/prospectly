@@ -427,7 +427,7 @@ def get_list_companies(user_id, limit, cursor):
 			.order_by(Company.name, Company.creation_date.desc())
 			.offset(cursor)
 			.limit(limit+1) ) # limit + 1 to check whether there is a need for a 'next_page' btn
-	companies = list(map(from_sql, query.all()))
+	companies = list(query.all())
 	# propsects =  query.all()# return a sqlalchemy obj
 	next_page = cursor + limit if len(companies)>limit else None 
 	previous_page = cursor - limit if cursor >= limit else None 

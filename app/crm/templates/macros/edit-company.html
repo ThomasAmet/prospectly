@@ -175,14 +175,8 @@
                 <div class="form-group mb-3">
                   <!-- Opportunite -->
                   <label class="form-control-label" for="input-opportunity-name">Note</label>
-                  {% if company.notes %}
-                    {% with f = edit_form.process_data(company.notes.first().content) %}
+                    {% set f = edit_form.note_content.process_data(company.notes.first().content) %}
                     {{edit_form.note_content(class="form-control form-control-alternative", placeholder='Ici, notez tout ce qui peut être nécessaire...')}}
-                    {% endwith %}
-                  {% else %}
-                    {{ edit_form.note_content(class='form-control form-control-alternative', placeholder='Ici, notez tout ce qui peut être nécessaire...')}}
-                  {% endif %}
-                </div>
                 </div>
               </div> 
             </div>

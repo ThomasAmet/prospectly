@@ -12,7 +12,37 @@
 
 {% block header_content %}
   <!-- Beginning Card Header -->
-  <div class="row mb-4 pt-4 pb-5">
+  <div class="row align-items-center py-5 mb-4">
+    <div class="col-lg-6 col-4">
+      <!-- <h6 class="h2 text-white d-inline-block mb-0">Défaut</h6> -->
+      <i class="ni ni-single-copy-04 text-white"></i></a></li>
+      <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+          <!-- <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li> -->
+          <li class="breadcrumb-item"><a href="#">Contacts</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Liste</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-lg-6 col-8 text-right">
+      <!-- <a href="#" class="btn btn-sm btn-neutral">Actions</a> -->
+      <div class="dropdown">
+        <button class="btn btn-neutral dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <span class="btn-inner--icon"><i class="ni ni-atom"></i></span>
+          <span class="btn-inner--text">Actions</span>
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <a class="dropdown-item" href="" id='deleteAllContacts'>Supprimer la sélection</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addContactModal">Importer un fichier .csv</a>    
+        </div>  
+      </div>
+      <button class="btn btn-icon btn-3 btn-neutral" type="button" id='addContactBtn' data-toggle="modal" data-target="#addContactModal">
+        <span class="btn-inner--icon"><i class="fa fa-plus"></i></span>
+      </button>
+    </div>
+  </div>
+  <!-- <div class="row mb-4 pt-4 pb-5">
     <div class="col-12">
       <div class="card shadow card-stats">
         <div class='card-body'>
@@ -41,7 +71,6 @@
                   </div>
 
                 <div class='col-2 mr-2'>
-                  <!-- Trigger/Open the AddOpportunityModal -->
                   <button class="btn btn-icon btn-3  btn-outline-primary" type="button" id='addContactBtn' data-toggle="modal" data-target="#addContactModal">
                     <span class="btn-inner--icon"><i class="fa fa-plus"></i></span>
                   </button>
@@ -52,153 +81,151 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
   <!-- End Card Header -->
 {% endblock header_content %}
 
 {% block main_content %}
 
-  <div class="container-fluid mt--8">
-    <!-- Card Table -->
-    <div class='row'>
-      <div class='col'>
-        <div class='card shadow'>
-          <div class='card-body border-0 px-0'>
-          <!-- Table -->
-          <div class="table-responsive table-hover rounded">
-            <table class="table align-items-center table-flush" id='contactsTable'>
-              <!-- Table Head -->
-              <thead class="thead-light">
-                <tr>
-                  <th>
-                    <span class="custom-checkbox">
-                      <input type="checkbox" id="selectAll">
-                      <!-- <label for="selectAll"></label> -->
-                    </span>
-                  </th>
-                  <th scope="col" data-sort='first_name'>Prénom</th>
-                  <th scope="col" data-sort='last_name'>Nom</th>
-                  <th scope="col" data-sort='company'>Entreprise</th>
-                  <th scope="col" data-sort='email'>Email</th>
-                  <th scope="col" data-sort='phone'>Téléphone</th>
-                  <th scope="col" data-sort='creation_date'>Date de création</th>
-                  <th scope="col"></th>
-                </tr>
-              </thead>
-              <!-- End Table Head -->
-              <!-- Table Body -->
-              <tbody>
-              {% for contact in contacts %}
-                <!--  Modal editContact -->
-                {{ render_edit_modal(edit_form=edit_form, contact=contact) }}
-                <!-- end Modal -->
-                <tr>
-                  <td>
-                    <span class="custom-control custom-checkbox px-0">
-                      <input type="checkbox" name="checkbox[]" value="{{contact.id}}">
-                      <!-- <label for="checkbox{{key}}"></label> -->
-                    </span>
-                  </td>
-                  <!-- <td class='clickable-row' data-href=""> -->
-                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
-                    <div class="media align-items-center">
-                      <div class="media-body">
-                        <span class="mb-0 text-sm first_name">{{contact.first_name}}</span>
-                      </div>
+  <!-- Card Table -->
+  <div class='row'>
+    <div class='col'>
+      <div class='card shadow'>
+        <div class='card-body border-0 px-0'>
+        <!-- Table -->
+        <div class="table-responsive table-hover rounded">
+          <table class="table align-items-center table-flush" id='contactsTable'>
+            <!-- Table Head -->
+            <thead class="thead-light">
+              <tr>
+                <th>
+                  <span class="custom-checkbox">
+                    <input type="checkbox" id="selectAll">
+                    <!-- <label for="selectAll"></label> -->
+                  </span>
+                </th>
+                <th scope="col" data-sort='first_name'>Prénom</th>
+                <th scope="col" data-sort='last_name'>Nom</th>
+                <th scope="col" data-sort='company'>Entreprise</th>
+                <th scope="col" data-sort='email'>Email</th>
+                <th scope="col" data-sort='phone'>Téléphone</th>
+                <th scope="col" data-sort='creation_date'>Date de création</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <!-- End Table Head -->
+            <!-- Table Body -->
+            <tbody>
+            {% for contact in contacts %}
+              <!--  Modal editContact -->
+              {{ render_edit_modal(edit_form=edit_form, contact=contact) }}
+              <!-- end Modal -->
+              <tr>
+                <td>
+                  <span class="custom-control custom-checkbox px-0">
+                    <input type="checkbox" name="checkbox[]" value="{{contact.id}}">
+                    <!-- <label for="checkbox{{key}}"></label> -->
+                  </span>
+                </td>
+                <!-- <td class='clickable-row' data-href=""> -->
+                <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
+                  <div class="media align-items-center">
+                    <div class="media-body">
+                      <span class="mb-0 text-sm first_name">{{contact.first_name}}</span>
                     </div>
-                  </td>
-                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
-                    {{contact.last_name}}
-                  </td>
-                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
-                    <!-- span is used to retrieve value with jquery and hide if val == None -->
-                    <span class="entreprise-cell">{{contact.firm}}</span>
-                  </td>
-                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
-                    <!-- email -->
-                    {% for email in  contact.emails %}
-                      {{ email.email }}
-                    {% endfor %}
-                  </td>
-                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
-                    {{contact.phone}}
-                  </td>
-                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
-                    {{ contact.creation_date.date() }}
-                  </td>
-                  <td class="text-right">
-                    <div class="dropdown">
-                        <a class="btn btn-sm btn-icon-only text-light" href="" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          <i class="fas fa-ellipsis-v"></i>
+                  </div>
+                </td>
+                <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
+                  {{contact.last_name}}
+                </td>
+                <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
+                  <!-- span is used to retrieve value with jquery and hide if val == None -->
+                  <span class="entreprise-cell">{{contact.firm}}</span>
+                </td>
+                <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
+                  <!-- email -->
+                  {% for email in  contact.emails %}
+                    {{ email.email }}
+                  {% endfor %}
+                </td>
+                <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
+                  {{contact.phone}}
+                </td>
+                <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
+                  {{ contact.creation_date.date() }}
+                </td>
+                <td class="text-right">
+                  <div class="dropdown">
+                      <a class="btn btn-sm btn-icon-only text-light" href="" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i>
+                      </a>
+                      <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                        <a data-toggle='modal' data-target='#editContactModal_{{contact.id}}'>
+                          <span class='dropdown-item'><span class="text-capitalize drop">éditer</span> le contact</span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                          <a data-toggle='modal' data-target='#editContactModal_{{contact.id}}'>
-                            <span class='dropdown-item'><span class="text-capitalize drop">éditer</span> le contact</span>
-                          </a>
-                          <form method="post" action="{{url_for('crm.delete_contact')}}">
-                            <input name='contact_id' value="{{contact.id}}" type='hidden'>
-                            <button class="dropdown-item" type='submit'>
-                              Supprimer le contact
-                            </button>
-                          </form>
-                        </div>
-                    </div>                     
-                  </td>
-                </tr>
-              {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          <div class="card-footer py-4">
-            <nav aria-label="...">
-              <ul class="pagination justify-content-end mb-0">
-                {% if previous_page_token is not none %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page_token={{previous_page_token}}" tabindex="-1">
-                      <i class="fas fa-angle-left"></i>
-                      <span class="sr-only">Page precedente</span>
-                    </a>
-                  </li>
-                {% else %}
-                  <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">
-                      <i class="fas fa-angle-left"></i>
-                      <span class="sr-only">Page precedente(desactivee)</span>
-                    </a>
-                  </li>
-                {% endif %}
-                <!-- <li class="page-item active">
-                  <a class="page-link" href="#">1</a>
-                </li>
+                        <form method="post" action="{{url_for('crm.delete_contact')}}">
+                          <input name='contact_id' value="{{contact.id}}" type='hidden'>
+                          <button class="dropdown-item" type='submit'>
+                            Supprimer le contact
+                          </button>
+                        </form>
+                      </div>
+                  </div>                     
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer py-4">
+          <nav aria-label="...">
+            <ul class="pagination justify-content-end mb-0">
+              {% if previous_page_token is not none %}
                 <li class="page-item">
-                  <a class="page-link" href="#">2<span class="sr-only">(current)</span></a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="#">3</a>
-                </li> -->
-                {% if next_page_token is not none %}                  
-                <li class="page-item">
-                  <a class="page-link" href="?page_token={{next_page_token}}">
-                    <i class="fas fa-angle-right"></i>
-                    <span class="sr-only">Page suivante</span>
+                  <a class="page-link" href="?page_token={{previous_page_token}}" tabindex="-1">
+                    <i class="fas fa-angle-left"></i>
+                    <span class="sr-only">Page precedente</span>
                   </a>
                 </li>
-                {% else %}
+              {% else %}
                 <li class="page-item disabled">
-                  <a class="page-link" href="">
-                    <i class="fas fa-angle-right"></i>
-                    <span class="sr-only">Page suivante</span>
+                  <a class="page-link" href="#" tabindex="-1">
+                    <i class="fas fa-angle-left"></i>
+                    <span class="sr-only">Page precedente(desactivee)</span>
                   </a>
                 </li>
-                {% endif %}
-              </ul>
-            </nav>
-          </div>
+              {% endif %}
+              <!-- <li class="page-item active">
+                <a class="page-link" href="#">1</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">2<span class="sr-only">(current)</span></a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">3</a>
+              </li> -->
+              {% if next_page_token is not none %}                  
+              <li class="page-item">
+                <a class="page-link" href="?page_token={{next_page_token}}">
+                  <i class="fas fa-angle-right"></i>
+                  <span class="sr-only">Page suivante</span>
+                </a>
+              </li>
+              {% else %}
+              <li class="page-item disabled">
+                <a class="page-link" href="">
+                  <i class="fas fa-angle-right"></i>
+                  <span class="sr-only">Page suivante</span>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
         </div>
       </div>
     </div>
-    <!-- End Table -->
-  </div>      
+  </div>
+  <!-- End Table -->
 
   <!--  Modal addContact -->
   {{ render_add_modal(add_form=add_form) }}

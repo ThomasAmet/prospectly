@@ -37,9 +37,25 @@ def admin_login_required(func):
 		return func(*args, **kwargs)
 	return decorated_view
 
+
+def pro_plan_required(func):
+	@wraps(func)
+	def decorated_view(*args, **kwargs):
+		user = User.query.get(current_user.id)
+		plan = user.subscriptions.order_by(Subscription.subscription_date.desc()).first().plan
+		if not plan.lead_generator:
+			flash('Pour accéder au générateur de prospects, vous devez souscrire à un abonnement Prospectly Pro.')
+			return redirect(url_for('crm.home'))
+		return func(*args, **kwargs)
+	return decorated_view
+
+
+
 @auth.route('/')
 def index():
 	return render_template('profile.html')
+
+
 
 @auth.route('/stripe-public-key', methods=['GET'])
 def get_publishable_key():

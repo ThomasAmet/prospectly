@@ -10,9 +10,43 @@
   {% endblock stylesheets %}
 
   {% block header_content %}
-   
-    <!-- Beginning Card Header -->
-    <div class="row mb-4 pt-4 pb-5">
+  <!-- Beginning Card Header -->
+  <div class="row align-items-center py-5 mb-4">
+    <div class="col-lg-6 col-4">
+      <!-- <h6 class="h2 text-white d-inline-block mb-0">Défaut</h6> -->
+      <i class="ni ni-planet text-white"></i></a></li>
+      <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+          <!-- <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li> -->
+          <li class="breadcrumb-item"><a href="#">Opportunités</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Liste</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-lg-6 col-8 text-right">
+      <!-- <a href="#" class="btn btn-sm btn-neutral">Actions</a> -->
+      <div class="dropdown">
+        <button class="btn btn-neutral dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <span class="btn-inner--icon"><i class="ni ni-atom"></i></span>
+          <span class="btn-inner--text">Actions</span>
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <a class="dropdown-item" href="" id='deleteAllOpportunities'>Supprimer la sélection</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">
+            <span class='text-capitalize'>éditer</span> les étapes
+          </a>
+          <a class="dropdown-item" href="#">
+            <span class='text-capitalize'>éditer</span> les status
+          </a>
+        </div>  
+      </div>
+      <button class="btn btn-icon btn-3 btn-neutral" type="button" id='addOpportunityBtn' data-toggle="modal" data-target="#addOpportunityModal">
+        <span class="btn-inner--icon"><i class="fa fa-plus"></i></span>
+      </button>
+    </div>
+  </div>
+    <!-- <div class="row mb-4 pt-4 pb-5">
       <div class="col-12">
         <div class="card shadow card-stats">
           <div class='card-body'>
@@ -45,7 +79,6 @@
                     </div>
                   </div>
                   <div class='col-2 mr-2'>
-                    <!-- Trigger/Open the AddOpportunityModal -->
                     <button class="btn btn-icon btn-3  btn-outline-primary" type="button" id='addOpportunityBtn' data-toggle="modal" data-target="#addOpportunityModal">
                       <span class="btn-inner--icon"><i class="fa fa-plus"></i></span>
                     </button>
@@ -56,7 +89,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     <!-- End Card Header -->
   {% endblock header_content %}
 
@@ -65,8 +98,6 @@
     <!--  Modal addOpportunity -->
     {{ render_add_modal(add_form) }}
     <!-- End Modal addOpportunity -->
-
-    <div class="container-fluid mt--8">
 
       <!-- Card Table -->
       <div class='row'>
@@ -92,7 +123,7 @@
                       <th scope="col" data-sort="amount">Montant</th>
                       <th scope="col" data-sort="stage">étape</th>
                       <th scope="col" data-sort="status">Statut</th>
-                      <th scope="col" data-sort="last_update">Dérnière Modification</th>
+                      <th scope="col" data-sort="last_update">Dernière Modification</th>
                       <th scope="col"></th>
                     </tr>
                   </thead>
@@ -226,8 +257,6 @@
         </div>
       </div>
       <!-- End Table -->
-    </div>      
-
 
   {% endblock main_content %}
 

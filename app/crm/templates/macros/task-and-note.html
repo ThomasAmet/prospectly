@@ -24,7 +24,7 @@
           {% set f = form.note_content.process_data(latest_step.notes.first().content) %}
           {{form.note_content(class="form-control form-control-alternative note-form-group")}}
           {% else %}
-          {{form.note_content(class="form-control form-control-alternative note-form-group", placeholder='Ici, on note tout ce qui peut etre nécessaire...')}}
+          {{form.note_content(class="form-control form-control-alternative note-form-group", placeholder='Ici, on note tout ce qui peut être nécessaire...')}}
           {% endif %}
         </div>
         </div>

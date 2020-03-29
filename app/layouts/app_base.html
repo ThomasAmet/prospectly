@@ -123,13 +123,13 @@
     </div>
     {% endblock header %}
     
+    <div class="container-fluid mt--7">
+      {% block main_content %}
+      {% endblock main_content %}
 
-    {% block main_content %}
-    {% endblock main_content %}
-
-    {% block footer %}
-    {% endblock footer %}
-
+      {% block footer %}
+      {% endblock footer %}
+    </div>
   </div>
 
   {% block javascripts %}
@@ -146,6 +146,7 @@
 
 
     <!-- Optional JS -->
+    <!-- <script src="{{ url_for('static', filename='js/vendor/select2/dist/js/select2.min.js') }}"></script> -->
     <script src="{{ url_for('static', filename='js/vendor/chart.js/dist/Chart.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/vendor/chart.js/dist/Chart.extension.js') }}"></script>
     <script src="{{ url_for('static', filename='js/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>

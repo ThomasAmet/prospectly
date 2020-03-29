@@ -10,7 +10,7 @@ from config import DevelopmentConfig, TestConfig, ProductionConfig
 
 
 app = Flask(__name__, static_folder='./static', template_folder='./layouts')
-app.config.from_object(ProductionConfig) # Dont forget to switch stripe key in prospectly.js
+app.config.from_object(DevelopmentConfig) # Dont forget to switch stripe key in prospectly.js
 
 
 talisman = Talisman(app, 
@@ -44,10 +44,11 @@ from .auth.views import *
 admin = Admin(app, name='ProspectLy', index_view=AdminMyIndexView(), template_mode='bootstrap3')
 # admin.add_view(AdminHomeView(name='Home'))
 admin.add_view(AdminModelView(User, db.session))
-admin.add_view(AdminModelView(Lead, db.session))
+admin.add_view(AdminModelView(CompanyLead, db.session))
+admin.add_view(AdminModelView(ContactLead, db.session))
+admin.add_view(AdminModelView(LeadRequest, db.session))
 admin.add_view(AdminModelView(Subscription, db.session))
 admin.add_view(AdminModelView(Plan, db.session))
-admin.add_view(AdminModelView(LeadRequest, db.session))
 admin.add_view(AdminModelView(Company, db.session))
 admin.add_view(AdminModelView(Contact, db.session))
 admin.add_view(AdminModelView(ContactsEmail, db.session))

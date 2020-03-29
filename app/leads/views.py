@@ -7,13 +7,15 @@ logging.basicConfig(level=logging.INFO)
 from datetime import datetime
 from flask import render_template, redirect, url_for, flash, request, session, make_response
 from flask_login import current_user, login_required
+from app.auth.views import admin_login_required, pro_plan_required
 from werkzeug.utils import secure_filename
-from app.auth.views import admin_login_required
 from . import leads
-from .forms import LeadsQueryForm
+from .forms import CompaniesQueryForm, ContactsQueryForm
 from .. import app, db
-from ..models import User, Subscription, Lead, LeadRequest
+from ..models import User, Subscription, CompanyLead, ContactLead, LeadRequest
+
 # from ...bin import all_utils
+
 
 def from_sql(row):
 	"""Translates a SQLAlchemy model instance into a dictionary"""
@@ -27,6 +29,102 @@ def from_sql(row):
 
 
 
+# To be placed within utils
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() == 'csv'
+
+
+# To be placed within utils
+def clean_leads_input(leads_df):
+	'''
+		This function aims at cleaning the company_postal_code and company_phone columns as well as removing nan.
+		company_postal_code: 
+			pandas usually read it as integer, hence we return the first 5 digits as a string.
+			return series of type str
+
+		company_phone:
+			first remove '.' and '-' from the phone number and make sure every number starts with a 0.
+			return series of type str wiht phone number in a format 0XXXXXXXXX
+	'''
+	df = leads_df
+	df['company_postal_code'] = df.company_postal_code.apply(lambda x: str(x)[:5]) 
+	df['company_phone'] = df.company_phone.str.replace('\.', '').str.replace('-', '').\
+	apply(lambda x: '0' + str(x) if not (x is np.nan or str(x).startswith('0')) else x)
+	df = df.replace(np.nan, '')
+	return df
+
+
+
+@leads.route('/test', methods=['POST', 'GET'])
+# @leads.route('/prospectly-generator', methods=['POST', 'GET'])
+@login_required
+@pro_plan_required
+def view_leads():
+	companies_form = CompaniesQueryForm()
+	flash("args: {}".format(request.args.to_dict(flat=True)))
+
+	# leads_requested = db.session.query(LeadRequest).filter_by(user_id=1)
+	# todays requests for company leads
+	today_requests = [elt.company_lead_id for elt in current_user.requested_leads.all() if elt.query_date.date()==datetime.utcnow().date() and not elt.company_lead_id is None]
+	# todays request for contact leads
+	today_requests = [elt.contact_lead_id for elt in current_user.requested_leads.all() if elt.query_date.date()==datetime.utcnow().date() and not elt.contact_lead_id is None]
+	# Max number of query per day according to the plan
+	max_results = current_user.subscriptions.order_by(Subscription.subscription_date.desc()).first().plan.limit_daily_query
+	
+	
+	# flash("todays' requests: {}".format(today_requests))
+	# flash("max_results {}".format(max_results))
+	return render_template('generator.html', companies_form=companies_form)
+
+
+
+@leads.route('/leads_request', methods=['POST','GET'])
+def query_leads():
+	"""
+		>>> ql1 = db.session.query(CompanyLead).filter(CompanyLead.postal_code.like('75001%'))
+		>>> ql2 = db.session.query(CompanyLead).filter(CompanyLead.postal_code.like('94%'))
+		>>> ql3 = db.session.query(CompanyLead).filter(CompanyLead.activity_field1.in_(['Conseil']) | CompanyLead.activity_field2.in_(['Conseil']) | CompanyLead.activity_field3.in_(['Conseil']))
+		>>> activity_filter ['Conseil', 'SMMA']
+		>>> ql4 = db.session.query(CompanyLead).filter(CompanyLead.activity_field1.in_(activity_filter) | CompanyLead.activity_field2.in_(activity_filter) | CompanyLead.activity_field3.in_(activity_filter))
+		>>> activity_filter ['Conseil']
+		>>> ql5 = db.session.query(CompanyLead).filter((CompanyLead.activity_field1.in_(activity_filter) | CompanyLead.activity_field2.in_(activity_filter) | CompanyLead.activity_field3.in_(activity_filter)) & CompanyLead.postal_code.like('75%'))
+		>>> activity_filter ['Conseil','Plombier']
+		>>> ql6 = db.session.query(CompanyLead).filter((CompanyLead.activity_field1.in_(activity_filter) | CompanyLead.activity_field2.in_(activity_filter) | CompanyLead.activity_field3.in_(activity_filter)) & CompanyLead.postal_code.like('94%'))
+	"""
+	if request.method=='GET':
+		return redirect(url_for('crm.home'))
+
+	data = request.form.to_dict(flat=True)
+	users_requests = [elt.id for elt in current_user.requested_leads.all()]
+	max_exports = current_user.subscriptions.order_by(Subscription.subscription_date.desc()).first().plan.limit_daily_query
+	today_requests = [elt.id for elt in current_user.requested_leads.all() if elt.query_date.date()==datetime.utcnow().date()]
+	remaining_exports = min(max_exports, max_exports-len(today_requests))
+	results_len = list(np.random.randint(low=6, high=14, size=1))[0]*10 # number of pages to be displayed (random) * number of results per page
+	# Query companies
+	if data.get('leads_type') == 'company':
+		location = data.get('company_location')
+		print("location: {}".format(location))
+		location_filter = "{}%".format(location)
+		activity_filter = data.get('company_activity_field')
+		query1 = db.session.query(CompanyLead.activity_field1.like(activity_filter), CompanyLead.postal_code.like(location_filter))
+		query1.all()
+		
+
+		# CompanyLead.query.filter(CompanyLead.postal_code.like(location_filter),)
+		# users_requests = [elt.company_lead_id for elt in current_user.requested_leads.all() if not elt.company_lead_id is None]
+		# if len_results==0:
+		# else:
+			# request_results = 
+	# Query contacts	
+	else:
+		pass
+
+	print(data)
+	return redirect(url_for('leads.view_leads', lead_type=data.get('leads_type') ))
+
+
+
 @leads.route('/generator', methods=['POST', 'GET'])
 @login_required
 def query():
@@ -37,8 +135,8 @@ def query():
 	user_subscription = cu.subscriptions.order_by(Subscription.subscription_date.desc()).first()
 
 	if not user_subscription or not user_subscription.is_valid:
-		flash('Vous devez souscrire a un abonnement pour beneficier de ce service')
-		return redirect(url_for('landing.pricing'))
+		flash('Vous devez souscrire à un abonnement pour bénéficier de ce service')
+		return redirect(url_for('main.pricing'))
 
 	output_max_len = user_subscription.plan.limit_daily_query
 	output_max_len = 5
@@ -64,7 +162,7 @@ def query():
 		else:
 			request_filters = [form.activity_field.data, form.postal_code.data]# get filter for the query from the form fields
 			excluding_leads = [record.lead_id for record in cu.leads_requested.all()]# id of leads already requested to be excluded from the result
-			query_output_all = Lead.query.filter(Lead.company_activity_field==request_filters[0], Lead.company_postal_code.like(request_filters[1]+'%'), ~Lead.id.in_(excluding_leads)).all()
+			query_output_all = Lead.query.filter(Lead.company_activity_field==request_filters[0], Lead.company_postal_code.like(request_filters[1]+'%'), ~Lead.id.in_(excluding_leads)).all()# use ~ not_() to negate 
 			
 			# No new result for that query
 			if not query_output_all:
@@ -97,7 +195,7 @@ def query():
 		# 	return redirect(url_for('auth.login'))# change redirect to error page 505
 	# flash('left to query: {}'.format(output_max_len-len(session['todays_output'])))
 	flash(session['todays_output'])
-	return render_template('leads/generator.html', form=form, request_output=session['todays_output'])
+	return render_template('generator.html', form=form, request_output=session['todays_output'])
 
 
 
@@ -114,33 +212,6 @@ def download():
 	# Drop the session variable
 	session.pop('todays_output', None)
 	return output
-
-
-
-# To be placed within utils
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() == 'csv'
-
-
-# To be placed within utils
-def clean_leads_input(leads_df):
-	'''
-		This function aims at cleaning the company_postal_code and company_phone columns as well as removing nan.
-		company_postal_code: 
-			pandas usually read it as integer, hence we return the first 5 digits as a string.
-			return series of type str
-
-		company_phone:
-			first remove '.' and '-' from the phone number and make sure every number starts with a 0.
-			return series of type str wiht phone number in a format 0XXXXXXXXX
-	'''
-	df = leads_df
-	df['company_postal_code'] = df.company_postal_code.apply(lambda x: str(x)[:5]) 
-	df['company_phone'] = df.company_phone.str.replace('\.', '').str.replace('-', '').\
-	apply(lambda x: '0' + str(x) if not (x is np.nan or str(x).startswith('0')) else x)
-	df = df.replace(np.nan, '')
-	return df
 
 
 

@@ -11,8 +11,38 @@
 {% endblock stylesheets %}
 
 {% block header_content %}
+  <div class="row align-items-center py-5 mb-4">
+    <div class="col-lg-6 col-4">
+      <!-- <h6 class="h2 text-white d-inline-block mb-0">Défaut</h6> -->
+      <i class="ni ni-single-copy-04 text-white"></i></a></li>
+      <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+          <!-- <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li> -->
+          <li class="breadcrumb-item"><a href="#">Entreprise</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Liste</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-lg-6 col-8 text-right">
+      <!-- <a href="#" class="btn btn-sm btn-neutral">Actions</a> -->
+      <div class="dropdown">
+        <button class="btn btn-neutral dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <span class="btn-inner--icon"><i class="ni ni-atom"></i></span>
+          <span class="btn-inner--text">Actions</span>
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <a class="dropdown-item" href="" id='deleteAllCompanies'>Supprimer la sélection</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addCompanyModal">Importer un fichier .csv</a>    
+        </div>  
+      </div>
+      <button class="btn btn-icon btn-3 btn-neutral" type="button" id='addCompanyBtn' data-toggle="modal" data-target="#addCompanyModal">
+        <span class="btn-inner--icon"><i class="fa fa-plus"></i></span>
+      </button>
+    </div>
+  </div>
   <!-- Beginning Card Header -->
-  <div class="row mb-4 pt-4 pb-5">
+  <!-- <div class="row mb-4 pt-4 pb-5">
     <div class="col-12">
       <div class="card shadow card-stats">
         <div class='card-body'>
@@ -41,7 +71,6 @@
                   </div>
 
                 <div class='col-2 mr-2'>
-                  <!-- Trigger/Open the AddOpportunityModal -->
                   <button class="btn btn-icon btn-3  btn-outline-primary" type="button" id='addCompanyBtn' data-toggle="modal" data-target="#addCompanyModal">
                     <span class="btn-inner--icon"><i class="fa fa-plus"></i></span>
                   </button>
@@ -52,13 +81,13 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
   <!-- End Card Header -->
 {% endblock header_content %}
 
 {% block main_content %}
 
-  <div class="container-fluid mt--8">
+  
     <!-- Card Table -->
     <div class='row'>
       <div class='col'>
@@ -199,7 +228,6 @@
       </div>
     </div>
     <!-- End Table -->
-  </div>      
 
   <!--  Modal addCompany -->
   {{ render_add_modal(add_form=form) }}

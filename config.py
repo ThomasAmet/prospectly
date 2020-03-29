@@ -3,7 +3,7 @@ from dotenv import load_dotenv, find_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# Load envrion variables from .env in local
+# Load envrion variables from .env in local mode
 if os.environ.get('GAE_INSTANCE'):
 	load_dotenv(find_dotenv())
 
@@ -56,7 +56,7 @@ class BaseConfig():
     'img-src':'\'self\'  data: *'
 	}
 
-	SESSION_COOKIE_SAMESITE='Strict'
+	SESSION_COOKIE_SAMESITE='Strict' # life saver
 
 	# MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
 	# MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))

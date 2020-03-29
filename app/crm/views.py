@@ -4,9 +4,10 @@ from .forms import CompanyForm, AddContactForm, EditContactForm, AddOpportunityF
 from app import db
 from ..models import User, Subscription, Company, Contact, ContactsEmail, Opportunity, OpportunityStep, CommercialStage, Status, Task, Note
 from ..models import get_list_opportunities, get_list_companies, get_list_contacts
-from app.auth.views import admin_login_required
+from app.auth.views import admin_login_required, pro_plan_required
 from flask_login import current_user, login_required
 from datetime import datetime
+
 
 def clear_session():
 	session.pop('note_content', None)
@@ -23,12 +24,14 @@ def clear_session():
 	return True
 
 
+
 @crm.route('/error')
 @login_required
 @admin_login_required
 def test():
 	contacts, next_page, previous_page = get_list_contacts(current_user.id, limit=25, cursor=None)
 	return render_template('test.html', contacts=contacts)
+
 
 
 @crm.route('/', methods=['GET','POST'])
@@ -66,32 +69,33 @@ def add_company():
 	if not request.method=='POST':
 		return redirect(url_for('crm.home'))
 
-	# try:
-	form = CompanyForm(request.form)
-	data = request.form.to_dict(flat=True)
-	print(data)
-	data['user_id'] = current_user.id
-	note_content = data['note_content']
-	data.pop('note_content')
-	data.pop('csrf_token')
-	company = Company(**data) # This method only works if data only contains key that are attributes of Company. Otherwise use setattr(company, k, v) looped over company.items()
-	db.session.add(company)
-	db.session.flush()
+	try:
+		form = CompanyForm(request.form)
+		data = request.form.to_dict(flat=True)
+		print(data)
+		data['user_id'] = current_user.id
+		note_content = data['note_content']
+		data.pop('note_content')
+		data.pop('csrf_token')
+		company = Company(**data) # This method only works if data only contains key that are attributes of Company. Otherwise use setattr(company, k, v) looped over company.items()
+		db.session.add(company)
+		db.session.flush()
 
-	# if note_content!='':
-	note = Note(company_id=company.id, content=note_content)
-	db.session.add(note)
-		
-	db.session.commit()
-		# flash('Entreprise ajoutée avec succès.')
-	# except:
-		# db.session.rollback()
-		# flash("Une erreur s'est produite. Veuillez réessayer ou contactez le support.")
+		# if note_content!='':
+		note = Note(company_id=company.id, content=note_content)
+		db.session.add(note)
+			
+		db.session.commit()
+			# flash('Entreprise ajoutée avec succès.')
+	except:
+		db.session.rollback()
+		flash("Une erreur s'est produite. Veuillez réessayer ou contactez le support.")
 	return redirect(url_for('crm.view_companies_list'))
 
 
 
 @crm.route('/entreprises/suppression', methods=['POST','GET'])
+@login_required
 def delete_company():	
 	if request.form.get('company_id'):
 		companies_ids = [request.form.get('company_id')]
@@ -113,6 +117,7 @@ def delete_company():
 
 
 @crm.route('/entreprise/<id>/edition', methods=['GET','POST'])
+@login_required
 def edit_company(id):			
 	company = Company.query.get(id)
 	data = request.form.to_dict(flat=True)
@@ -138,6 +143,7 @@ def edit_company(id):
 
 
 @crm.route('/contacts/liste', methods=['GET'])
+@login_required
 def view_contacts_list():
 	add_contact_form = AddContactForm()
 	edit_contact_form = EditContactForm()
@@ -154,39 +160,40 @@ def view_contacts_list():
 
 
 @crm.route('/contacts/ajout', methods=['POST'])
+@login_required
 def add_contact():
 
 	if request.method == 'POST':
-		# Get input from the form
-		data = request.form.to_dict(flat=True) 	
-		print(data)
-
-		# Prepare input data to create Emails and Notes 
-		email = data['email']
-		is_main = True if data['is_email_main']=='True' else False
-		note_content = data['note_content']	
-
-		if data['company_id'] == '__None':
-			data.pop('company_id')	
-		data['user_id'] = current_user.id
-		data.pop('csrf_token')
-		data.pop('email')
-		data.pop('is_email_main')
-		data.pop('note_content')
-
-		# Add contact to db and flush to get an id
-		contact = Contact(**data)
-		db.session.add(contact)
-		db.session.flush()
-		
-		# if not note_content == '':
-		note = Note(content=note_content, contact_id=contact.id)
-		db.session.add(note)
-		# if not email == '':
-		contactsemail = ContactsEmail(contact_id=contact.id, email=email, is_main=is_main)
-		db.session.add(contactsemail)
-
 		try:
+			# Get input from the form
+			data = request.form.to_dict(flat=True) 	
+			print(data)
+
+			# Prepare input data to create Emails and Notes 
+			email = data['email']
+			is_main = True if data['is_email_main']=='True' else False
+			note_content = data['note_content']	
+
+			if data['company_id'] == '__None':
+				data.pop('company_id')	
+			data['user_id'] = current_user.id
+			data.pop('csrf_token')
+			data.pop('email')
+			data.pop('is_email_main')
+			data.pop('note_content')
+
+			# Add contact to db and flush to get an id
+			contact = Contact(**data)
+			db.session.add(contact)
+			db.session.flush()
+			
+			# if not note_content == '':
+			note = Note(content=note_content, contact_id=contact.id)
+			db.session.add(note)
+			# if not email == '':
+			contactsemail = ContactsEmail(contact_id=contact.id, email=email, is_main=is_main)
+			db.session.add(contactsemail)
+
 			db.session.commit()
 			# flash('Contact ajouté avec succès.')
 		except:
@@ -198,6 +205,7 @@ def add_contact():
 
 
 @crm.route('/contacts/suppression', methods=['POST'])
+@login_required
 def delete_contact():
 
 	if request.form.get('contact_id'):
@@ -221,28 +229,29 @@ def delete_contact():
 
 
 @crm.route('/contact/<id>/edition', methods=['POST'])
+@login_required
 def edit_contact(id):
 	contact = Contact.query.get(id)
 	# Return to list of contact for GET request or when trying to edit someone else contact
 	if request.method=='GET' or not contact.user_id==current_user.id:
 		return redirect(url_for('crm.view_contacts_list'))
-	
-	data = request.form.to_dict(flat=True)
-
-	# Remove company id if none
-	if data['company_id'] == '__None':
-			data.pop('company_id')
-	print(data)
-	for k,v in data.items():
-		setattr(contact, k, v)
-
-	if data.get('note_content'):
-		contact.notes.first().content = data.get('note_content')
-	if data.get('email'):
-		contact.emails.first().email = data.get('email')
-
 	try:
+		data = request.form.to_dict(flat=True)
+
+		# Remove company id if none
+		if data['company_id'] == '__None':
+				data.pop('company_id')
+		print(data)
+		for k,v in data.items():
+			setattr(contact, k, v)
+
+		if data.get('note_content'):
+			contact.notes.first().content = data.get('note_content')
+		if data.get('email'):
+			contact.emails.first().email = data.get('email')
+
 		db.session.commit()
+
 	except:
 		db.session.rollback()
 
@@ -355,79 +364,82 @@ def delete_opportunity():
 
 
 @crm.route('/opportunites/<id>/edition', methods=['POST'])
+@login_required
 def edit_opportunity(id):
+
 	data = request.form.to_dict(flat=True)
-
-	print(data)	
-	
-	# Query some object from the form's input
 	opportunity = Opportunity.query.get(id)
-	company = Company.query.get(data.get('company_id'))
-	initial_step = OpportunityStep.query.get(int(data.get('initial_step_id')))
-	new_stage_id = CommercialStage.query.filter_by(name=data.get('stage')).first().id
-	new_status_id = Status.query.filter_by(name=data.get('status')).first().id
+	print(data)	
 
-	# Parse some input
-	due_date = request.form.get('task_due_date')
-	due_date = datetime(year=int(due_date[-4:]), month=int(due_date[:2].replace('0','')), day=int(due_date[3:-5].replace('0',''))) if due_date else None # Parse the task's due-date from mm/dd/yyyy to dd/mm/yyyy if exists
-	task_done = True if request.form.get('task_done') else False
-
-	# Condition to verify that the user that request the page is the owner of the requested opportunity
-	if not opportunity.user_id == current_user.id:
+	if request.methods=='GET' or not opportunity.user_id == current_user.id:
 		return redirect(url_for('crm.view_opportunities_list'))
 
-	# No change in step status nor commercial stage so we only edit Note or Task
-	if data.get('initial_stage') == data.get('stage') and data.get('initial_status') == data.get('status'):
-		latest_note = Note.query.filter_by(opportunity_step_id=int(data.get('initial_step_id'))).first()
-		latest_task = Task.query.filter_by(opportunity_step_id=int(data.get('initial_step_id'))).first()
-		# If true, update the task associated to the step
-		if data.get('status') == 'A faire':
-
-			latest_task.title = data.get('task_title')
-			latest_task.priority = data.get('task_priority')
-			latest_task.content = data.get('task_content')
-			latest_task.due_date = due_date
-			latest_task.done = task_done
-		# Else update the note associated to the step 
-		else:
-			latest_note.content = data.get('note_content')
-	# Else check if an opportunity'step with the required stage and status already exists		
-	else:
-		new_latest_step = OpportunityStep.query.filter_by(opportunity_id=data.get('opportunity_id'),
-										  stage_id=new_stage_id,
-										  status_id=new_status_id).first()
-		# If not, create a new step
-		if not new_latest_step:
-			new_latest_step = OpportunityStep(opportunity_id=data.get('opportunity_id'),
-											  stage_id=new_stage_id,
-											  status_id=new_status_id)
-			db.session.add(new_latest_step)
-			db.session.flush() # get new_opp id
-		
-		# Then create a task or note
-		if data.get('status') == 'A faire':
-			new_task = Task(opportunity_step_id=new_latest_step.id,
-							title=data.get('task_title'),
-							content=data.get('task_content'),
-							priority=data.get('task_priority'),
-							due_date=due_date,
-							done=task_done)
-		else:
-			new_note = Note(opportunity_step_id=new_latest_step.id,
-							content=data.get('note_content'))
-
-	# Edit the company associated to that opportunity if the customer clicked on the pencil in the form
-	company.email = data.get('company-email') if data.get('company-email') else company.email
-	company.phone = data.get('company-phone') if data.get('company-phone')else company.phone
-	company.activity_field = data.get('company-activity') if data.get('company-activity') else company.activity_field
-
 	try:
+		# Query some object from the form's input
+		company = Company.query.get(data.get('company_id'))
+		initial_step = OpportunityStep.query.get(int(data.get('initial_step_id')))
+		new_stage_id = CommercialStage.query.filter_by(name=data.get('stage')).first().id
+		new_status_id = Status.query.filter_by(name=data.get('status')).first().id
+
+		# Parse some input
+		due_date = request.form.get('task_due_date')
+		due_date = datetime(year=int(due_date[-4:]), month=int(due_date[:2].replace('0','')), day=int(due_date[3:-5].replace('0',''))) if due_date else None # Parse the task's due-date from mm/dd/yyyy to dd/mm/yyyy if exists
+		task_done = True if request.form.get('task_done') else False
+
+		# Condition to verify that the user that request the page is the owner of the requested opportunity
+		if not opportunity.user_id == current_user.id:
+			return redirect(url_for('crm.view_opportunities_list'))
+
+		# No change in step status nor commercial stage so we only edit Note or Task
+		if data.get('initial_stage') == data.get('stage') and data.get('initial_status') == data.get('status'):
+			latest_note = Note.query.filter_by(opportunity_step_id=int(data.get('initial_step_id'))).first()
+			latest_task = Task.query.filter_by(opportunity_step_id=int(data.get('initial_step_id'))).first()
+			# If true, update the task associated to the step
+			if data.get('status') == 'A faire':
+
+				latest_task.title = data.get('task_title')
+				latest_task.priority = data.get('task_priority')
+				latest_task.content = data.get('task_content')
+				latest_task.due_date = due_date
+				latest_task.done = task_done
+			# Else update the note associated to the step 
+			else:
+				latest_note.content = data.get('note_content')
+		# Else check if an opportunity'step with the required stage and status already exists		
+		else:
+			new_latest_step = OpportunityStep.query.filter_by(opportunity_id=data.get('opportunity_id'),
+											  stage_id=new_stage_id,
+											  status_id=new_status_id).first()
+			# If not, create a new step
+			if not new_latest_step:
+				new_latest_step = OpportunityStep(opportunity_id=data.get('opportunity_id'),
+												  stage_id=new_stage_id,
+												  status_id=new_status_id)
+				db.session.add(new_latest_step)
+				db.session.flush() # get new_opp id
+			
+			# Then create a task or note
+			if data.get('status') == 'A faire':
+				new_task = Task(opportunity_step_id=new_latest_step.id,
+								title=data.get('task_title'),
+								content=data.get('task_content'),
+								priority=data.get('task_priority'),
+								due_date=due_date,
+								done=task_done)
+			else:
+				new_note = Note(opportunity_step_id=new_latest_step.id,
+								content=data.get('note_content'))
+
+		# Edit the company associated to that opportunity if the customer clicked on the pencil in the form
+		company.email = data.get('company-email') if data.get('company-email') else company.email
+		company.phone = data.get('company-phone') if data.get('company-phone')else company.phone
+		company.activity_field = data.get('company-activity') if data.get('company-activity') else company.activity_field
+
 		db.session.commit()
 	except:
 		db.session.rollback()
 
 	return redirect(url_for('crm.view_opportunities_list'))
-
 
 
 

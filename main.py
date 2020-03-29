@@ -4,8 +4,8 @@ from app.models import *
 
 @app.shell_context_processor
 def configure_shell_context():
-	return {'db': db, 'User': User, 'Plan':Plan, 'Lead': Lead, 'Lead_Request': LeadRequest, 'Subscription': Subscription, 'Note':Note, 'Company':Company, 'Commercial_Stage_Step':CommercialStageStep,
-	 'Contact':Contact, 'Contacts_Email':ContactsEmail, 'Status':Status, 'Task':Task, 'Commercial_Step':CommercialStage, 'Opportunity':Opportunity, 'Opportunity_Steps':OpportunityStep}
+	return {'db': db, 'User': User, 'Plan':Plan, 'CompanyLead': CompanyLead, 'ContactLead': ContactLead, 'LeadRequest':LeadRequest, 'Subscription': Subscription, 'Note':Note, 'Company':Company,
+	 'Contact':Contact, 'ContactsEmail':ContactsEmail, 'Status':Status, 'Task':Task, 'CommercialStep':CommercialStage, 'Opportunity':Opportunity, 'OpportunityStep':OpportunityStep}
 
 
 if __name__ == '__main__':

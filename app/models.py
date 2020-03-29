@@ -19,36 +19,27 @@ class Subscription(db.Model):
 	def is_valid(self):
 		if Plan.query.get(self.plan_id).plan_name == 'Beta':
 			return True
-		if self.yearly:
-			limit_subscription =  self.subscription_date.replace(year=self.subscription_date.year+1)
 		else:
-			limit_subscription = self.subscription_date.replace(month=self.subscription_date.month+1)
-		return limit_subscription >= datetime.utcnow()
+			return self.next_payment >= datetime.utcnow()
 
 	def set_next_payment(self):
-		if Plan.query.get(self.plan_id).plan_name == 'Beta':
-			self.next_payment = datetime.utcnow() + relativedelta(years=4) # relativedelta accepts months and years
+		plan = Plan.query.get(self.plan_id)
 
-		if self.next_payment is None:
-			try:
-				self.next_payment = datetime.utcnow()+timedelta(days=14) # timedelta only accepts days
-			except ValueError:
-				self.next_payment = datetime.utcnow()+timedelta(days=15)
+		if plan.name == 'Beta':
+			self.next_payment = datetime.utcnow() + relativedelta(years=+4) # relativedelta accepts months and years
 
-	def update_next_payment(self):
-		if Plan.query.get(self.plan_id).plan_name == 'Beta':
-			self.next_payment = datetime.utcnow() + relativedelta(years=4)
-			
-		if self.yearly:
-			try:
-				self.next_payment = self.next_payment.replace(year=self.next_payment.year+1)
-			except ValueError:
-				self.next_payment = self.next_payment.replace(year=self.next_payment.year+1, month=self.next_payment.year+1, day=1)
+		# Case when we initiate the subscription 
+		if self.next_payment is None and plan.name == 'Basic':
+			# try:
+			self.next_payment = datetime.utcnow() + relativedelta(days=+plan.free_trial)# timedelta only accepts days
+			# except ValueError:
+			# 	self.next_payment = datetime.utcnow() + timedelta(days=+15)
+		# Cases for subscriptions renewal 
 		else:
-			try:
-				self.next_payment = self.next_payment.replace(month=self.next_payment.month+1)
-			except ValueError:
-				self.next_payment = self.next_payment.replace(month=self.next_payment.month+2, day=1)
+			if self.yearly:
+				self.next_payment = self.next_payment + relativedelta(years=+1) 
+			else:
+				self.next_payment = self.next_payment + relativedelta(months=+1) 
 
 	def __init__(self, **kwargs):
 		super(Subscription, self).__init__(**kwargs)
@@ -63,22 +54,26 @@ class Subscription(db.Model):
 class Plan(db.Model):
 	__tablename__ = 'plans'
 	id = db.Column(db.Integer, primary_key=True)
-	plan_name = db.Column(db.String(30), index=True)
+	name = db.Column(db.String(30), index=True)
 	monthly_price = db.Column(db.Integer)
 	yearly_price = db.Column(db.Integer)
+	free_trial = db.Column(db.Integer)#number of days for the free trial
 	limit_daily_query = db.Column(db.Integer)
 	lead_generator = db.Column(db.Boolean, default=False)
+
 	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.plan_id], backref=db.backref('plan', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
 
 	def __repr__(self):
-		return "<{}>".format(self.plan_name)
+		return "<{}>".format(self.name)
 
 
 
 class LeadRequest(db.Model):
 	__tablename__ = 'lead_requests'
-	lead_id = db.Column(db.Integer, db.ForeignKey('leads.id'), primary_key=True)# one-to-many (one side)
-	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)# one side
+	id = db.Column(db.Integer, primary_key=True)
+	contact_lead_id = db.Column(db.Integer, db.ForeignKey('contact_leads.id'), default=None)# one side of a one-to-many with contact leads
+	company_lead_id = db.Column(db.Integer, db.ForeignKey('company_leads.id'), default=None)# one side of a one-to-many with comapny leads
+	user_id = db.Column(db.Integer, db.ForeignKey('users.id'))# one side
 	query_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def exists(self):
@@ -88,7 +83,7 @@ class LeadRequest(db.Model):
 		return True
 
 	def __repr__(self):
-		return "On {}, user {} queried lead {}".format(self.query_date, self.user_id, self.lead_id)
+		return "On {}, user {} queried lead {} ".format(self.query_date, self.user_id, self.company_lead_id if self.company_lead_id else self.contact_lead_id)
 
 
 
@@ -106,10 +101,10 @@ class User(db.Model, UserMixin):
 	# avatar = db.Column(db.String(120))
 	admin = db.Column(db.Boolean, default=False)
 	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
-	leads_requested = db.relationship('LeadRequest', foreign_keys=[LeadRequest.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
+	requested_leads = db.relationship('LeadRequest', foreign_keys=[LeadRequest.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
 	companies = db.relationship('Company', backref='user', lazy='dynamic')# one-to-many (many side)
 	contacts = db.relationship('Contact', backref='user', lazy='dynamic')
-	opportunities = db.relationship('Opportunity',backref=db.backref('user', lazy='joined'), lazy='dynamic')# one-to-many (many-side)
+	opportunities = db.relationship('Opportunity', backref=db.backref('user', lazy='joined'), lazy='dynamic')# one-to-many (many-side)
 	# Maybe delete the relationship below
 	commercial_stages = db.relationship('CommercialStage', backref=db.backref('user', lazy='joined'), lazy='dynamic')# one-to-many (many-side)
 	tasks =  db.relationship('Task', backref='user', lazy='dynamic')# many-to-one with Task (many-side)
@@ -143,31 +138,56 @@ class User(db.Model, UserMixin):
 		return "<{}>".format(self.username)
 
 
-
-class Lead(db.Model):
-	__tablename__ = 'leads'
+class ContactLead(db.Model):
+	__tablename__ = 'contact_leads'
 	id = db.Column(db.Integer, primary_key=True)
-	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
-	company_name = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	company_address = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	company_postal_code = db.Column(db.String(30), index=False, unique=False, nullable=True)
-	company_city = db.Column(db.String(60), index=False, unique=False, nullable=True)
-	company_email = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	company_email_bcc = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	company_phone = db.Column(db.String(60), index=False, unique=False, nullable=True)
-	company_activity_field = db.Column(db.String(60), index=True, unique=False, nullable=False)
-	owner_firstname	= db.Column(db.String(60), index=True, unique=False, nullable=True)
-	owner_lastname = db.Column(db.String(60), index=True, unique=False, nullable=True)
-	requests = db.relationship('LeadRequest', foreign_keys=[LeadRequest.lead_id], backref=db.backref('lead', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
-
-	def exists(self):
-		lead = Lead.query.filter(Lead.company_name==self.company_name, Lead.company_postal_code==self.company_postal_code).first()
-		if not lead:
-			return False
-		return True
+	firstname = db.Column(db.String(120), index=False, unique=False, nullable=False)
+	lastname = db.Column(db.String(120), index=False, unique=False, nullable=False)
+	company_name = db.Column(db.String(120), index=False, unique=False, nullable=False)
+	position = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	country = db.Column(db.String(60), index=True, nullable=False)
+	email = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	phone = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	linkedin = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	activity_field1 = db.Column(db.String(120), index=True, unique=False, nullable=False)
+	activity_field2 = db.Column(db.String(120), index=True, unique=False, default=None)
+	activity_field3 = db.Column(db.String(120), index=True, unique=False, default=None)
+	requests = db.relationship('LeadRequest', foreign_keys=[LeadRequest.contact_lead_id], backref='contact_lead', lazy='dynamic')# many side
 
 	def __repr__(self):
-		return "{} situe a {}".format(self.company_name, self.company_city)
+		return '{} {}'.format(self.firstname, self.lastname)
+
+
+class CompanyLead(db.Model):
+	__tablename__ = 'company_leads'
+	id = db.Column(db.Integer, primary_key=True)
+	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
+	name = db.Column(db.String(120), nullable=False)
+	address = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	postal_code = db.Column(db.String(30), index=False, unique=False, nullable=True)
+	city = db.Column(db.String(60), index=True, unique=False, nullable=True)
+	country = db.Column(db.String(60), index=True, nullable=False)
+	email = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	phone = db.Column(db.String(60), index=False, unique=False, nullable=True)
+	website = db.Column(db.String(60), index=False, unique=False, nullable=True)
+	activity_field1 = db.Column(db.String(60), index=True, unique=False, nullable=False)
+	activity_field2 = db.Column(db.String(60), index=True, unique=False, default=None)
+	activity_field3 = db.Column(db.String(60), index=True, unique=False, default=None)
+	contact_firstname = db.Column(db.String(60), index=False, unique=False, nullable=True)
+	contact_lastname = db.Column(db.String(60), index=False, unique=False, nullable=True)
+	contact_position = db.Column(db.String(60), index=False, unique=False, nullable=True)
+	requests = db.relationship('LeadRequest', foreign_keys=[LeadRequest.company_lead_id], backref='company_lead', lazy='dynamic')# many side
+
+	# def exists(self):
+	# 	lead = Lead.query.filter(Lead.company_name==self.company_name, Lead.company_postal_code==self.company_postal_code).first()
+	# 	if not lead:
+	# 		return False
+	# 	return True
+
+	def __repr__(self):
+		return "{} situe a {}".format(self.name, self.city if self.city else '<information manquante>')
+
+
 
 
 
@@ -286,7 +306,7 @@ class CommercialStage(db.Model):
 	__tablename__ = 'commercial_stages'
 	id = db.Column(db.Integer, primary_key=True)
 	stage_steps = db.relationship('OpportunityStep', foreign_keys=[OpportunityStep.stage_id], backref=db.backref('commercial_stage', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with Opportunity (many side of a many-to-one with CommercialStageStep)
-	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True) # one-side (necessary when user wants to creata a custom Stage)
+	user_id = db.Column(db.Integer, db.ForeignKey('users.id')) # one-side (necessary when user wants to creata a custom Stage)
 	name = db.Column(db.String(60))
 	closing_perc = db.Column(db.Numeric(2,2))
 	private = db.Column(db.Boolean(), default=True)
@@ -382,18 +402,19 @@ def distinct_status_values():
 
 
 
-def distinct_activity_values():
-	''' Exctract distinct field_actvity from Lead table.
-	 	Return a dict with each value paired with a label that will be displayed on the form field '''
-	try:
-		distinct_activities = db.session.query(Lead.company_activity_field).distinct().all()
-	except:
-		distinct_activities = [('fitness',)]
-	list_distinct_activities = [elt[0] for elt in distinct_activities]
-	form_field_labels = [str(elt[0]).capitalize() for elt in distinct_activities]
+def companies_activity_values():
+	''' Exctract distinct field_actvity from CompanyLead table.
+		Query distinct field for each of the 3 field's column and join together.
+	 	Then reformat data to return a list of tupple.
+	 	Each value paired with a label that will be displayed on the form field '''
+	q1 = db.session.query(CompanyLead.activity_field1.distinct().label("field"))
+	q2 = db.session.query(CompanyLead.activity_field2.distinct().label("field"))
+	q3 = db.session.query(ContactLead.activity_field3.distinct().label("field"))
+	list_distinct_activities = [elt.field for elt in q1.union(q2).union(q3).all() if elt.field]
+	form_field_labels = [elt.field.capitalize() for elt in q1.union(q2).union(q3).all() if elt.field]
 	dict_labels_activities = list(zip(list_distinct_activities, form_field_labels))
-	dict_labels_activities = [("", "-")] + dict_labels_activities
-	return dict_labels_activities
+	companies_activities = [("", "-")] + dict_labels_activities
+	return companies_activities
 
 
 def from_sql(row):

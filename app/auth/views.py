@@ -90,7 +90,7 @@ def signup():
 					# Send confirmation email
 					data = {
 						'user_id': user.id,
-						'exp': time() + 7200
+						'exp': time() + 86400
 					}
 					# print(data)
 					token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
@@ -104,7 +104,7 @@ def signup():
 				else:
 					return Response(url_for('main.login'), 404)
 			else:
-				stripe_plan_id = get_stripe_plan_id(request.form.get('plan_name'))
+				stripe_plan_id = get_stripe_plan_id(request.form.get('plan_name')) #
 				user = User.query.filter_by(email=request.form['email']).first()
 				# Case to handle custome who enter email but didn't pay
 				if user:
@@ -143,8 +143,8 @@ def signup():
 						'items': [{
 							'plan': stripe_plan_id,
 						}],
-						'trial_period_days':14,
-					}, # I think u r right.
+						'trial_period_days':14, #use a variable that will depend on plan_id and will be return by get_stripe_plan_id()
+					}, 
 					success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
 					cancel_url='%sauth/paiement-echec' %request.host_url,
 					locale='fr'
@@ -215,7 +215,8 @@ def session_completed_webhook():
 		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
 		# Create Subscription
 		plan_id, yearly = get_plan_details(data_object['display_items'][0]['plan']['id'])
-		sub = Subscription(user_id=user.id, plan_id=plan_id, yearly=yearly)
+		stripe_sub_id = stripe_customer.subscriptions.data[0].id
+		sub = Subscription(user_id=user.id, plan_id=plan_id, yearly=yearly, stripe_id=stripe_sub_id)
 		user.last_token = stripe_customer.id
 		db.session.add(sub)
 		db.session.commit()
@@ -375,8 +376,28 @@ def logout():
 @auth.route('/profil')
 @login_required
 def profile():
-	return render_template('profile.html')
+	latest_sub_query = db.session.query(Subscription).filter(Subscription.user_id==current_user.id).order_by(Subscription.subscription_date.desc())
+	latest_sub = latest_sub_query.first()
 
+	return render_template('profile.html', latest_sub=latest_sub)
+
+
+@auth.route('/account-upgrade')
+@login_required
+def upgrade_account():
+	latest_sub_query = db.session.query(Subscription).filter(Subscription.user_id==current_user.id).order_by(Subscription.subscription_date.desc())
+	stripe_sub_id = latest_sub_query.first().stripe_id
+	subscription = stripe.Subscription.retrieve(stripe_sub_id)
+
+	stripe.Subscription.modify(
+	  subscription.id,
+	  cancel_at_period_end=False,
+	  items=[{
+	    'id': subscription['items']['data'][0].id,
+	    'plan': os.get('PLAN_MONTHLY_PRO'),
+	  }]
+	)
+	return redirect(url_for('auth.profile'))
 
 @auth.route('email-support', methods=['POST', 'GET'])
 @login_required
@@ -457,8 +478,16 @@ def get_stripe_plan_id(plan_name):
 	plans = {
 		'monthly_basic':app.config.get('PLAN_MONTHLY_BASIC'),
 		'yearly_basic':app.config.get('PLAN_YEARLY_BASIC'),
+		'monthly_pro':app.config.get('PLAN_MONTHLY_PRO'),
+		'yearly_pro':app.config.get('PLAN_YEARLY_PRO')
 	}
-	return plans[plan_name]
+	free_trial = {
+		'monthly_basic':14,
+		'yearly_basic':14,
+		'monthly_pro':0,
+		'yearly_pro':0
+	}
+	return (plans[plan_name], free_trial[plan_name])
 
 def get_plan_details(stripe_plan_id):
 	plans = {

@@ -99,8 +99,10 @@ def add_company():
 def delete_company():	
 	if request.form.get('company_id'):
 		companies_ids = [request.form.get('company_id')]
+		jquery = False
 	else:
 		companies_ids = request.get_json()['companies_ids']
+		jquery = True
 
 	for company_id in companies_ids:
 		company = Company.query.get(company_id)
@@ -111,7 +113,7 @@ def delete_company():
 	except:
 		flash("Une erreur s'est produite. Veuillez réessayer ou contactez le support.")
 		db.session.rollback()
-
+		
 	return redirect(url_for('crm.view_companies_list'))
 
 
@@ -371,7 +373,7 @@ def edit_opportunity(id):
 	opportunity = Opportunity.query.get(id)
 	print(data)	
 
-	if request.methods=='GET' or not opportunity.user_id == current_user.id:
+	if request.method=='GET' or not opportunity.user_id == current_user.id:
 		return redirect(url_for('crm.view_opportunities_list'))
 
 	try:

@@ -1,34 +1,201 @@
-// Script to delete multiple row in opportunities view page
 $(document).ready(function(){
 
-  // Jquery to edit Comapny attributes directly from the OpportunityEditForm
+  // #####################
+  // Script to toogle state of input fields in both form when clicking on CompanySettings toggle button
+  $('#checkboxCompanySettings').click(function(){
+    if($(this).prop("checked")){
+      // Enable all input + select field + button in the CompanyForm.
+      $.each($('#companyLeadsForm').find("input"), function(){
+        $(this).prop('disabled', false);
+      });
+      $("#companyLeadsForm").find('#company_activity_field').prop('disabled', false);
+      $.each($('#companyLeadsForm').find("button"), function(){
+        $(this).prop('disabled', false);
+      });   
+      // Disable all inputs, select field  and buttons in ContactFrom
+      $.each($('#contactLeadsForm').find("input"), function(){
+        $(this).prop('disabled', true);
+      });
+      $("#contactLeadsForm").find('#company_activity_field').prop('disabled', true);
+      $.each($('#contactLeadsForm').find("button"), function(){
+        $(this).prop('disabled', true);
+      });   
+      // Uncheck the toggle button in ContactForm but keep both Company and Contact switch btn enabled
+      $('#checkboxContactSettings').prop('disabled', false);
+      $('#checkboxCompanySettings').prop('disabled', false);
+      $('#checkboxContactSettings').prop('checked', false);
+    }
+    else{
+      // Disable all input + select field + button in the CompanyForm.
+      $.each($('#companyLeadsForm').find("input"), function(){
+        $(this).prop('disabled', true);
+      });
+      $("#companyLeadsForm").find('#company_activity_field').prop('disabled', true);
+      $.each($('#companyLeadsForm').find("button"), function(){
+        $(this).prop('disabled', true);
+      });   
+      // Enable all inputs, select field  and buttons in ContactFrom
+      $.each($('#contactLeadsForm').find("input"), function(){
+        $(this).prop('disabled', false);
+      });
+      $("#contactLeadsForm").find('#company_activity_field').prop('disabled', false);
+      $.each($('#contactLeadsForm').find("button"), function(){
+        $(this).prop('disabled', false);
+      });   
+      // Check the toggle button in ContactForm
+      $('#checkboxContactSettings').prop('disabled', false);
+      $('#checkboxCompanySettings').prop('disabled', false);
+      $('#checkboxContactSettings').prop('checked', true);
+    }
+  })
+
+
+
+
+  // #####################
+  // Script to toogle state of input fields in both form when clicking on ContactSettings toggle button
+  $('#checkboxContactSettings').click(function(){
+    if($(this).prop("checked")){
+      // Enable all input + select field + button in the CompanyForm.
+      $.each($('#contactLeadsForm').find("input"), function(){
+        $(this).prop('disabled', false);
+      });
+      $("#contactLeadsForm").find('#company_activity_field').prop('disabled', false);
+      $.each($('#contactLeadsForm').find("button"), function(){
+        $(this).prop('disabled', false);
+      });   
+      // Disable all inputs, select field  and buttons in ContactFrom
+      $.each($('#companyLeadsForm').find("input"), function(){
+        $(this).prop('disabled', true);
+      });
+      $("#companyLeadsForm").find('#company_activity_field').prop('disabled', true);
+      $.each($('#companyLeadsForm').find("button"), function(){
+        $(this).prop('disabled', true);
+      });   
+      // Uncheck the toggle button in ContactForm but keep both Company and Contact switch btn enabled
+      $('#checkboxContactSettings').prop('disabled', false);
+      $('#checkboxCompanySettings').prop('disabled', false);
+      $('#checkboxCompanySettings').prop('checked', false);
+    }
+    else{
+      // Disable all input + select field + button in the ContactSettings Form.
+      $.each($('#contactLeadsForm').find("input"), function(){
+        $(this).prop('disabled', true);
+      });
+      $("#contactLeadsForm").find('#company_activity_field').prop('disabled', true);
+      $.each($('#contactLeadsForm').find("button"), function(){
+        $(this).prop('disabled', true);
+      });   
+      // Enable all inputs, select field  and buttons in ContactFrom
+      $.each($('#companyLeadsForm').find("input"), function(){
+        $(this).prop('disabled', false);
+      });
+      $("#companyLeadsForm").find('#company_activity_field').prop('disabled', false);
+      $.each($('#companyLeadsForm').find("button"), function(){
+        $(this).prop('disabled', false);
+      });   
+      // Check the toggle button in CompanyForm
+      $('#checkboxContactSettings').prop('disabled', false);
+      $('#checkboxCompanySettings').prop('disabled', false);
+      $('#checkboxCompanySettings').prop('checked', true);
+    }
+  })
+
+
+  // #####################
+  // Jquery to edit Company attributes directly from the OpportunityEditForm
   $('#toggle-company-fields').click(function(){
     $.each($("[class*='company-field']"), function(){
       $(this).prop('disabled', function (_, val) { return ! val; });
     });
   });
 
+
+  // #####################
   // Jquery to activate sorting in tables
   $("#opportunitiesTable").tablesorter();
   $('#companiesTable').tablesorter();
   $('#contactsTable').tablesorter();
+  $('#companyLeadsTable').tablesorter();
+  $('#contactLeadsTable').tablesorter();
   $("div.tablesorter-header-inner").css('display','inline');
 
   
-
+  // #####################
+  // Select all the checkboxes when clicking on the checkbox in table head
   $("#selectAll").click(function(){
-        $("input[name='checkbox[]']").prop('checked', $(this).prop('checked'));// $(this).prop('checked') equals True or False depending on state of master checkbox
+    $("input[name='checkbox[]']").prop('checked', $(this).prop('checked'));// $(this).prop('checked') equals True or False depending on state of master checkbox
   });
 
-  $('#deleteAllOpportunities').click(function(){
 
+  // #####################
+  // Script to load CompanyLeads when they are selected
+  $("#uploadContactLeads").click(function(){
+    var rowIds = [];
+    let activity_field;
+    $.each($('#contactLeadsTable').find("input[name='checkbox[]']:checked"), function(){
+      rowIds.push($(this).val());
+    });
+    activity_field = $("#contactLeadsForm").find('#company_activity_field').val()
+    data = JSON.stringify({'leads_ids':rowIds, 'activity_field':activity_field})
+    // alert(data);
+    $.ajax({
+      type: 'POST',
+      url: '/app/leads/import-contacts',
+      data: data,
+      dataType: 'json',
+      contentType: 'application/json',
+      async: false,
+    })
+    // The function always fails because "/app/oppportunites/suppression" never return success due to handling both individual and collective deletion
+    .done(function(data){
+      // location.href = '/app/opportunites/liste';
+      location.href = '/app/leads/generator';
+    })
+    .fail(function(jqXHR, textStatus, errorThrown){
+      location.href = '/leads/erreur/upload';
+    });
+  });
+
+
+  // #####################
+  // Script to load ContactLeads when they are selected
+  $("#uploadCompanyLeads").click(function(){
+    var rowIds = [];
+    let activity_field;
+    $.each($('#companyLeadsTable').find("input[name='checkbox[]']:checked"), function(){
+      rowIds.push($(this).val());
+    });
+    activity_field = $("#companyLeadsForm").find('#company_activity_field').val()
+    data = JSON.stringify({'leads_ids':rowIds, 'activity_field':activity_field})
+    // alert(data);
+    $.ajax({
+      type: 'POST',
+      url: '/app/leads/import-entreprises',
+      data: data,
+      dataType: 'json',
+      contentType: 'application/json',
+      async: false,
+    })
+    // The function always fails because "/app/oppportunites/suppression" never return success due to handling both individual and collective deletion
+    .done(function(data){
+      // location.href = '/app/opportunites/liste';
+      location.href = '/app/leads/generator';
+    })
+    .fail(function(jqXHR, textStatus, errorThrown){
+      location.href = '/leads/erreur/upload';
+    });
+  });
+
+
+
+  // Script to delete multiple rows in opportunities view page  
+  $('#deleteAllOpportunities').click(function(){
     var rowIds = [];
     $.each($('#opportunitiesTable').find("input[name='checkbox[]']:checked"), function(){
-                rowIds.push($(this).val());
-            });
-
+      rowIds.push($(this).val());
+    });
     data = JSON.stringify({'opp_ids':rowIds})
-    
     // alert(data)
     $.ajax({
       type: 'POST',
@@ -39,6 +206,7 @@ $(document).ready(function(){
       contentType: 'application/json',
       async: false,
     })
+    // The function always fails because "/app/oppportunites/suppression" never return success due to handling both individual and collective deletion
     .done(function(data){
       // location.href = '/app/opportunites/liste';
       location.href = '/app/dashboard';
@@ -48,13 +216,13 @@ $(document).ready(function(){
     });
   });
   
-  //  delete All Companies
+  // ###############
+  // Script to delete all rows in the company view page
   $('#deleteAllCompanies').click(function(){
     var rowIds = [];
     $.each($('#companiesTable').find("input[name='checkbox[]']:checked"), function(){
               rowIds.push($(this).val());
             });
-    
     data = JSON.stringify({'companies_ids':rowIds})
     $.ajax({
       type: 'POST',
@@ -74,7 +242,8 @@ $(document).ready(function(){
     });
   });
 
-  // delete All Contacts
+  // ###########
+  // Script to delete all rows in the contacts view page
   $('#deleteAllContacts').click(function(){
     var rowIds = [];
     $.each($('#contactsTable').find("input[name='checkbox[]']:checked"), function(){
@@ -105,7 +274,8 @@ $(document).ready(function(){
 
 
 
-// Script that works with register.html to handle stripe (v2) Why this script not called?
+
+// Script that works with register.html to handle stripe (v2)
 $(document).ready(function(){
     var stripe = null;
 
@@ -182,6 +352,8 @@ $(document).ready(function(){
 
     });
 });
+
+
 
 $(document).ready(function(){
   // 

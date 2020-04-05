@@ -85,7 +85,7 @@
               {% if 'Generator' in title %}
               <a class="nav-link active" href="#">
               {% else %}
-              <a class="nav-link" href="#">
+              <a class="nav-link" href="{{url_for('leads.view_leads')}}">
               {% endif %}
                 <i class="ni ni-spaceship text-blue"></i>
                 <span class="nav-link-text">Générateur de Prospects</span>  

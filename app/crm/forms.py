@@ -27,6 +27,7 @@ class CompanyForm(FlaskForm):
 	linkedin = StringField('Page LinkedIn')
 
 
+# Needs to duplicate ContactForm for both edit and add because of the presence of the QuerySelectField
 class AddContactForm(FlaskForm):
 	first_name = StringField('Prénom', validators=[DataRequired('Champ obligatoire')])
 	last_name = StringField('Nom', validators=[DataRequired('Champ obligatoire')])

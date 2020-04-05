@@ -12,6 +12,7 @@ class Subscription(db.Model):
 	__tablename__ = 'subscriptions'
 	plan_id = db.Column(db.Integer, db.ForeignKey('plans.id'), primary_key=True)# one side
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)# one side
+	stripe_id = db.Column(db.String(60), nullable=True)
 	yearly = db.Column(db.Boolean, default=False)
 	subscription_date = db.Column(db.DateTime, default=datetime.utcnow)
 	next_payment = db.Column(db.DateTime)
@@ -74,6 +75,8 @@ class LeadRequest(db.Model):
 	contact_lead_id = db.Column(db.Integer, db.ForeignKey('contact_leads.id'), default=None)# one side of a one-to-many with contact leads
 	company_lead_id = db.Column(db.Integer, db.ForeignKey('company_leads.id'), default=None)# one side of a one-to-many with comapny leads
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'))# one side
+	company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), default=None)
+	contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'), default=None)
 	query_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def exists(self):
@@ -94,6 +97,10 @@ class User(db.Model, UserMixin):
 	last_name = db.Column(db.String(30))
 	username = db.Column(db.String(60), index=True)
 	email = db.Column(db.String(120), index=True, unique=True)
+	phone = db.Column(db.String(60), nullable=True)
+	address = db.Column(db.String(120), nullable=True)
+	postal_code = db.Column(db.String(120), nullable=True)
+	city = db.Column(db.String(120), nullable=True)
 	stripe_customer_id = db.Column(db.String(256), nullable=True)
 	last_token = db.Column(db.String(256), nullable=True)
 	password_hash = db.Column(db.String(120))
@@ -143,16 +150,15 @@ class ContactLead(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	firstname = db.Column(db.String(120), index=False, unique=False, nullable=False)
 	lastname = db.Column(db.String(120), index=False, unique=False, nullable=False)
-	company_name = db.Column(db.String(120), index=False, unique=False, nullable=False)
+	company_id = db.Column(db.Integer, db.ForeignKey('company_leads.id'), nullable=True)
 	position = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	country = db.Column(db.String(60), index=True, nullable=False)
 	email = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	phone = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	linkedin = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	activity_field1 = db.Column(db.String(120), index=True, unique=False, nullable=False)
-	activity_field2 = db.Column(db.String(120), index=True, unique=False, default=None)
-	activity_field3 = db.Column(db.String(120), index=True, unique=False, default=None)
+	instagram = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	facebook = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	requests = db.relationship('LeadRequest', foreign_keys=[LeadRequest.contact_lead_id], backref='contact_lead', lazy='dynamic')# many side
+	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def __repr__(self):
 		return '{} {}'.format(self.firstname, self.lastname)
@@ -166,16 +172,17 @@ class CompanyLead(db.Model):
 	address = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	postal_code = db.Column(db.String(30), index=False, unique=False, nullable=True)
 	city = db.Column(db.String(60), index=True, unique=False, nullable=True)
-	country = db.Column(db.String(60), index=True, nullable=False)
+	country = db.Column(db.String(60), index=True, nullable=True)
 	email = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	phone = db.Column(db.String(60), index=False, unique=False, nullable=True)
 	website = db.Column(db.String(60), index=False, unique=False, nullable=True)
+	facebook = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	instagram = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	linkedin = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	activity_field1 = db.Column(db.String(60), index=True, unique=False, nullable=False)
 	activity_field2 = db.Column(db.String(60), index=True, unique=False, default=None)
 	activity_field3 = db.Column(db.String(60), index=True, unique=False, default=None)
-	contact_firstname = db.Column(db.String(60), index=False, unique=False, nullable=True)
-	contact_lastname = db.Column(db.String(60), index=False, unique=False, nullable=True)
-	contact_position = db.Column(db.String(60), index=False, unique=False, nullable=True)
+	contacts = db.relationship('ContactLead', backref='firm', lazy='dynamic')
 	requests = db.relationship('LeadRequest', foreign_keys=[LeadRequest.company_lead_id], backref='company_lead', lazy='dynamic')# many side
 
 	# def exists(self):
@@ -252,6 +259,7 @@ class Company(db.Model):
 	address = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	postal_code = db.Column(db.String(30), index=False, unique=False, nullable=True)
 	city = db.Column(db.String(60), index=False, unique=False, nullable=True)
+	country = db.Column(db.String(60), index=False, unique=False, nullable=True)
 	email = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	phone = db.Column(db.String(60), index=False, unique=False, nullable=True)
 	activity_field = db.Column(db.String(60), index=True, unique=False, nullable=False)
@@ -401,28 +409,50 @@ def distinct_status_values():
 	return dict_distinct_status
 
 
+def get_list_contacts_positions():
+	q1 = db.session.query(ContactLead.position.label('position')).distinct()
+	list_distinct_position = [elt.position for elt in q1.all()] # keeping None as position is not a required field
+	return list_distinct_position
 
-def companies_activity_values():
+
+def get_list_companies_activities():
+	q1 = db.session.query(CompanyLead.activity_field1.distinct().label("field"))
+	q2 = db.session.query(CompanyLead.activity_field2.distinct().label("field"))
+	q3 = db.session.query(CompanyLead.activity_field3.distinct().label("field"))
+	list_distinct_activities = [elt.field for elt in q1.union(q2).union(q3).all() if elt.field] # removing None as activty is a required field in db
+	return list_distinct_activities
+
+
+
+def distinct_companies_activity_values():
 	''' Exctract distinct field_actvity from CompanyLead table.
 		Query distinct field for each of the 3 field's column and join together.
 	 	Then reformat data to return a list of tupple.
 	 	Each value paired with a label that will be displayed on the form field '''
-	q1 = db.session.query(CompanyLead.activity_field1.distinct().label("field"))
-	q2 = db.session.query(CompanyLead.activity_field2.distinct().label("field"))
-	q3 = db.session.query(ContactLead.activity_field3.distinct().label("field"))
-	list_distinct_activities = [elt.field for elt in q1.union(q2).union(q3).all() if elt.field]
-	form_field_labels = [elt.field.capitalize() for elt in q1.union(q2).union(q3).all() if elt.field]
+	list_distinct_activities = get_list_companies_activities()
+	form_field_labels = [elt.capitalize() for elt in list_distinct_activities]
 	dict_labels_activities = list(zip(list_distinct_activities, form_field_labels))
 	companies_activities = [("", "-")] + dict_labels_activities
 	return companies_activities
 
 
+# def from_sql(row):
+#     """	Translates a SQLAlchemy model instance into a dictionary """
+#     data = row.__dict__.copy()
+#     data['id'] = row.id
+#     data.pop('_sa_instance_state')
+#     return data
+
 def from_sql(row):
-    """	Translates a SQLAlchemy model instance into a dictionary """
-    data = row.__dict__.copy()
-    data['id'] = row.id
-    data.pop('_sa_instance_state')
-    return data
+	"""Translates a SQLAlchemy model instance into a dictionary"""
+	if not row:
+		return []
+	else:	
+	    data = row.__dict__.copy()
+	    data['id'] = row.id
+	    data.pop('_sa_instance_state')
+	    return data
+
 
 
 def get_list_contacts(user_id, limit, cursor):

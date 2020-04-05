@@ -4744,7 +4744,7 @@ input[type='button'].btn-block
 .input-group-append .btn
 {
     position: relative;
-    z-index: 2;
+    z-index: 3;
 }
 .input-group-prepend .btn:focus,
 .input-group-append .btn:focus
@@ -4760,7 +4760,7 @@ input[type='button'].btn-block
 .input-group-append .input-group-text + .input-group-text,
 .input-group-append .input-group-text + .btn
 {
-    margin-left: -1px;
+    margin-left: 1px;
 }
 
 .input-group-prepend

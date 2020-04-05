@@ -100,8 +100,8 @@ def signup():
 						return Response(url_for('auth.signup', plan_name=request.form.get('plan_name')), 404)
 					# Else retrieve user and update info
 					else:
-						user.first_name = request.form['first_name'].capitalize()
-						user.last_name = request.form['last_name'].capitalize()
+						user.first_name = request.form.get('first_name').capitalize()
+						user.last_name = request.form.get('last_name').capitalize()
 						user.set_username()
 						customer = stripe.Customer.retrieve(user.stripe_customer_id)
 						customer.name = request.form['first_name'].capitalize() + ' ' + request.form['last_name'].capitalize()		
@@ -109,10 +109,10 @@ def signup():
 				else:
 					print('New User !')
 					customer = stripe.Customer.create(
-						name = request.form.get('first_name').capitalize() + ' ' + request.form['last_name'].capitalize(),
-						email=request.form['email'].lower()
+						name = request.form.get('first_name').capitalize() + ' ' + request.form.get('last_name').capitalize(),
+						email=request.form.get('email').lower()
 					)
-					user = User(first_name=request.first_name.data.capitalize(),
+					user = User(first_name=form.first_name.data.capitalize(),
 								last_name=form.last_name.data.capitalize(),
 								email=form.email.data.lower(), stripe_customer_id=customer.id)
 					db.session.add(user)

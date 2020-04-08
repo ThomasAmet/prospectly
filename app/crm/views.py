@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, request, session, jsonify, flash, Response
 from . import crm
-from .forms import CompanyForm, AddContactForm, EditContactForm, AddOpportunityForm, EditOpportunityForm
+from .forms import AddCompanyForm, EditCompanyForm, AddContactForm, EditContactForm, AddOpportunityForm, EditOpportunityForm
 from app import db
 from ..models import User, Subscription, Company, Contact, ContactsEmail, Opportunity, OpportunityStep, CommercialStage, Status, Task, Note
 from ..models import get_list_opportunities, get_list_companies, get_list_contacts
@@ -52,14 +52,16 @@ def home():
 @crm.route('/entreprises/liste')
 @login_required
 def view_companies_list():
-	form = CompanyForm()
+	add_form = AddCompanyForm()
+	edit_form = EditCompanyForm()
 	token = request.args.get('page_token', None)
-	if token:
-		token = token.encode('utf-8')
+	token = int(token.encode('utf-8')) if token else 0 # used to compute the number of item displayed 
 
-	companies, next_page, previous_page = get_list_companies(user_id=current_user.id, limit=25, cursor=token)
+	companies, next_page_token, previous_page_token, size = get_list_companies(user_id=current_user.id, limit=10, cursor=token)
+	print(next_page_token, previous_page_token)
 
-	return render_template('companies-list.html', companies=companies, next_page=next_page, previous_page=previous_page, form=form)
+	return render_template('companies-list.html', companies=companies, size=size, next_page_token=next_page_token, 
+		previous_page_token=previous_page_token, add_form=add_form, edit_form=edit_form, page_token=token)
 
 
 
@@ -70,7 +72,7 @@ def add_company():
 		return redirect(url_for('crm.home'))
 
 	try:
-		form = CompanyForm(request.form)
+		form = AddCompanyForm(request.form)
 		data = request.form.to_dict(flat=True)
 		print(data)
 		data['user_id'] = current_user.id
@@ -89,8 +91,8 @@ def add_company():
 			# flash('Entreprise ajoutée avec succès.')
 	except:
 		db.session.rollback()
-		flash("Une erreur s'est produite. Veuillez réessayer ou contactez le support.")
-	return redirect(url_for('crm.view_companies_list'))
+		flash("Une erreur s'est produite, veuillez réessayer. Si l'erreur persiste, merci de contacter le support.")
+		return redirect(url_for('crm.view_companies_list'))
 
 
 
@@ -150,13 +152,12 @@ def view_contacts_list():
 	add_contact_form = AddContactForm()
 	edit_contact_form = EditContactForm()
 	token = request.args.get('page_token', None)
-	if token:
-		token = token.encode('utf-8')
+	token = int(token.encode('utf-8')) if token else 0
 
-	contacts, next_page, previous_page = get_list_contacts(current_user.id, limit=25, cursor=None)
+	contacts, next_page_token, previous_page_token, size = get_list_contacts(current_user.id, limit=5, cursor=token)
 	print([contact.firm for contact in contacts])
-	return render_template('contacts-list.html', contacts=contacts, next_page=next_page,
-							previous_page=previous_page, add_form=add_contact_form, edit_form=edit_contact_form)
+	return render_template('contacts-list.html', contacts=contacts, size=size, next_page_token=next_page_token,  page_token=token,
+							previous_page_token=previous_page_token, add_form=add_contact_form, edit_form=edit_contact_form)
 
 
 
@@ -272,7 +273,7 @@ def view_opportunities_list():
 	if token:
 		token = token.encode('utf-8')
 	
-	opportunities, next_page, previous_page = get_list_opportunities(user_id=current_user.id, limit=20, cursor=token)
+	opportunities, next_page, previous_page = get_list_opportunities(user_id=current_user.id, limit=10, cursor=token)
 	latest_steps = [OpportunityStep.query.filter_by(opportunity_id=opportunity.id).order_by(OpportunityStep.creation_date.desc()).first() for opportunity in opportunities]
 	# ids = [opp.id for opp in opportunities]
 	# opportunities = dict(zip(ids,list(zip(opportunities, latest_steps)))) #dict of list: key is an integer, value is a list. Each list is compose of an opportunity and its latest stage. 

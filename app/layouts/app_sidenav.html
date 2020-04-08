@@ -136,7 +136,7 @@
           </ul>
 
           <!-- Admin Divider -->
-
+          {% if current_user.is_admin() %}
           <!-- Divider -->
           <hr class="my-3">
           <!-- Heading -->
@@ -152,6 +152,7 @@
               </a>
             </li>
           </ul>
+          {% endif %}
         </div>
       </div>
     </div>

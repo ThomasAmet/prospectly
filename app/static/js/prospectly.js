@@ -1,4 +1,16 @@
 $(document).ready(function(){
+  // #####################
+  // Script to display monthly price or yearly price on plan upgrade
+  $('#checkboxUpgradeChoice').click(function(){
+    if($(this).prop("checked")){
+      $('div.monthlyChoice').addClass('d-none');
+      $('div.yearlyChoice').removeClass('d-none');  
+    }
+    else{
+      $('div.monthlyChoice').removeClass('d-none');
+      $('div.yearlyChoice').addClass('d-none');
+    }
+  });
 
   // #####################
   // Script to toogle state of input fields in both form when clicking on CompanySettings toggle button

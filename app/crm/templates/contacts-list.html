@@ -23,6 +23,8 @@
           <li class="breadcrumb-item active" aria-current="page">Liste</li>
         </ol>
       </nav>
+      {% set displayed_elt = contacts|length + page_token %}
+      <span class="badge badge-primary ml-2">{{displayed_elt}}/{{size}}</span>
     </div>
     <div class="col-lg-6 col-8 text-right">
       <!-- <a href="#" class="btn btn-sm btn-neutral">Actions</a> -->
@@ -109,6 +111,7 @@
                 <th scope="col" data-sort='company'>Entreprise</th>
                 <th scope="col" data-sort='email'>Email</th>
                 <th scope="col" data-sort='phone'>Téléphone</th>
+                <th scope="col" data-sort='position'>Position</th>
                 <th scope="col" data-sort='creation_date'>Date de création</th>
                 <th scope="col"></th>
               </tr>
@@ -140,7 +143,11 @@
                 </td>
                 <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
                   <!-- span is used to retrieve value with jquery and hide if val == None -->
-                  <span class="entreprise-cell">{{contact.firm}}</span>
+                  {% if contact.firm is none %}
+                  <span class="entreprise-cell">Aucune entreprise associée</span>
+                  {% else %}
+                  <span class="entreprise-cell">{{contact.firm.name}}</span>
+                  {% endif %}
                 </td>
                 <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
                   <!-- email -->
@@ -150,6 +157,9 @@
                 </td>
                 <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
                   {{contact.phone}}
+                </td>
+                <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
+                  {{contact.position}}
                 </td>
                 <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
                   {{ contact.creation_date.date() }}

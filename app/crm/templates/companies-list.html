@@ -20,8 +20,14 @@
           <!-- <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li> -->
           <li class="breadcrumb-item"><a href="#">Entreprise</a></li>
           <li class="breadcrumb-item active" aria-current="page">Liste</li>
+          <!-- <li class="breadcrumb-item active"> {{companies|length}}/{{size}}</li> -->
         </ol>
       </nav>
+      <!-- <button type="button" class="btn btn-sm btn-default ml-4"> -->
+      <!-- <span class="text-capitalize">Affichés</span> -->
+      {% set displayed_elt = companies|length + page_token %}
+      <span class="badge badge-primary ml-2">{{displayed_elt}}/{{size}}</span> 
+      <!-- </button> -->
     </div>
     <div class="col-lg-6 col-8 text-right">
       <!-- <a href="#" class="btn btn-sm btn-neutral">Actions</a> -->
@@ -120,7 +126,7 @@
               <tbody>
               {% for company in companies %}
                 <!--  Modal editCompany -->
-                {{ render_edit_modal(edit_form=form, company=company) }}
+                {{ render_edit_modal(edit_form=edit_form, company=company) }}
                 <!-- End Modal editCompany -->
                 <tr>
                   <td>
@@ -181,7 +187,6 @@
           <div class="card-footer py-4">
             <nav aria-label="...">
               <ul class="pagination justify-content-end mb-0">
-                {{previous_page_token}}
                 {% if previous_page_token is not none %}
                   <li class="page-item">
                     <a class="page-link" href="?page_token={{previous_page_token}}" tabindex="-1">
@@ -230,7 +235,7 @@
     <!-- End Table -->
 
   <!--  Modal addCompany -->
-  {{ render_add_modal(add_form=form) }}
+  {{ render_add_modal(add_form=add_form) }}
   <!-- End Modal addContact -->
 
   

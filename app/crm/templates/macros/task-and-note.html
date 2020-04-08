@@ -91,7 +91,7 @@
           <label class="form-control-label">Descriptif</label>
           {% if latest_step %}  
             {% set f = form.task_content.process_data(latest_step.tasks.first().content) %}
-            {{ form.task_content(class="form-control form-control-alternative") }}         
+            {{ form.task_content(class="form-control form-control-alternative") }} 
           {% else %}  
             {{ form.task_content(class="form-control form-control-alternative", placeholder='Descriptif de la tache a effectuer...') }}
           {% endif %}

@@ -10,10 +10,10 @@ from dateutil.relativedelta import relativedelta
 
 class Subscription(db.Model):
 	__tablename__ = 'subscriptions'
-	plan_id = db.Column(db.Integer, db.ForeignKey('plans.id'), primary_key=True)# one side
-	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)# one side
+	id = db.Column(db.Integer, primary_key=True)
+	plan_id = db.Column(db.Integer, db.ForeignKey('plans.id'))# one side
+	user_id = db.Column(db.Integer, db.ForeignKey('users.id'))# one side
 	stripe_id = db.Column(db.String(60), nullable=True)
-	yearly = db.Column(db.Boolean, default=False)
 	subscription_date = db.Column(db.DateTime, default=datetime.utcnow)
 	next_payment = db.Column(db.DateTime)
 
@@ -24,30 +24,33 @@ class Subscription(db.Model):
 			return self.next_payment >= datetime.utcnow()
 
 	def set_next_payment(self):
+		print('Set up subscription: {}'.format(self.plan_id))
 		plan = Plan.query.get(self.plan_id)
 
-		if plan.name == 'Beta':
+		if plan.name == 'beta':
 			self.next_payment = datetime.utcnow() + relativedelta(years=+4) # relativedelta accepts months and years
 
-		# Case when we initiate the subscription 
-		if self.next_payment is None and plan.name == 'Basic':
+		# Case when we initiate the subscription
+		if self.next_payment is None:
 			# try:
 			self.next_payment = datetime.utcnow() + relativedelta(days=+plan.free_trial)# timedelta only accepts days
 			# except ValueError:
 			# 	self.next_payment = datetime.utcnow() + timedelta(days=+15)
 		# Cases for subscriptions renewal 
 		else:
-			if self.yearly:
-				self.next_payment = self.next_payment + relativedelta(years=+1) 
+			if plan.yearly:
+				self.next_payment = datetime.utcnow()  + relativedelta(years=1) # utcnow + 1 month or 1 year instead of next_payment + 1month or 1 year to handle when the user moves from yeary to monthly
 			else:
-				self.next_payment = self.next_payment + relativedelta(months=+1) 
+				self.next_payment = datetime.utcnow()  + relativedelta(months=1) 
+
 
 	def __init__(self, **kwargs):
 		super(Subscription, self).__init__(**kwargs)
+		# Create a next payment date when a new subscription is created 
 		self.set_next_payment()
 
 	def __repr__(self):
-		return "[On {}, user {} subscribed to a yearly({}) plan {}]".format(self.subscription_date, self.user_id, self.yearly, self.plan_id )
+		return "[On {}, user {} subscribed to a {} plan]".format(self.subscription_date, self.user_id, self.plan.name )
 	# define next_paymnet date when initiate
 
 
@@ -56,11 +59,13 @@ class Plan(db.Model):
 	__tablename__ = 'plans'
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(30), index=True)
+	category = db.Column(db.String(30))
 	monthly_price = db.Column(db.Integer)
-	yearly_price = db.Column(db.Integer)
 	free_trial = db.Column(db.Integer)#number of days for the free trial
 	limit_daily_query = db.Column(db.Integer)
 	lead_generator = db.Column(db.Boolean, default=False)
+	yearly = db.Column(db.Boolean, default=False)
+	stripe_id = db.Column(db.String(120))
 
 	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.plan_id], backref=db.backref('plan', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
 
@@ -454,35 +459,38 @@ def from_sql(row):
 	    return data
 
 
+def get_list_companies(user_id, limit, cursor):
+	user_id = int(user_id)
+	cursor = int(cursor) if cursor else 0
+	query = (Company.query
+			.filter(Company.user_id==user_id)
+			.order_by(Company.name, Company.creation_date.desc()) )
+	size = len(query.all())
+	query = (query.offset(cursor)
+				  .limit(limit+1) ) # limit + 1 to check whether there is a need for a 'next_page' btn
+	companies = list(query.all())
+	# propsects =  query.all()# return a sqlalchemy obj
+	next_page = cursor + limit if len(companies)>limit else None 
+	previous_page = cursor - limit if cursor >= limit else None 
+	return (companies[:limit], next_page, previous_page, size)
+
+
 
 def get_list_contacts(user_id, limit, cursor):
 	user_id = int(user_id)
 	cursor = int(cursor) if cursor else 0
 	query = (Contact.query
 			.filter_by(user_id=user_id)
-			.order_by(Contact.last_name, Contact.creation_date.desc())
-			.offset(cursor)
-			.limit(limit+1) )
+			.order_by(Contact.last_name, Contact.creation_date.desc()))
+	size = len(query.all())
+	query = (query.offset(cursor)
+				  .limit(limit+1) )
 	# contacts = list(map(from_sql, query.all())) # return a list of dict, we loose relationship
 	contacts = list(query.all())
 	next_page = cursor + limit if len(contacts) > limit else None
 	previous_page = cursor - limit if cursor >= limit else None
-	return (contacts[:limit], next_page, previous_page)
+	return (contacts[:limit], next_page, previous_page, size)
 
-
-def get_list_companies(user_id, limit, cursor):
-	user_id = int(user_id)
-	cursor = int(cursor) if cursor else 0
-	query = (Company.query
-			.filter(Company.user_id==user_id)
-			.order_by(Company.name, Company.creation_date.desc())
-			.offset(cursor)
-			.limit(limit+1) ) # limit + 1 to check whether there is a need for a 'next_page' btn
-	companies = list(query.all())
-	# propsects =  query.all()# return a sqlalchemy obj
-	next_page = cursor + limit if len(companies)>limit else None 
-	previous_page = cursor - limit if cursor >= limit else None 
-	return (companies[:limit], next_page, previous_page)
 
 
 def get_list_opportunities(user_id, limit, cursor):

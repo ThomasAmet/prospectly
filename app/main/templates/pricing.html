@@ -139,7 +139,7 @@
             </div>
               <!-- Live button -->
               <!-- <div class="btn"> -->
-              <a href="{{url_for('auth.signup', plan_name='yearly_basic')}}">
+              <a href="{{url_for('auth.signup', plan_stripe_id=plans_ids.yearly_basic)}}">
                 <button id="checkout-button-yearly-basic" role="link" class='btn-pricing btn btn-border btn-circle'>
                  ESSAI GRATUIT
                </button>
@@ -157,7 +157,7 @@
           <div class="card-item style-4 look-1 pt-5">
             <div class="title">
               <i class="fa fa-rocket" aria-hidden="true"></i>
-              <h3 class='py-2'>Prospectly<sup><span style="font-size: 32px">+</span></sup></h3>
+              <h3 class='py-2'>Prospectly<sup><span style="font-size: 1.5">+</span></sup></h3>
             </div>
             <div class="price">
               <h4 class='pr-0 mr-0'>159<sup>€</sup><span style="font-size: 0.4em">/mois</span></h4>
@@ -172,8 +172,8 @@
               <li> <i class="fa fa-check" aria-hidden="true"></i> Accompagnement dans le processus de vente </li>
               </ul>
             </div>
-            <button class='btn-pricing btn btn-border btn-circle'>A venir...</button>
-            <!-- <a href="{{url_for('auth.signup', plan_name='yearly_pro')}}">
+            <button class='btn-pricing btn btn-border btn-circle'><span class='capitalize'>à</span> venir...</button>
+            <!-- <a href="{{url_for('auth.signup', plan_stripe_id=plans_ids.yearly_pro)}}">
                 <button id="checkout-button-yearly-pro" role="link" class='btn-pricing btn btn-border btn-circle'>
                  PROSPECTEZ MAINTENANT
                </button>
@@ -214,7 +214,7 @@
               </ul>
             </div>
             <!-- Live button -->
-            <a href="{{url_for('auth.signup', plan_name='monthly_basic')}}">
+            <a href="{{url_for('auth.signup', plan_stripe_id=plans_ids.monthly_basic)}}">
               <button id="checkout-button-monthly-basic" role="link" class='btn-pricing btn btn-border btn-circle'> 
               ESSAI GRATUIT             
               </button>
@@ -249,7 +249,7 @@
               </ul>
             </div>
             <button class='btn-pricing btn btn-border btn-circle'>A venir...</button>
-            <!-- <a href="{{url_for('auth.signup', plan_name='monthly_pro')}}">
+            <!-- <a href="{{url_for('auth.signup', plan_stripe_id=plans_ids.monthly_pro)}}">
                 <button id="checkout-button-monthly-pro" role="link" class='btn-pricing btn btn-border btn-circle'>
                  PROSPECTEZ MAINTENANT
                </button>

@@ -12,7 +12,21 @@ def company_choices():
 	#result = Contact.query.filter(Contact.postal_code.like('94%'))
 	return Company.query.filter(Company.user_id==current_user.id)
 
-class CompanyForm(FlaskForm):
+class AddCompanyForm(FlaskForm):
+	name = StringField("Nom de l'opportunité", validators=[DataRequired()])
+	activity_field = StringField("Domaine d'activité", validators=[DataRequired()])#choice from exisitng + free
+	email = StringField("Email", validators=[Email()], default=None)
+	phone = StringField("Téléphone", validators=[Regexp('0[0-9]{9}', 0, 'Le format doit être de la forme 0XXXXXXXXX')], default=None)
+	address = StringField("Adresse", default=None)
+	postal_code = StringField("Code Postal", default=None)
+	city = StringField("Ville", default=None)
+	note_content = TextAreaField('Note', validators=[Optional(), Length(max=200)], default=None)
+	website = StringField('Site web', default=None)
+	facebook = StringField('Page Facebook', default=None)
+	instagram = StringField('Page Instagram web')
+	linkedin = StringField('Page LinkedIn')
+
+class EditCompanyForm(FlaskForm):
 	name = StringField("Nom de l'opportunité", validators=[DataRequired()])
 	activity_field = StringField("Domaine d'activité", validators=[DataRequired()])#choice from exisitng + free
 	email = StringField("Email", validators=[Email()], default=None)

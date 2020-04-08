@@ -1,0 +1,96 @@
+
+{% macro render_downgrade_choices() %}
+<div class="modal fade" id="downgradeAccountModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="card card-pricing border-0 text-center mb-4">
+        <div class="card-header bg-transparent">
+          <h4 class="text-uppercase ls-1 text-primary py-3 mb-0 px-0 mx-0">Repassez à</h4>
+          <h1 class="text-primary text-uppercase ">Prospectly Basic</h1>
+          <div class="row text-center">
+            <div class="col-lg-12 col-md-12 mt-4 ml-auto mr-auto">
+              <h5>Choix du paiement</h5>
+              <div class='row align-items-center mb-2'>
+                <label class="ml-auto my-auto" id="monthly-choice">mensuel</label>
+                <label class="custom-toggle custom-toggle-primary mx-2 my-auto">
+                  <input type="checkbox" checked id='checkboxUpgradeChoice'>
+                  <span class="custom-toggle-slider rounded-circle" data-label-off="" data-label-on=""></span>
+                </label>   
+                <label class="mr-auto my-auto" id="yearly-choice">annuel</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body px-lg-7">
+          <div class='yearlyChoice'>
+            <h3 class='pr-0 mr-0 display-1 text-primary' style="display: inline;">29<sup>€</sup><span style="font-size: 0.5em; display: inline;">/mois</span></h3>
+          </div>
+          <div class='monthlyChoice d-none'>
+            <h3 class='pr-0 mr-0 display-1 text-primary' style="display: inline;">34<sup>€</sup><span style="font-size: 0.5em; display: inline;">/mois</span></h3>
+          </div>
+
+          <ul class="list-unstyled my-4">
+            <li>
+              <div class="d-flex align-items-center">
+                <div>
+                  <!-- <div class="icon icon-xs icon-shape bg-gradient-primary shadow rounded-circle text-white"> -->
+                    <i class="fas fa-times"></i>
+                  <!-- </div> -->
+                </div>
+                <div>
+                  <span class="pl-2">Moteur de génération de leads</span>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="d-flex align-items-center">
+                <div>
+                  <!-- <div class="icon icon-xs icon-shape bg-gradient-primary shadow rounded-circle text-white"> -->
+                    <i class="fas fa-times"></i>
+                  <!-- </div> -->
+                </div>
+                <div>
+                  <span class="pl-2">Coaching de votre processus de vente</span>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="d-flex align-items-center">
+                <div>
+                  <!-- <div class="icon icon-xs icon-shape bg-gradient-primary shadow rounded-circle text-white"> -->
+                    <i class="fas fa-times"></i>
+                  <!-- </div> -->
+                </div>
+                <div>
+                  <span class="pl-2">Accès à plus de 25.000 prospects</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <!-- Display/Hide button too -->
+          <div class='yearlyChoice'>
+            <button type="button" class="btn btn-secondary mb-3">
+              <a href="{{url_for('auth.downgrade_plan', type='yearly')}}">Je dis non à la prospection 2.0</a>
+            </button>
+          </div>
+          <div class='monthlyChoice d-none'>
+            <button type="button" class="btn btn-secondary mb-3">
+              <a href="{{url_for('auth.downgrade_plan', type='monthly')}}">Je dis non à la prospection 2.0</a>
+            </button>
+          </div>
+          <!-- End toggle -->   
+        </div>
+        <div class="card-footer bg-transparent">
+          <div data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false">
+            <h4 class="text-white">Plus d'informations</h4>
+          </div>
+          <div class='mt-3 collapse' id="collapseTwo" aria-labelledby="headingOne">
+            <p>Lors du passage d'un compte Prospectly<sup> +</sup> à un compte  Prospectly Basic, votre ancien abonnement reste valide jusqu'à la fin de la période actuelle. A la suite de laquelle votre abonnement Prospectly Basic se mettra automatiquement en place. Si vous rencontrez des difficultés, merci de contacter le support.</p><br>
+          </div>
+        </div>   
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}

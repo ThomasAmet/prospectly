@@ -164,50 +164,10 @@ def signup():
 					customer.name = request.form.get('first_name').capitalize() + ' ' + request.form.get('last_name').capitalize()		
 			# If User is none, create a new one		
 			else:
-				stripe_plan_id = get_stripe_plan_id(request.form.get('plan_name'))
-				user = User.query.filter_by(email=request.form['email']).first()
-				# Case to handle custome who enter email but didn't pay
-				if user:
-					print('Exisiting User')
-					# If user password exists, it means customer paid so we redirect to login
-					if user.last_token:
-						print('password_hash')
-						flash('Oups... Cet email est utilisé. Connectez-vous ou choisissez un autre email.')
-						return Response(url_for('auth.signup', plan_name=request.form.get('plan_name')), 404)
-					# Else retrieve user and update info
-					else:
-						user.first_name = request.form.get('first_name').capitalize()
-						user.last_name = request.form.get('last_name').capitalize()
-						user.set_username()
-						customer = stripe.Customer.retrieve(user.stripe_customer_id)
-						customer.name = request.form['first_name'].capitalize() + ' ' + request.form['last_name'].capitalize()		
-				# If not user, create a new one		
-				else:
-					print('New User !')
-					customer = stripe.Customer.create(
-						name = request.form.get('first_name').capitalize() + ' ' + request.form.get('last_name').capitalize(),
-						email=request.form.get('email').lower()
-					)
-					user = User(first_name=form.first_name.data.capitalize(),
-								last_name=form.last_name.data.capitalize(),
-								email=form.email.data.lower(), stripe_customer_id=customer.id)
-					db.session.add(user)
-
-				db.session.commit()
-				print('Commit Succeeded!')
-				stripe_session = stripe.checkout.Session.create(
-					customer = customer.id,
-					# customer_email = customer.email,
-					payment_method_types=['card'],
-					subscription_data={
-						'items': [{
-							'plan': stripe_plan_id,
-						}],
-						'trial_period_days':14,
-					}, # I think u r right.
-					success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
-					cancel_url='%sauth/paiement-echec' %request.host_url,
-					locale='fr'
+				print('New user!')
+				customer = stripe.Customer.create(
+					name = request.form.get('first_name').capitalize() + ' ' + request.form.get('last_name').capitalize(),
+					email=request.form.get('email').lower()
 				)
 				user = User(first_name=form.first_name.data.capitalize(),
 							last_name=form.last_name.data.capitalize(),

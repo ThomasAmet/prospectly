@@ -400,43 +400,56 @@ $(document).ready(function(){
 
   
   // JQuery for displaying task module or note moduel within EditOpportunityForm
-  var loadEditTaskAndNote = function(){
-    if ($("#status-field-edit-form").val()=='A faire'){
-      $("[class*='note-form-group']").hide();
-      $("[class*='task-form-group']").show();
-      $.each($("input.task-form-group"), function(){
-        $(this).prop('required',true);
-      });
-    }
-    else{
-      $("[class*='note-form-group']").show();
-      $("[class*='task-form-group']").hide();   
-      $.each($("input.task-form-group"), function(){
-        $(this).removeAttr('required');
-      });
-    }
-  }
-  $(".clickable-cell").click(function() {
-    loadEditTaskAndNote();  
-  });
-  $('#status-field-edit-form').change(function(){
-      // alert($(this).val());
-      if ($("#status-field-edit-form").val()=='A faire'){
-        $("[class*='note-form-group']").hide();
-        $("[class*='task-form-group']").show();
-        $.each($("input.task-form-group"), function(){
-          $(this).prop('required',true);
+  $("#opportunitiesTable > tbody > tr").on('click', function(){
+      var id = $(this).find("input[name='checkbox[]']").val();
+      
+      // var form = $('#editOpportunityStepForm_'+id);
+      // // alert(JSON.stringify(form.serialize()));  
+      // var values = {};
+      // $.each(form.serializeArray(), function (i, field) {
+      //   values[field.name] = field.value;
+      // });
+      // //Value Retrieval Function
+      // var getValue = function (valueName) {
+      //     return values[valueName];
+      // };
+
+      // Find the active EditOpportunity Modal
+      var modal = $('#editOpportunityModal_'+id);
+      // Immediately display/hide Taks and Note groups when the modal is opened
+      if(modal.find("[class*='status-field']").val()=='A faire'){
+        modal.find("[class*='note-form-group']").hide();
+        modal.find("[class*='task-form-group']").show();
+        $.each(modal.find("input.task-form-group"), function(){
+            $(this).prop('required',true);
         });
       }
       else{
-        $("[class*='note-form-group']").show();
-        $("[class*='task-form-group']").hide();
-        $.each($("input.task-form-group"), function(){
-          $(this).removeAttr('required');
-      });      
+        modal.find("[class*='note-form-group']").show();
+        modal.find("[class*='task-form-group']").hide();
+        $.each(modal.find("input.task-form-group"), function(){
+            $(this).removeAttr('required');
+        });
       }
-    });
-
+      // Change the display/hide of Taks and Note groups when the status changes
+      modal.find("[class*='status-field']").change(function(){
+        if(modal.find("[class*='status-field']").val()=='A faire'){
+          modal.find("[class*='note-form-group']").hide();
+          modal.find("[class*='task-form-group']").show();
+          $.each(modal.find("input.task-form-group"), function(){
+              $(this).prop('required',true);
+          });
+        }
+        else{
+          modal.find("[class*='note-form-group']").show();
+          modal.find("[class*='task-form-group']").hide();
+          $.each(modal.find("input.task-form-group"), function(){
+              $(this).removeAttr('required');
+          });
+        }
+      });
+  });
+    
 
 
   // JQuery for displaying task module or note moduel within AddOppportunityForm 

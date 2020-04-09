@@ -1,4 +1,4 @@
-{% macro render_edit_modal(edit_form, opportunity, latest_step) %}
+{% macro render_edit_modal(edit_form, opportunity, latest_step ) %}
 
   {% from 'macros/task-and-note.html' import render_task_and_note %}
 
@@ -25,7 +25,7 @@
           <!-- End card header -->
 
           <!-- Start form -->
-          <form action="{{url_for('crm.edit_opportunity', id=opportunity.id)}}" method="post" id='editOpportunityStepForm'>
+          <form action="{{url_for('crm.edit_opportunity', id=opportunity.id)}}" method="post" id='editOpportunityStepForm_{{opportunity.id}}'>
             {{ edit_form.csrf_token }}
             <!-- start card body -->
             <div class="card-body">
@@ -65,7 +65,7 @@
                     <div class="col-lg-2">
                     <div class="form-group mb-3 ">
                       <label class="form-control-label" for="input-country">Succès (%) </label>
-                      <input type="text" id="input-postal-code" class="form-control form-control-alternative"  value="{{ latest_step.commercial_stage.closing_perc * 100 }}" disabled>
+                      <input type="text" class="form-control form-control-alternative"  value="{{ latest_step.commercial_stage.closing_perc * 100 }}" disabled>
                     </div>
                     </div>
                   </div>
@@ -93,9 +93,11 @@
                         <div class="col-lg-7">
                         <div class="form-group mb-3">
                           <label class="form-control-label" for="input-city">
-                            <span class="text-capitalize">étape </span>commerciale</label>
+                            <span class="text-capitalize">étape </span>commerciale
+                          </label>
                           {% set f = edit_form.stage.process_data(latest_step.commercial_stage.name) %}
-                          {{edit_form.stage(class="form-control form-control-alternative")}}
+                          {{edit_form.stage(class="form-control form-control-alternative")}}                          
+                          </select>
                         </div>
                         </div>
                         <!-- Name of Status -->
@@ -103,7 +105,7 @@
                         <div class="form-group mb-3">
                           <label class="form-control-label" for="input-country">Statut</label>
                           {% set f = edit_form.status.process_data(latest_step.status.name) %}
-                          {{edit_form.status(class="form-control form-control-alternative status-field-edit-form", id="status-field-edit-form")}}
+                          {{edit_form.status(class="form-control form-control-alternative status-field")}}
                         </div>
                         </div>
                       </div>                      
@@ -121,7 +123,7 @@
               <hr class="my-2" />
 
               <!-- Paste Task and Note between here.... -->
-              {{ render_task_and_note(form=edit_form, latest_step=latest_step) }}
+              {{ render_task_and_note(form=edit_form, opportunity=opportunity, latest_step=latest_step) }}
               <!-- ...and here -->
 
               <hr class="my-2" />
@@ -146,14 +148,14 @@
                         <div class="col-lg-7">
                         <div class="form-group mb-3">
                             <label class="form-control-label" for="input-company-email">Email</label>
-                            <input type="email" id="input-company-email" class="form-control form-control-alternative company-field" name="company-email"
+                            <input type="email"  class="form-control form-control-alternative company-field" name="company-email"
                             placeholder="Email" value="{{ opportunity.company.email }}" disabled>
                         </div>
                         </div>
                         <div class="col-lg-5">
                         <div class="form-group mb-3">
                             <label class="form-control-label" for="input-company-phone">Téléphone</label>
-                            <input type="text" id="input-company-phone" class="form-control company-field form-control-alternative" name="company-phone" value="{{ opportunity.company.phone }}" placeholder='Téléphone' disabled>
+                            <input type="text"  class="form-control company-field form-control-alternative" name="company-phone" value="{{ opportunity.company.phone }}" placeholder='Téléphone' disabled>
                         </div>
                         </div>
                       </div>
@@ -161,7 +163,7 @@
                     <div class="col-lg-5">
                     <div class="form-group mb-3">
                         <label class="form-control-label" for="input-company-phone">Domaine d'activité</label>
-                        <input type="text" id="input-company-phone" class="form-control company-field form-control-alternative"  name="company-activity" value="{{ opportunity.company.activity_field }}" palceholder="Domaine d'activité" disabled>
+                        <input type="text"  class="form-control company-field form-control-alternative"  name="company-activity" value="{{ opportunity.company.activity_field }}" palceholder="Domaine d'activité" disabled>
                     </div>
                     </div>
                   </div>

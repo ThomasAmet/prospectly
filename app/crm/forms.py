@@ -103,14 +103,12 @@ class EditOpportunityForm(FlaskForm):
 	name = StringField("Nom de l'opportunité", validators=[DataRequired()])
 	euros_value = DecimalField("Montant (en €)", default=0, places=2)
 	# Fields regarding the Stage Step
-	stage = SelectField(u'Etape Commerciale', choices=distinct_stages_values(), validators=[DataRequired()])
+	stage = SelectField('Etape Commerciale', choices=distinct_stages_values(), validators=[DataRequired()])
 	status = SelectField('Status', choices=distinct_status_values(), validators=[DataRequired()])
 	note_content = TextAreaField('Note', validators=[Optional(), Length(max=200)], default=None)
 	task_title = StringField('Nom de la tâche', validators=[Optional()], default=None)
 	task_content = TextAreaField('Descriptif', validators=[Optional(), Length(max=200)], default=None)
 	task_priority = SelectField('Priorité', choices=distinct_priority_values(), validators=[Optional()])
-	# task_due_date = DateField('A faire pour:', format='%Y-%m-%d')
-	# submit = SubmitField('Valider')
 
 	def __init__(self, *args, **kwargs):
 		super(EditOpportunityForm, self).__init__(*args, **kwargs)
@@ -119,21 +117,14 @@ class EditOpportunityForm(FlaskForm):
 		self.status.choices = distinct_status_values()
 		self.task_priority.choices = distinct_priority_values()
 	
-	def prepopulate_values(self, session):
-		"""	Pre-populate the form with the data of the latest step """
-		self.stage.data = session.get('stage')
-		self.status.data = session.get('status')
-		self.note_content.data = session.get('note_content')
-		self.task_title.data = session.get('task_title')
-		self.task_content.data = session.get('task_content')
-		self.task_priority.data = session.get('task_priority')
-		# self.task_due_date.data = session.get('task_due_date')
 
 	def validate_task_fields(self):
 		if not ((self.task_title.data and self.task_content.data) and self.task_priority.data):
 			return False
 		else:
 			return True
+
+			
 # class AddOpportunityForm(FlaskForm):
 # 	company = QuerySelectField("Entreprise", query_factory=company_choices, allow_blank=False)# when selecting a choice it return company's id. Add arg 'get_label=company_name' if we just want to return company's name instead
 # 	name = StringField("Nom de l'opportunité", validators=[DataRequired()])

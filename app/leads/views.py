@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 from datetime import datetime
 from flask import render_template, redirect, url_for, flash, request, session, make_response
 from flask_login import current_user, login_required
-from app.auth.views import admin_login_required, pro_plan_required
+from app.auth.views import admin_login_required, pro_plan_required, valid_subscription_required
 from werkzeug.utils import secure_filename
 from . import leads
 from .forms import CompaniesQueryForm, ContactsQueryForm, LeadsQueryForm
@@ -37,6 +37,7 @@ from ..models import User, Subscription, Company, Contact, CompanyLead, ContactL
 # @leads.route('/prospectly-generator', methods=['POST', 'GET'])
 @login_required
 @pro_plan_required
+@valid_subscription_required
 def view_leads():
 	comp_lead_form = CompaniesQueryForm()
 	
@@ -58,9 +59,11 @@ def view_leads():
 
 
 
+
+@leads.route('/import-entreprises', methods=['POST'])
 @login_required
 @pro_plan_required
-@leads.route('/import-entreprises', methods=['POST'])
+@valid_subscription_required
 def upload_company_leads():
 	data = request.get_json()
 	print('data: {}'.format(data))
@@ -106,6 +109,8 @@ def upload_company_leads():
 
 
 @leads.route('/import-contacts', methods=['POST'])
+@pro_plan_required
+@valid_subscription_required
 def upload_contact_leads():
 	data = request.get_json()
 	print('Upload Contact data: {}'.format(data))
@@ -148,7 +153,7 @@ def upload_contact_leads():
 
 
 @leads.route('/generator2', methods=['POST', 'GET'])
-@login_required
+@admin_login_required
 def query():
 	form = LeadsQueryForm()	
 	cu = current_user
@@ -222,7 +227,7 @@ def query():
 
 
 @leads.route('/telechargement')
-@login_required
+@admin_login_required
 def download():
 	# Transform session value into dataframe and reorder the columns
 	df = pd.DataFrame(session['todays_output'])	

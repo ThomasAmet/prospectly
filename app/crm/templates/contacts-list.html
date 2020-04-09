@@ -36,7 +36,8 @@
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
           <a class="dropdown-item" href="" id='deleteAllContacts'>Supprimer la sélection</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addContactModal">Importer un fichier .csv</a>    
+          <span class="dropdown-item">Nouveautés prochainement</span>
+          <!-- <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addContactModal">Importer un fichier .csv</a>     -->
         </div>  
       </div>
       <button class="btn btn-icon btn-3 btn-neutral" type="button" id='addContactBtn' data-toggle="modal" data-target="#addContactModal">
@@ -144,9 +145,9 @@
                 <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
                   <!-- span is used to retrieve value with jquery and hide if val == None -->
                   {% if contact.firm is none %}
-                  <span class="entreprise-cell">Aucune entreprise associée</span>
+                  <span class="company">Aucune entreprise associée</span>
                   {% else %}
-                  <span class="entreprise-cell">{{contact.firm.name}}</span>
+                  <span class="company">{{contact.firm.name}}</span>
                   {% endif %}
                 </td>
                 <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>

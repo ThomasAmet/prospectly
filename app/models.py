@@ -1,6 +1,7 @@
 from . import db, login_manager
 from flask_login import UserMixin
 from datetime import datetime
+from operator import itemgetter
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
 from datetime import datetime, timedelta, date
@@ -201,36 +202,19 @@ class CompanyLead(db.Model):
 
 
 
-
-
-class CommercialStageStep(db.Model):
-	__tablename__ = 'commercial_stage_steps'	
-	opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunities.id'), primary_key=True)# pk
-	commercial_stage_id = db.Column(db.Integer, db.ForeignKey('commercial_stages.id'), primary_key=True)# pk
-	status_id = db.Column(db.Integer, db.ForeignKey('status.id'), primary_key=True)# many-to-one (one side)
-	note_id = db.Column(db.Integer, db.ForeignKey('notes.id'), nullable=True)
-	task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=True) # task activated only when status == 'a faire'
-	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
-	last_update = db.Column(db.DateTime, default=datetime.utcnow)
-
-	def __repr__(self):
-		return "<Opp. {} on stage {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stage.name, self.status.name, self.creation_date)
-
-
-
 class OpportunityStep(db.Model):
 	__tablename__ = 'opportunity_steps'
 	id = db.Column(db.Integer, primary_key=True)
 	opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunities.id'))
 	stage_id = db.Column(db.Integer, db.ForeignKey('commercial_stages.id'))
 	status_id = db.Column(db.Integer, db.ForeignKey('status.id'))
-	notes = db.relationship('Note', backref='opportunity_step', lazy='dynamic', cascade='all, delete-orphan')
+	# notes = db.relationship('Note', backref='opportunity_step', lazy='dynamic', cascade='all, delete-orphan')
 	tasks = db.relationship('Task', backref='opportunity_step', lazy='dynamic', cascade='all, delete-orphan')
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	last_update = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def __repr__(self):
-		return "<Opp. {} on stage {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stage.name, self.status.name, self.creation_date)
+		return "<Opp. {} on stage {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stages.name, self.status.name, self.creation_date)
 
 
 
@@ -304,7 +288,7 @@ class Opportunity(db.Model):
 	company_id = db.Column(db.Integer, db.ForeignKey('companies.id'))
 	name = db.Column(db.String(120), nullable=False)
 	euros_value = db.Column(db.Numeric(8,2))
-	# commercial_stages = db.relationship('CommercialStageStep', foreign_keys=[CommercialStageStep.opportunity_id], backref=db.backref('opportunity', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many-to-many with CommercialStage (many side of a many-to-one with CommercialStageStep)
+	notes = db.relationship('Note', backref='opportunity_step', lazy='dynamic', cascade='all, delete-orphan')
 	opportunity_steps = db.relationship('OpportunityStep', foreign_keys=[OpportunityStep.opportunity_id], backref=db.backref('opportunity', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 	deal_closed = db.Column(db.Boolean, default=False)
@@ -360,7 +344,7 @@ class Task(db.Model):
 class Note(db.Model):
 	__tablename__ = 'notes'
 	id = db.Column(db.Integer, primary_key=True)
-	opportunity_step_id = db.Column(db.Integer, db.ForeignKey('opportunity_steps.id'), default=None)
+	opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunities.id'), default=None)
 	contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'), default=None)
 	company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), default=None)
 	content = db.Column(db.String(240), default='')
@@ -383,7 +367,7 @@ def distinct_priority_values():
 	# values = ["",'Haute', 'Moyenne', 'Basse']
 	labels = ['Haute', 'Moyenne', 'Basse']
 	# labels = ["---",'Haute', 'Moyenne', 'Basse']
-	return zip(values, labels)
+	return list(zip(values, labels))
 
 
 
@@ -394,9 +378,10 @@ def distinct_stages_values():
 		distinct_stages = db.session.query(CommercialStage.name).distinct().all()
 	except:
 		distinct_stages = [('',)]
-	list_distinct_stages = [elt[0] for elt in distinct_stages]
-	form_field_labels = [str(elt[0]).replace(' ','_').capitalize().replace('_',' ') for elt in distinct_stages]
-	dict_distinct_stages = zip(list_distinct_stages, form_field_labels)
+	# list_distinct_stages = [elt[0] for elt in distinct_stages]
+	list_distinct_stages = list(map(itemgetter(0), distinct_stages))
+	form_field_labels = [str(elt[0]).replace(' ','_').capitalize().replace('_',' ') for elt in distinct_stages] # not really necessary anymore since database value are the same as the one we shoul display
+	dict_distinct_stages = list(zip(list_distinct_stages, form_field_labels))
 	return dict_distinct_stages
 
 
@@ -410,13 +395,14 @@ def distinct_status_values():
 		distinct_status = [('',)]
 	list_distinct_status = [elt[0] for elt in distinct_status]
 	form_field_labels = [str(elt[0]).capitalize().replace('_',' ') for elt in distinct_status]
-	dict_distinct_status = zip(list_distinct_status, form_field_labels)
+	dict_distinct_status = list(zip(list_distinct_status, form_field_labels)) #we need a list to access it multiple times
 	return dict_distinct_status
 
 
 def get_list_contacts_positions():
 	q1 = db.session.query(ContactLead.position.label('position')).distinct()
-	list_distinct_position = [elt.position for elt in q1.all()] # keeping None as position is not a required field
+	# list_distinct_position = [elt.position for elt in q1.all()] # keeping None as position is not a required field
+	list_distinct_position = map(itemgetter('position'), q1.all())# keeping None as position is not a required field
 	return list_distinct_position
 
 

@@ -164,7 +164,6 @@ def signup():
 					customer.name = request.form.get('first_name').capitalize() + ' ' + request.form.get('last_name').capitalize()		
 			# If User is none, create a new one		
 			else:
-<<<<<<< HEAD
 				stripe_plan_id = get_stripe_plan_id(request.form.get('plan_name'))
 				user = User.query.filter_by(email=request.form['email']).first()
 				# Case to handle custome who enter email but didn't pay

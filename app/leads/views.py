@@ -1,34 +1,159 @@
+# >>> ql1 = db.session.query(CompanyLead).filter(CompanyLead.postal_code.like('75001%'))
+# >>> ql2 = db.session.query(CompanyLead).filter(CompanyLead.postal_code.like('94%'))
+# >>> ql3 = db.session.query(CompanyLead).filter(CompanyLead.activity_field1.in_(['Conseil']) | CompanyLead.activity_field2.in_(['Conseil']) | CompanyLead.activity_field3.in_(['Conseil']))
+# >>> activity_filter ['Conseil', 'SMMA']
+# >>> ql4 = db.session.query(CompanyLead).filter(CompanyLead.activity_field1.in_(activity_filter) | CompanyLead.activity_field2.in_(activity_filter) | CompanyLead.activity_field3.in_(activity_filter))
+# >>> activity_filter ['Conseil']
+# >>> ql5 = db.session.query(CompanyLead).filter((CompanyLead.activity_field1.in_(activity_filter) | CompanyLead.activity_field2.in_(activity_filter) | CompanyLead.activity_field3.in_(activity_filter)) & CompanyLead.postal_code.like('75%'))
+# >>> activity_filter ['Conseil','Plombier']
+# >>> ql6 = db.session.query(CompanyLead).filter((CompanyLead.activity_field1.in_(activity_filter) | CompanyLead.activity_field2.in_(activity_filter) | CompanyLead.activity_field3.in_(activity_filter)) & CompanyLead.postal_code.like('94%'))
+# >>> ql7 = Patient.query.filter(Patient.mother.has(phenoscore=10)) #use has() on reltionship
+# >>> ql8 = Patient.query.join(Patient.mother, aliased=True).filter_by(phenoscore=10)
+
+
 import os
 import pandas as pd
 import numpy as np
+import random
 import logging
 logging.basicConfig(level=logging.INFO)
 
 from datetime import datetime
 from flask import render_template, redirect, url_for, flash, request, session, make_response
 from flask_login import current_user, login_required
+from app.auth.views import admin_login_required, pro_plan_required, valid_subscription_required
 from werkzeug.utils import secure_filename
-from app.auth.views import admin_login_required
 from . import leads
-from .forms import LeadsQueryForm
+from .forms import CompaniesQueryForm, ContactsQueryForm, LeadsQueryForm
 from .. import app, db
-from ..models import User, Subscription, Lead, LeadRequest
+from ..models import User, Subscription, Company, Contact, CompanyLead, ContactLead, LeadRequest, from_sql, get_list_companies_activities
+
 # from ...bin import all_utils
 
-def from_sql(row):
-	"""Translates a SQLAlchemy model instance into a dictionary"""
-	if not row:
-		return []
-	else:	
-	    data = row.__dict__.copy()
-	    data['id'] = row.id
-	    data.pop('_sa_instance_state')
-	    return data
 
 
 
 @leads.route('/generator', methods=['POST', 'GET'])
+# @leads.route('/prospectly-generator', methods=['POST', 'GET'])
 @login_required
+@pro_plan_required
+@valid_subscription_required
+def view_leads():
+	comp_lead_form = CompaniesQueryForm()
+	
+	# The following chunk is to handle when there is multiple pages to display 
+	leads_ids = session.get('leads_ids') if session.get('leads_ids') else None
+	leads_type = request.args.get('leads_type') if request.args.get('leads_type') else None
+	token = int(request.args.get('page_token')) if request.args.get('page_token') else 0
+
+	if request.method=='POST':
+		data = request.form.to_dict(flat=True)
+		leads_ids, leads_type = get_leads_ids(data)
+		session.pop('leads_ids') if session.get('leads_ids') else None
+		session['leads_ids'] = leads_ids
+		# print('session (POST): {}'.format(session.get('leads_ids')))
+		 
+	leads_to_show, next_page_token, previous_page_token = get_displayed_leads(leads_ids, leads_type, token, limit=2) 
+	# print('leads to display: {}'.format(leads_to_show))
+	return render_template('generator.html', comp_lead_form=comp_lead_form, leads=leads_to_show, lead_type=leads_type, next_page_token=next_page_token, previous_page_token=previous_page_token)
+
+
+
+
+@leads.route('/import-entreprises', methods=['POST'])
+@login_required
+@pro_plan_required
+@valid_subscription_required
+def upload_company_leads():
+	data = request.get_json()
+	print('data: {}'.format(data))
+
+	if not data.get('leads_ids'):
+		return make_response(url_for('leads.view_leads'), 400)
+
+	for lead_id in data.get('leads_ids'):
+		lead = from_sql(CompanyLead.query.get(lead_id))
+
+		# Check if the queried company_lead already exists in user's Company's table (then update values) or if we have to create it
+		query1 = db.session.query(LeadRequest.company_id).filter_by(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==lead.id) # checking if the user already requested a contact from that company. If yes we use the same Company's id
+		query2 = db.session.query(CompanyLead.id).filter_by(Company.user_id==current_user.id, Company.name==company_lead.name)
+		
+		if query1.first():
+			company = Company.query.get(query1.first())
+			for k,v in lead.items():
+				setattr(company, k, v)
+		elif query2.first():
+			company = Company.query.get(query2.first())
+			for k,v in lead.items():
+				setattr(company, k, v)
+		else:
+			lead.pop('creation_date')
+			lead['user_id'] = current_user.id
+
+			if data['activity_field']:
+				lead['activity_field'] = data.get('activity_field')
+			else:
+				lead['activity_field'] = lead['activity_field1']
+
+			lead.pop('activity_field1')
+			lead.pop('activity_field2')
+			lead.pop('activity_field3')
+			
+			company = Company(**lead)
+			db.session.add(company)
+	
+	db.session.commit()	
+		
+	return make_response(url_for('leads.view_leads'), 400)
+
+
+
+@leads.route('/import-contacts', methods=['POST'])
+@pro_plan_required
+@valid_subscription_required
+def upload_contact_leads():
+	data = request.get_json()
+	print('Upload Contact data: {}'.format(data))
+
+	for lead_id in data.get('leads_ids'):
+		contact_lead = from_sql(ContactLead.query.get(lead_id))
+		contact_lead.pop('creation_date')
+		company_lead = from_sql(CompanyLead.query.get(contact_lead.get('company_id')))
+		contact_lead.pop('company_id')
+		company_lead.pop('creation_date')
+
+		if data['activity_field']:
+			company_lead['activity_field'] = data.get('activity_field')
+		else:
+			company_lead['activity_field'] = company_lead['activity_field1']
+
+		# Look for the contact's associated company in user's companies 
+		query1 = db.session.query(LeadRequest.company_id).filter_by(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==company_lead.id) # checking if the user already requested a contact from that company. If yes we use the same Company's id
+		query2 = db.session.query(CompanyLead.id).filter_by(Company.user_id==current_user.id, Company.name==company_lead.name)
+		
+		if query1.first():
+			contact_lead['company_id'] = query1.first()
+		elif query2.first():
+			contact_lead['company_id'] = query2.first()
+		# create the company if doesnt found in Company table (but limit the information that we provide to 'name, activity, postal_code, city')
+		else:
+			company = Company(name=company_lead.get('name'), activity_field=company_lead.get('activity_field'),
+							  city=company_lead.get('city'), postal_code=company_lead.get('postal_code'))
+			db.session.add(company)
+			db.session.flush()
+			contact_lead['company_id'] = company.id 
+		
+		contact = Contact(**contact_lead) 
+
+		print('contact_lead: {}'.format(contact_lead))
+		print('company_lead: {}'.format(company_lead))
+
+	return ''
+
+
+
+@leads.route('/generator2', methods=['POST', 'GET'])
+@admin_login_required
 def query():
 	form = LeadsQueryForm()	
 	cu = current_user
@@ -37,8 +162,8 @@ def query():
 	user_subscription = cu.subscriptions.order_by(Subscription.subscription_date.desc()).first()
 
 	if not user_subscription or not user_subscription.is_valid:
-		flash('Vous devez souscrire a un abonnement pour beneficier de ce service')
-		return redirect(url_for('landing.pricing'))
+		flash('Vous devez souscrire à un abonnement pour bénéficier de ce service')
+		return redirect(url_for('main.pricing'))
 
 	output_max_len = user_subscription.plan.limit_daily_query
 	output_max_len = 5
@@ -64,7 +189,7 @@ def query():
 		else:
 			request_filters = [form.activity_field.data, form.postal_code.data]# get filter for the query from the form fields
 			excluding_leads = [record.lead_id for record in cu.leads_requested.all()]# id of leads already requested to be excluded from the result
-			query_output_all = Lead.query.filter(Lead.company_activity_field==request_filters[0], Lead.company_postal_code.like(request_filters[1]+'%'), ~Lead.id.in_(excluding_leads)).all()
+			query_output_all = Lead.query.filter(Lead.company_activity_field==request_filters[0], Lead.company_postal_code.like(request_filters[1]+'%'), ~Lead.id.in_(excluding_leads)).all()# use ~ not_() to negate 
 			
 			# No new result for that query
 			if not query_output_all:
@@ -97,12 +222,12 @@ def query():
 		# 	return redirect(url_for('auth.login'))# change redirect to error page 505
 	# flash('left to query: {}'.format(output_max_len-len(session['todays_output'])))
 	flash(session['todays_output'])
-	return render_template('leads/generator.html', form=form, request_output=session['todays_output'])
+	return render_template('generator.html', comp_lead_form=form, request_output=session['todays_output'])
 
 
 
 @leads.route('/telechargement')
-@login_required
+@admin_login_required
 def download():
 	# Transform session value into dataframe and reorder the columns
 	df = pd.DataFrame(session['todays_output'])	
@@ -114,33 +239,6 @@ def download():
 	# Drop the session variable
 	session.pop('todays_output', None)
 	return output
-
-
-
-# To be placed within utils
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() == 'csv'
-
-
-# To be placed within utils
-def clean_leads_input(leads_df):
-	'''
-		This function aims at cleaning the company_postal_code and company_phone columns as well as removing nan.
-		company_postal_code: 
-			pandas usually read it as integer, hence we return the first 5 digits as a string.
-			return series of type str
-
-		company_phone:
-			first remove '.' and '-' from the phone number and make sure every number starts with a 0.
-			return series of type str wiht phone number in a format 0XXXXXXXXX
-	'''
-	df = leads_df
-	df['company_postal_code'] = df.company_postal_code.apply(lambda x: str(x)[:5]) 
-	df['company_phone'] = df.company_phone.str.replace('\.', '').str.replace('-', '').\
-	apply(lambda x: '0' + str(x) if not (x is np.nan or str(x).startswith('0')) else x)
-	df = df.replace(np.nan, '')
-	return df
 
 
 
@@ -228,3 +326,113 @@ def import_csv():
 		return redirect(url_for('main.home'))
 
 	return render_template('leads/upload.html', uploaded=session['uploaded'])
+
+
+
+def get_displayed_leads(leads_ids, leads_type, cursor, limit):
+	"""
+	"""	
+	print('ids: {}'.format(leads_ids))
+	print('type: {}'.format(leads_type))
+	print('cursor: {}'.format(cursor))
+	print('limit: {}'.format(limit))
+	if leads_type is None:
+		leads_to_show = []
+	else:
+		if leads_type=='company':
+			leads_to_show = db.session.query(CompanyLead).filter(CompanyLead.id.in_(leads_ids)).offset(cursor).limit(limit+1).all()
+		else:
+			leads_to_show = db.session.query(ContactLead).filter(ContactLead.id.in_(leads_ids)).offset(cursor).limit(limit+1).all()
+
+	next_page_token = cursor + limit if len(leads_to_show) > limit else None
+	previous_page_token = cursor - limit if cursor >= limit else None	
+	print('next_page_token: {}'.format(next_page_token))
+	print('previous_page_token: {}'.format(previous_page_token))
+	return (leads_to_show[:limit], next_page_token, previous_page_token)
+
+
+
+def get_leads_ids(data):
+	"""
+	"""	
+	max_exports = current_user.subscriptions.order_by(Subscription.subscription_date.desc()).first().plan.limit_daily_query
+	today_requests = [elt.id for elt in current_user.requested_leads.all() if elt.query_date.date()==datetime.utcnow().date()]
+	remaining_exports = min(max_exports, max_exports-len(today_requests))
+	# Set a random seed to assure the same results if request is launched again
+	random.seed(int(datetime.utcnow().strftime('%Y%m%d'))*current_user.id)	
+	results_len = list(np.random.randint(low=6, high=14, size=1))[0]*10 # number of pages to be displayed (random) * number of results per page
+	results_len = 3
+
+	# Neet to create a list from activity_field input as it will be passed in a "in_" filter which only supports list
+	activity_filter = [data.get('company_activity_field')] if data.get('company_activity_field') else get_list_companies_activities()
+	print("activity: {}".format(activity_filter))
+
+	# User requested company leads
+	if data.get('leads_type') == 'company':
+		requested_companies_ids = [elt.company_lead_id for elt in current_user.requested_leads.all() if not elt.company_lead_id is None]
+		# Query by filter on activity_field and removing previous query results
+		leads_query = db.session.query(CompanyLead).filter((CompanyLead.activity_field1.in_(activity_filter) | 
+												   CompanyLead.activity_field2.in_(activity_filter) |
+												   CompanyLead.activity_field3.in_(activity_filter) ),
+												   ~CompanyLead.id.in_(requested_companies_ids))
+		# If exists, add location filter
+		if data.get('company_location'):
+			location_filter = "{}%".format(data.get('company_location'))
+			print("location: {}".format(location_filter))
+			leads_query = leads_query.filter(CompanyLead.postal_code.like(location_filter))			
+	
+	# User requested contact leads	
+	else:
+		requested_contacts_ids = [elt.contact_lead_id for elt in current_user.requested_leads.all() if not elt.contact_lead_id is None]
+		# Get company with required filed of activity
+		sub_query  = db.session.query(CompanyLead).filter(CompanyLead.activity_field1.in_(activity_filter) | 
+											   			  CompanyLead.activity_field2.in_(activity_filter) |
+											   			  CompanyLead.activity_field3.in_(activity_filter) ).subquery()
+		if data.get('location'):
+			location_filter = "{}%".format(data.get('location'))
+			print("location: {}".format(location_filter))
+			sub_query = sub_query.filter(CompanyLead.postal_code.like(location_filter))
+
+		leads_query = db.session.query(ContactLead).filter(~ContactLead.id.in_(requested_contacts_ids))
+		leads_query = leads_query.join(sub_query, ContactLead.company_id==sub_query.c.id)
+
+		if data.get('position'):
+			position_filter = "%{}%".format(data.get('position'))
+			print("position: {}".format(position_filter))
+			leads_query = leads_query.filter(ContactLead.position.like(position_filter))
+	
+	requested_leads_id = [elt.id for elt in leads_query.all() ] 
+	# print('all_ids: {}'.format(requested_leads_id))
+	random_leads_id = random.sample(requested_leads_id, min(len(requested_leads_id), results_len))
+	# print('random_ids: {}'.format(random_leads_id))
+	return (random_leads_id, data.get('leads_type'))
+
+
+
+
+# To be placed within utils
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() == 'csv'
+
+
+
+
+# To be placed within utils
+def clean_leads_input(leads_df):
+	'''
+		This function aims at cleaning the company_postal_code and company_phone columns as well as removing nan.
+		company_postal_code: 
+			pandas usually read it as integer, hence we return the first 5 digits as a string.
+			return series of type str
+
+		company_phone:
+			first remove '.' and '-' from the phone number and make sure every number starts with a 0.
+			return series of type str wiht phone number in a format 0XXXXXXXXX
+	'''
+	df = leads_df
+	df['company_postal_code'] = df.company_postal_code.apply(lambda x: str(x)[:5]) 
+	df['company_phone'] = df.company_phone.str.replace('\.', '').str.replace('-', '').\
+	apply(lambda x: '0' + str(x) if not (x is np.nan or str(x).startswith('0')) else x)
+	df = df.replace(np.nan, '')
+	return df

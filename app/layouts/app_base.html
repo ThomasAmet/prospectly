@@ -48,6 +48,8 @@
     <link href="{{ url_for('static', filename='js/plugins/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <!-- CSS Files -->
     <link href="{{ url_for('static', filename='css/argon.css') }}" rel="stylesheet">
+    <!--== pricing css -->
+      <!-- <link href="{{ url_for('static', filename='css/pricing.css') }}" rel="stylesheet" type="text/css">   -->
     <!-- Header / Flash messages styles -->
     <style type="text/css">
     #offerBar { background: #de2e2e; background: rgb(46, 207, 178); text-align: left; min-height: 60px; z-index: 999999999; font-size: 16px; color: #fff; padding: 18px 5%; font-weight: 400; display: block; position: relative; top: 0px; width: 100%; box-shadow: 0 6px 13px -4px rgba(0, 0, 0, 0.25); }
@@ -123,13 +125,13 @@
     </div>
     {% endblock header %}
     
+    <div class="container-fluid mt--7">
+      {% block main_content %}
+      {% endblock main_content %}
 
-    {% block main_content %}
-    {% endblock main_content %}
-
-    {% block footer %}
-    {% endblock footer %}
-
+      {% block footer %}
+      {% endblock footer %}
+    </div>
   </div>
 
   {% block javascripts %}
@@ -146,6 +148,7 @@
 
 
     <!-- Optional JS -->
+    <!-- <script src="{{ url_for('static', filename='js/vendor/select2/dist/js/select2.min.js') }}"></script> -->
     <script src="{{ url_for('static', filename='js/vendor/chart.js/dist/Chart.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/vendor/chart.js/dist/Chart.extension.js') }}"></script>
     <script src="{{ url_for('static', filename='js/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>

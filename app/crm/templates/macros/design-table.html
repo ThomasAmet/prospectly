@@ -1,0 +1,106 @@
+{% macro render_commercial_stage(latest_step) %}
+
+  {% if latest_step.status.name=='En cours' %}
+	  <div class="progress-wrapper pt-0">
+	    <div class="progress-info">
+	        <span>{{latest_step.commercial_stage.name}}</span>
+	    </div>
+	    <div class="d-flex align-items-center">
+	      <div>
+	        <div class="progress">
+	          <div class="progress-bar bg-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{latest_step.commercial_stage.closing_perc*100}}%;">
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+  {% elif latest_step.status.name=='En attente' %}
+  	  <div class="progress-wrapper pt-0">
+	    <div class="progress-info">
+	        <span>{{latest_step.commercial_stage.name}}</span>
+	    </div>
+	    <div class="d-flex align-items-center">
+	      <div>
+	        <div class="progress">
+	          <div class="progress-bar bg-warning" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{latest_step.commercial_stage.closing_perc*100}}%;">
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+  {% elif latest_step.status.name=='A faire' %}
+  	  <div class="progress-wrapper pt-0">
+	    <div class="progress-info">
+	        <span>{{latest_step.commercial_stage.name}}</span>
+	    </div>
+	    <div class="d-flex align-items-center">
+	      <div>
+	        <div class="progress">
+	          <div class="progress-bar bg-info" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{latest_step.commercial_stage.closing_perc*100}}%;">
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+  {% elif latest_step.status.name=='Gagné' %}
+  	  <div class="progress-wrapper pt-0">
+	    <div class="progress-info">
+	        <span>{{latest_step.commercial_stage.name}}</span>
+	    </div>
+	    <div class="d-flex align-items-center">
+	      <div>
+	        <div class="progress">
+	          <div class="progress-bar bg-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{latest_step.commercial_stage.closing_perc*100}}%;">
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+  <!--  Status == Annule -->
+  {% else %}
+  	<div class="progress-wrapper pt-0">
+	    <div class="progress-info">
+	        <span>{{latest_step.commercial_stage.name}}</span>
+	    </div>
+	    <div class="d-flex align-items-center">
+	      <div>
+	        <div class="progress">
+	          <div class="progress-bar bg-danger" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{latest_step.commercial_stage.closing_perc*100}}%;">
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+  {% endif %}
+
+{% endmacro %}
+
+{% macro render_status(latest_step) %} 
+  {% if latest_step.status.name=='En cours' %}
+	<span class="badge badge-dot mr-4">
+	  <i class="bg-primary"></i>
+	  {{latest_step.status.name}}
+	</span>
+  {% elif latest_step.status.name=='En attente' %}
+  	<span class="badge badge-dot mr-4">
+	  <i class="bg-warning"></i>
+	  {{latest_step.status.name}}
+	</span>
+  {% elif latest_step.status.name=='A faire' %}
+  	<span class="badge badge-dot mr-4">
+	  <i class="bg-info"></i>
+	  {{latest_step.status.name}}
+	</span>
+  {% elif latest_step.status.name=='Gagné' %}
+  	<span class="badge badge-dot mr-4">
+	  <i class="bg-success"></i>
+	  {{latest_step.status.name}}
+	</span>
+  <!--  Status == Annule -->
+  {% else %}
+  	<span class="badge badge-dot mr-4">
+	  <i class="bg-danger"></i>
+	  {{latest_step.status.name}}
+	</span>
+  {% endif %}
+ {% endmacro %}

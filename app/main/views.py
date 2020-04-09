@@ -11,6 +11,8 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from werkzeug.security import generate_password_hash
+
 
 @main.route('/')
 def index():
@@ -30,7 +32,12 @@ def home():
 
 @main.route('/offres')
 def pricing():
-	return render_template('pricing.html', title='Prospectly - Offre')
+	plans_ids = {'monthly_basic':app.config.get('PLAN_MONTHLY_BASIC'),
+				 'yearly_basic':app.config.get('PLAN_YEARLY_BASIC'),
+				 'monthly_pro':app.config.get('PLAN_MONTHLY_PRO'),
+				 'yearly_pro':app.config.get('PLAN_YEARLY_PRO')
+				}
+	return render_template('pricing.html', title='Prospectly - Offre', plans_ids=plans_ids)
 
 
 

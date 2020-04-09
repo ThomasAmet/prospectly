@@ -3,7 +3,7 @@ from dotenv import load_dotenv, find_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# Load envrion variables from .env in local
+# Load envrion variables from .env in local mode
 if os.environ.get('GAE_INSTANCE'):
 	load_dotenv(find_dotenv())
 
@@ -56,7 +56,7 @@ class BaseConfig():
     'img-src':'\'self\'  data: *'
 	}
 
-	SESSION_COOKIE_SAMESITE='Strict'
+	SESSION_COOKIE_SAMESITE='Strict' # life saver
 
 	# MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
 	# MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
@@ -77,6 +77,8 @@ class TestConfig(BaseConfig):
 	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
 	PLAN_MONTHLY_BASIC = 'plan_GggQmCKZATWq0c'
 	PLAN_YEARLY_BASIC = 'plan_GggP03CwhdtuYk'
+	PLAN_MONTHLY_PRO = 'plan_H2mMV68SC3LiFJ'
+	PLAN_YEARLY_PRO = 'plan_H2mNrqykrSR9Bf'
 	# stripe login
 	# stripe listen --forward-to localhost:9191/auth/paiement-reussi
 	STRIPE_WEBHOOK_SECRET = 'whsec_jouz3Ee2M3Mqzc7xKj8ViZDhy8Zfr10E'
@@ -96,6 +98,8 @@ class DevelopmentConfig(BaseConfig):
 	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
 	PLAN_MONTHLY_BASIC = 'plan_GggQmCKZATWq0c'
 	PLAN_YEARLY_BASIC = 'plan_GggP03CwhdtuYk'
+	PLAN_MONTHLY_PRO = 'plan_H2mMV68SC3LiFJ'
+	PLAN_YEARLY_PRO = 'plan_H2mNrqykrSR9Bf'
 	STRIPE_WEBHOOK_SECRET = 'whsec_jouz3Ee2M3Mqzc7xKj8ViZDhy8Zfr10E'
 
 	
@@ -133,6 +137,8 @@ class ProductionConfig(BaseConfig):
 	STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 	PLAN_MONTHLY_BASIC = os.getenv('PLAN_MONTHLY_BASIC')
 	PLAN_YEARLY_BASIC = os.getenv('PLAN_YEARLY_BASIC')
+	PLAN_MONTHLY_PRO = os.getenv('PLAN_MONTHLY_PRO')
+	PLAN_YEARLY_PRO = os.getenv('PLAN_YEARLY_PRO')
 
 	
 	

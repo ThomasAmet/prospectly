@@ -1,0 +1,123 @@
+<!-- <div class="modal fade" id="upgradeAccountModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+{% macro render_upgrade_choices(monthly_cost, yearly_cost) %}
+<div class="modal fade" id="upgradeAccountModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <!-- <div class="card card-pricing bg-gradient-success zoom-in shadow-lg rounded border-0 text-center mb-4"> -->
+      <div class="card card-pricing bg-gradient-success rounded border-0 text-center mb--2">
+        <div class="card-header bg-transparent">
+          <h4 class="text-uppercase ls-1 text-white py-3 mb-0 px-0 mx-0">Passez à</h4>
+          <h1 class="text-white text-uppercase ">Prospectly<sup><strong> +</strong></sup></h1>
+          <div class="row text-center">
+            <div class="col-lg-12 col-md-12 mt-4 ml-auto mr-auto">
+              <h5 >Choix du paiement</h5>
+              <div class='row align-items-center mb-2'>
+                <label class="ml-auto my-auto" id="monthly-choice">mensuel</label>
+                <label class="custom-toggle custom-toggle-primary mx-2 my-auto">
+                  <input type="checkbox" checked id='checkboxUpgradeChoice'>
+                  <span class="custom-toggle-slider rounded-circle" data-label-off="" data-label-on=""></span>
+                </label>   
+                <label class="mr-auto my-auto" id="yearly-choice">annuel</label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="card-body px-lg-7">
+          <div class='yearlyChoice'>
+            <h3 class='pr-0 mr-0 display-1 text-white' style="display: inline;">159<sup>€</sup><span style="font-size: 0.5em; display: inline;">/mois</span></h3>
+          </div>
+          <div class='monthlyChoice d-none'>
+            <h3 class='pr-0 mr-0 display-1 text-white' style="display: inline;">199<sup>€</sup><span style="font-size: 0.5em; display: inline;">/mois</span></h3>
+          </div>
+          <!-- <div class="display-1 text-white">159€<span style="font-size: 0.4em">/mois</span></div> -->
+          <!-- <span class="text-white">par mois</span> -->
+          <ul class="list-unstyled my-4">
+            <li>
+              <div class="d-flex align-items-center">
+                <div>
+                  <div class="icon icon-xs icon-shape bg-white shadow rounded-circle text-muted">
+                    <i class="ni ni-spaceship"></i>
+                  </div>
+                </div>
+                <div>
+                  <span class="pl-2 text-white">Débloquez le générateur de leads</span>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="d-flex align-items-center">
+                <div>
+                  <div class="icon icon-xs icon-shape bg-white shadow rounded-circle text-muted">
+                    <i class="ni ni-hat-3"></i>
+                  </div>
+                </div>
+                <div>
+                  <span class="pl-2 text-white">Coaching de votre processus de vente</span>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="d-flex align-items-center">
+                <div>
+                  <div class="icon icon-xs icon-shape bg-white shadow rounded-circle text-muted">
+                    <i class="fas fa-hdd"></i>
+                  </div>
+                </div>
+                <div>
+                  <span class="pl-2 text-white">Accès à plus de 25.000 prospects</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <!-- Display/Hide button too -->
+          <div class='yearlyChoice'>
+            <button type="button" class="btn btn-secondary mb-3">
+              <a href="{{url_for('auth.upgrade_account', type='yearly')}}">Passez à la prospection 2.0</a>
+            </button>
+          </div>
+          <div class='monthlyChoice d-none'>
+            <button type="button" class="btn btn-secondary mb-3">
+              <a href="{{url_for('auth.upgrade_account', type='monthly')}}">Passez à la prospection 2.0</a>
+            </button>
+          </div>
+          <!-- End toggle -->
+        </div>
+        <div class="card-footer bg-transparent">
+          <div data-toggle="collapse" data-target="#collapseOne" aria-expanded="false">
+            <h4 class="text-white">Informations tarifaires</h4>
+          </div>
+          <div class='mt-3 yearlyChoice collapse' id="collapseOne" aria-labelledby="headingOne">
+            <p>En choisissant de souscrire un notre abonnement premium, vous acceptez d'être prélevé de 1908€ annuellement.</p><br>
+            <p>Le changement d'abonnement sera effectif immédiatement. Vous serez prélevé d'un montant de {{yearly_cost}}€, correspondant à la différence de tarif avec votre ancien abonnement, calculé au prorata depuis votre dernier paiement.</p>
+          </div>
+          <div class='mt-3 monthlyChoice d-none collapse' id="collapseOne" aria-labelledby="headingOne">
+            <p>En choisissant de souscrire un notre abonnement premium, vous acceptez d'être prélevé 199€ à une fréquence mensuelle.</p><br>
+            <p>Le changement d'abonnement sera effectif immédiatement. Vous serez prélevé d'un montant de {{monthly_cost}}€, correspondant à la différence de tarif avec votre ancien abonnement, calculé au prorata depuis votre dernier paiement.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}

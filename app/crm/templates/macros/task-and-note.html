@@ -1,4 +1,4 @@
-{% macro render_task_and_note(form, latest_step) %}
+{% macro render_task_and_note(form, opportunity, latest_step) %}
 
 
   
@@ -20,11 +20,11 @@
         <div class="form-group- mb-3">
           <label class="form-control-label">Note</label>
           <!-- <textarea rows="4" class="form-control form-control-alternative">Une petite note concernant l'etape commerciale en cours ...</textarea> -->
-          {% if latest_step %}
-          {% set f = form.note_content.process_data(latest_step.notes.first().content) %}
+          {% if opportunity %}
+          {% set f = form.note_content.process_data(opportunity.notes.first().content) %}
           {{form.note_content(class="form-control form-control-alternative note-form-group")}}
           {% else %}
-          {{form.note_content(class="form-control form-control-alternative note-form-group", placeholder='Ici, on note tout ce qui peut etre nécessaire...')}}
+          {{form.note_content(class="form-control form-control-alternative note-form-group", placeholder='Ici, on note tout ce qui peut être nécessaire...')}}
           {% endif %}
         </div>
         </div>
@@ -91,7 +91,7 @@
           <label class="form-control-label">Descriptif</label>
           {% if latest_step %}  
             {% set f = form.task_content.process_data(latest_step.tasks.first().content) %}
-            {{ form.task_content(class="form-control form-control-alternative") }}         
+            {{ form.task_content(class="form-control form-control-alternative") }} 
           {% else %}  
             {{ form.task_content(class="form-control form-control-alternative", placeholder='Descriptif de la tache a effectuer...') }}
           {% endif %}

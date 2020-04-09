@@ -1,0 +1,125 @@
+  {% extends 'main_base.html' %}
+<!--header start-->
+{% block header_attribs %} id="site-header" class="header header-2"{% endblock header_attribs %}
+
+
+<!--navbar start-->
+{% block navbar %}
+  {{super()}}
+{% endblock navbar %}
+
+
+
+{% block top_content %}
+<!-- <section class="page-title o-hidden pos-r md-text-center" data-bg-color="#fbf3ed"> -->
+<section class="page-title o-hidden pos-r md-text-center" data-bg-color="#dad5ff">
+  <!-- <canvas id="canvas"></canvas> -->
+    <div class="page-title-pattern"><img class="img-fluid" src="{{url_for('static', filename='images/bg/11.png')}}" alt=""></div>
+  <div class="row text-center">
+    <div class="col-lg-8 col-md-12 ml-auto mr-auto">
+      <div class="section-title mb-auto mt-auto">         
+        <h2>Bêta Inscription</h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock top_content %}
+
+<!--page title end-->
+
+
+<!--body content start-->
+{% block main_content %}
+
+<div class="page-content">
+
+<!--login start-->
+
+<section class="register pos-r o-hidden pt-0 mt-0">
+  <div class="bg-animation">
+    <img class="zoom-fade" src="{{url_for('static', filename='images/pattern/03.png')}}" alt="">
+  </div>
+  <div class="container">
+    <div class="row text-center">
+      <div class="col-lg-8 col-md-12 ml-auto mr-auto">
+        <div class="section-title">
+          <div class="title-effect">
+            <div class="bar bar-top"></div>
+            <div class="bar bar-right"></div>
+            <div class="bar bar-bottom"></div>
+            <div class="bar bar-left"></div>
+          </div>
+            <h6>Créez un compte bêta</h6>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    <div class="form container text-center">
+      <div class="col-lg-8 col-md-10 ml-auto mr-auto">
+        <div class="register-form text-center">
+          <form role='form' id="register-form" action="{{url_for('auth.beta_signup')}}" method='post'>
+            {{ form.hidden_tag() }}
+            <div class="messages">
+              {% if messages %}
+              {% endif %}
+            </div>
+            <div class="row">
+              <div class="col-md-6 mx-auto">
+                <div class="form-group">
+                    {{ form.first_name(placeholder="Prénom",class="form-control") }}
+                  <div class="help-block with-errors"></div>
+                    {% for error in form.first_name.errors %}
+                      {{error}}                    
+                    {% endfor %}
+                </div>
+              </div>
+            </div>
+            <div class='row'>
+              <div class="col-md-6 mx-auto">
+                <div class="form-group">
+                    {{ form.last_name(placeholder="Nom",class="form-control") }}
+                  <div class="help-block with-errors"></div>
+                    <ul class=errors>
+                    {% for error in form.last_name.errors %}
+                      </li>{{error}}</li>                    
+                    {% endfor %}
+                    </ul>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mx-auto">
+                <div class="form-group">
+                  <!-- <input id="form_email" type="email" name="email" class="form-control" placeholder="Email" required="required" data-error="Un email valide est necessaire.">
+                  <div class="help-block with-errors"></div> -->
+                  {{ form.email(placeholder="Email",class="form-control") }}
+                  <div class="help-block with-errors"></div>
+                    {% for error in form.email.errors %}
+                      {{error}}                    
+                    {% endfor %}
+                </div>
+              </div>
+            </div>
+            <input id='plan_name' name='plan_name' type='hidden' value="{{plan_name}}">
+
+            <div class="row">
+              <div class="col-md-12">
+                <button type="submit" name="register" class="btn btn-theme btn-circle mb-3 mt-3" data-text="Je m'inscris">
+                <span>N</span><span>o</span><span>u</span><span>v</span><span>e</span><span>a</span><span>u</span>
+                <span>c</span><span>o</span><span>m</span><span>p</span><span>t</span><span>e</span></a></button>
+                <!-- <input type="submit" name='register' class="btn btn-theme btn-circle mb-3 mt-3"> -->
+                <!-- {{ form.submit(class="btn btn-theme btn-circle mb-3 mt-3") }} -->
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+</div>
+{% endblock main_content %}

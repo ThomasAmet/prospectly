@@ -214,7 +214,7 @@ class OpportunityStep(db.Model):
 	last_update = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def __repr__(self):
-		return "<Opp. {} on stage {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stages.name, self.status.name, self.creation_date)
+		return "<Opp. {} on stage {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stage.name, self.status.name, self.creation_date)
 
 
 

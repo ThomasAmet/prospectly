@@ -123,7 +123,6 @@ def delete_company():
 
 @crm.route('/entreprise/<id>/edition', methods=['GET','POST'])
 @login_required
-@valid_subscription_required
 def edit_company(id):			
 	company = Company.query.get(id)
 	data = request.form.to_dict(flat=True)
@@ -150,7 +149,6 @@ def edit_company(id):
 
 @crm.route('/contacts/liste', methods=['GET'])
 @login_required
-@valid_subscription_required
 def view_contacts_list():
 	add_contact_form = AddContactForm()
 	edit_contact_form = EditContactForm()
@@ -167,7 +165,6 @@ def view_contacts_list():
 
 @crm.route('/contacts/ajout', methods=['POST'])
 @login_required
-@valid_subscription_required
 def add_contact():
 
 	if request.method == 'POST':
@@ -213,7 +210,6 @@ def add_contact():
 
 @crm.route('/contacts/suppression', methods=['POST'])
 @login_required
-@valid_subscription_required
 def delete_contact():
 
 	if request.form.get('contact_id'):
@@ -238,7 +234,6 @@ def delete_contact():
 
 @crm.route('/contact/<id>/edition', methods=['POST'])
 @login_required
-@valid_subscription_required
 def edit_contact(id):
 	contact = Contact.query.get(id)
 	# Return to list of contact for GET request or when trying to edit someone else contact
@@ -270,7 +265,6 @@ def edit_contact(id):
 
 @crm.route('/opportunites/liste')
 @login_required
-@valid_subscription_required
 def view_opportunities_list():	
 	add_form = AddOpportunityForm()
 	edit_form = EditOpportunityForm()
@@ -297,7 +291,6 @@ def view_opportunities_list():
 
 @crm.route('/opportunites/ajout', methods=['GET','POST'])
 @login_required
-@valid_subscription_required
 def add_opportunity(): 
 	if request.method=='GET':
 		return redirect(url_for('crm.view_opportunities_list'))
@@ -358,7 +351,6 @@ def add_opportunity():
 
 @crm.route('/oppportunites/suppression', methods=['POST','GET'])
 @login_required
-@valid_subscription_required
 def delete_opportunity():
 	# try:
 	if request.form.get('opportunity_id'):
@@ -382,7 +374,6 @@ def delete_opportunity():
 
 @crm.route('/opportunites/<id>/edition', methods=['POST'])
 @login_required
-@valid_subscription_required
 def edit_opportunity(id):
 
 	data = request.form.to_dict(flat=True)

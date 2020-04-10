@@ -37,7 +37,6 @@ from ..models import User, Subscription, Company, Contact, CompanyLead, ContactL
 # @leads.route('/prospectly-generator', methods=['POST', 'GET'])
 @login_required
 @pro_plan_required
-@valid_subscription_required
 def view_leads():
 	comp_lead_form = CompaniesQueryForm()
 	

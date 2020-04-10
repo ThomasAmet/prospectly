@@ -42,9 +42,8 @@ def admin_login_required(func):
 def pro_plan_required(func):
 	@wraps(func)
 	def decorated_view(*args, **kwargs):
-		user = User.query.get(current_user.id)
-		plan = user.subscriptions.order_by(Subscription.subscription_date.desc()).first().plan
-		if not plan.lead_generator:
+		latest_sub = db.session.query(Subscription).filter(Subscription.user_id==current_user.id).order_by(Subscription.subscription_date.desc()).first()
+		if not latest_sub.plan.lead_generator:
 			link = url_for('auth.profile')
 			message = Markup("Pour accéder au générateur de prospects, vous devez souscrire à un abonnement <a href={}>Prospectly<sup><strong> +</strong></sup></a>.".format(link))
 			flash(message)
@@ -136,68 +135,68 @@ def signup():
 	form = RegistrationForm()
 
 	# POST method part
-	try:
-		if request.method=='POST':
-			print(dict(request.form))
-			plan = Plan.query.filter_by(stripe_id=request.form.get('plan_stripe_id')).first() #
-			user = User.query.filter_by(email=request.form.get('email')).first()
-			print('Plan: {}'.format(plan.__dict__.copy()))
-			# Case to handle custome who enter email but didn't pay
-			if user:
-				print('Exisiting user!')
-				print(user.__dict__.copy())
-				print(Subscription.query.filter_by(user_id=user.id).first().__dict__.copy())
-				# If a subscription is associated with a user, it means customer paid so we redirect to login
-				if Subscription.query.filter_by(user_id=user.id).first():
-					print('User with subscription')
-				# # If user password exists, it means customer paid so we redirect to login
-				# if user.last_token:
-					flash('Oups... Cet email est utilisé. Connectez-vous ou choisissez un autre email.')
-					return Response(url_for('auth.signup', plan_stripe_id=request.form.get('plan_stripe_id')), status=404) # use 404 to throw an error in ajax call and not redirect to stripe session
-				# Else retrieve user and update infos in both database and stripe
-				else:
-					print('Updating user infos')
-					user.first_name = request.form.get('first_name').capitalize()
-					user.last_name = request.form.get('last_name').capitalize()
-					user.set_username()
-					customer = stripe.Customer.retrieve(user.stripe_customer_id)
-					customer.name = request.form.get('first_name').capitalize() + ' ' + request.form.get('last_name').capitalize()		
-			# If User is none, create a new one		
+# try:
+	if request.method=='POST':
+		print(dict(request.form))
+		plan = Plan.query.filter_by(stripe_id=request.form.get('plan_stripe_id')).first() #
+		user = User.query.filter_by(email=request.form.get('email')).first()
+		print('Plan: {}'.format(plan.__dict__.copy()))
+		# Case to handle custome who enter email but didn't pay
+		if user:
+			print('Exisiting user!')
+			print(user.__dict__.copy())
+			# If a subscription is associated with a user, it means customer paid so we redirect to login
+			if Subscription.query.filter_by(user_id=user.id).first():
+				print('User with subscription')
+				# print(Subscription.query.filter_by(user_id=user.id).first().__dict__.copy())
+			# # If user password exists, it means customer paid so we redirect to login
+			# if user.last_token:
+				flash('Oups... Cet email est utilisé. Connectez-vous ou choisissez un autre email.')
+				return Response(url_for('auth.signup', plan_stripe_id=request.form.get('plan_stripe_id')), status=404) # use 404 to throw an error in ajax call and not redirect to stripe session
+			# Else retrieve user and update infos in both database and stripe
 			else:
-				print('New user!')
-				customer = stripe.Customer.create(
-					name = request.form.get('first_name').capitalize() + ' ' + request.form.get('last_name').capitalize(),
-					email=request.form.get('email').lower()
-				)
-				user = User(first_name=form.first_name.data.capitalize(),
-							last_name=form.last_name.data.capitalize(),
-							email=form.email.data.lower(), stripe_customer_id=customer.id)
-				db.session.add(user)
-
-			db.session.commit()
-			print('Customer succesfully created!')
-			stripe_session = stripe.checkout.Session.create(
-				customer = customer.id,
-				# customer_email = customer.email,
-				payment_method_types=['card'],
-				subscription_data={
-					'items': [{
-						'plan':plan.stripe_id,
-					}],
-					# 'trial_period_days':int(plan.free_trial), #use a variable that will depend on plan_id and will be return by from_plan_name()
-					'trial_from_plan':True, # tell the subscription to pull the trial from the plan! https://stripe.com/docs/api/subscriptions/create#create_subscription-trial_from_plan	
-				}, 
-				success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
-				cancel_url='%sauth/paiement-echec' %request.host_url,
-				locale='fr'
+				print('Updating user infos')
+				user.first_name = request.form.get('first_name').capitalize()
+				user.last_name = request.form.get('last_name').capitalize()
+				user.set_username()
+				customer = stripe.Customer.retrieve(user.stripe_customer_id)
+				customer.name = request.form.get('first_name').capitalize() + ' ' + request.form.get('last_name').capitalize()		
+		# If User is none, create a new one		
+		else:
+			print('New user!')
+			customer = stripe.Customer.create(
+				name = request.form.get('first_name').capitalize() + ' ' + request.form.get('last_name').capitalize(),
+				email=request.form.get('email').lower()
 			)
-			# session['stripe_session_id'] = stripe_session.id #load stripe session in cookie to allow only one time success message
-			return Response(stripe_session.id, status=200)
-	except:
-		flash('Une erreur est survenue. Merci de contacter le support.')
-		print('User creation failed!')
-		db.session.rollback()
-		return Response(url_for('main.home'), status=404)
+			user = User(first_name=form.first_name.data.capitalize(),
+						last_name=form.last_name.data.capitalize(),
+						email=form.email.data.lower(), stripe_customer_id=customer.id)
+			db.session.add(user)
+
+		db.session.commit()
+		print('Customer succesfully created!')
+		stripe_session = stripe.checkout.Session.create(
+			customer = customer.id,
+			# customer_email = customer.email,
+			payment_method_types=['card'],
+			subscription_data={
+				'items': [{
+					'plan':plan.stripe_id,
+				}],
+				# 'trial_period_days':int(plan.free_trial), #use a variable that will depend on plan_id and will be return by from_plan_name()
+				'trial_from_plan':True, # tell the subscription to pull the trial from the plan! https://stripe.com/docs/api/subscriptions/create#create_subscription-trial_from_plan	
+			}, 
+			success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
+			cancel_url='%sauth/paiement-echec' %request.host_url,
+			locale='fr'
+		)
+		# session['stripe_session_id'] = stripe_session.id #load stripe session in cookie to allow only one time success message
+		return Response(stripe_session.id, status=200)
+# except:
+# 	flash('Une erreur est survenue. Merci de contacter le support.')
+# 	print('User creation failed!')
+# 	db.session.rollback()
+# 	return Response(url_for('main.home'), status=404)
 		
 	# GET method part (needs to be below POST method to make stripe work)
 	if request.method == 'GET' :
@@ -349,12 +348,12 @@ def request_new_password():
 	form = RequestNewPasswordForm()
 	if form.validate_on_submit():
 		user = User.query.filter_by(email=form.email.data).first_or_404()
-		if user is None or user.password_hash is None:
+		if user is None:
 			flash("Un email de réinitialisation vient d'être envoyé à l'addresse indiquée.")
 			return redirect(url_for('auth.login'))
 		data = {'user_id':user.id,
 				'exp':time() + 600}
-		token = jwt.encode(data, user.password_hash, algorithm='HS256')# use of password hash as secret key to encode to ensure single use password
+		token = jwt.encode(data, user.password_hash, algorithm='HS256') if user.password_hash else None# use of password hash as secret key to encode to ensure single use password
 		receiver_email = user.email
 		subject = "Prospectly - Réinitialiser votre mot de passe"
 		html_text=render_template('email/reset-password.html', user=user, token=token)

@@ -227,8 +227,7 @@ def webhooks():
 			request_data = json.loads(request.data)
 			data = request_data['data']
 			event_type = request_data['type']
-		else:
-			return Response('Error', 400)
+
 
 
 	# Create a subscription and automatically set the next_payment_date based on the type of plan
@@ -415,21 +414,13 @@ def login():
 
 	if current_user.is_authenticated:
 		redirect( url_for('main.home'))
-	# msg = request.args.get('msg')
-	# if msg is not None:
-	# 	flash(msg)
-	form = LoginForm()
-	# email = request.args.get('email')
-	# print(email)
-	# if email is not None:
-	# 	form.prepopulate_values(email=email)
-	# 	print(form)
 
+	form = LoginForm()
 	
 	if form.validate_on_submit():
 		user = User.query.filter_by(email=form.email.data.lower()).first()
-		password_hash = user.password_hash
-		if (user is not None and password_hash is not None) and user.verify_password(form.password.data):
+		password_hash = user.password_hash if user else None
+		if password_hash is not None and user.verify_password(form.password.data):
 			login_user(user, request.form.get('remember-me'))
 			next = request.args.get('next')
 			if next is None or not next.startswith('/'):
@@ -452,7 +443,6 @@ def logout():
 
 @auth.route('/account-upgrade')
 @login_required
-@valid_subscription_required
 def upgrade_account():
 	# Retrieve the latest active subscription
 	latest_sub_query = db.session.query(Subscription).filter(Subscription.user_id==current_user.id).order_by(Subscription.subscription_date.desc())
@@ -507,7 +497,6 @@ def upgrade_account():
 
 @auth.route('/account-downgrade')
 @login_required
-@valid_subscription_required
 def downgrade_plan():
 
 	# Downgrade from a Pro plan to a Basic plan without proration

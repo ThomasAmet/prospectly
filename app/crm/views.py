@@ -97,7 +97,7 @@ def add_company():
 	except:
 		db.session.rollback()
 		flash("Une erreur s'est produite, veuillez réessayer. Si l'erreur persiste, merci de contacter le support.")
-		return redirect(url_for('crm.view_companies_list'))
+	return redirect(url_for('crm.view_companies_list'))
 
 
 

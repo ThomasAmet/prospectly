@@ -1,4 +1,4 @@
-  <!-- Sidenav -->
+<!-- Sidenav -->
   <nav class="sidenav navbar navbar-vertical fixed-left navbar-expand-xs navbar-light bg-white" id="sidenav-main">
     <div class="scrollbar-inner">
       <!-- Brand -->
@@ -22,6 +22,7 @@
         <div class="collapse navbar-collapse" id="sidenav-collapse-main">
           <!-- Nav items -->
           <ul class="navbar-nav">
+            {% if current_user.is_admin() %}
             <li class="nav-item">
               {% if 'Dashboard' in title %}
               <a class="nav-link active" href="{{url_for('crm.home')}}">
@@ -32,6 +33,7 @@
                 <span class="nav-link-text">Dashboard</span>
               </a>
             </li>
+            {% endif %}
             <li class='nav-item'>
               {% if 'Prospects' in title %}
               <a class="nav-link active" href="#navbar-prospects" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-opportunities">
@@ -72,12 +74,14 @@
                       Vue Liste
                     </a>
                   </li>
+                  {% if current_user.is_admin() %}
                   <li class="nav-item">
                     <a href="#" class="nav-link">Vue Tunnel - à venir</a>
                   </li>
                   <li class="nav-item">
                     <a href="#" class="nav-link">Personnaliser le tunnel - à venir</a>
                   </li>
+                  {% endif %}
                 </ul>
               </div>
             </li>
@@ -115,6 +119,7 @@
 
           <!-- Navigation -->
           <ul class="navbar-nav mb-md-3">
+            {% if current_user.is_admin() %}
             <li class="nav-item">
               <a class="nav-link" href="" target="_blank">
                 <i class="ni ni-compass-04"></i>
@@ -127,6 +132,7 @@
                 <span class="nav-link-text">Questions populaires</span>
               </a>
             </li>
+            {% endif %}
             <li class="nav-item">
               <a class="nav-link" href="{{url_for('main.contact')}}">
                 <i class="ni ni-support-16"></i>
@@ -147,8 +153,14 @@
           <ul class="navbar-nav mb-md-3">
             <li class="nav-item">
               <a class="nav-link" href="{{url_for('auth.email_support')}}">
-                <i class="ni ni-support-16"></i>
+                <i class="ni ni-email-83"></i>
                 <span class="nav-link-text">Admin Email</span>
+              </a>
+            </li>
+            <li class='nav-item'>
+              <a class='nav-link' href="/admin">
+                <i class="ni ni-books"></i>
+                <span class='nav-link-text'>Admin Database</span>
               </a>
             </li>
           </ul>

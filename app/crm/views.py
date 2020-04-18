@@ -48,7 +48,10 @@ def index():
 @login_required
 @valid_subscription_required
 def home():
-	return render_template('dashboard.html', title='Dashboard')
+	if current_user.is_admin():
+		return render_template('dashboard.html', title='Dashboard')
+	else:
+		return redirect(url_for('crm.view_opportunities_list', title='Opportunités'))
 
 
 

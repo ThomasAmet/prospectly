@@ -48,7 +48,10 @@ def index():
 @login_required
 @valid_subscription_required
 def home():
-	return render_template('dashboard.html', title='Dashboard')
+	if current_user.is_admin():
+		return render_template('dashboard.html', title='Dashboard')
+	else:
+		return redirect(url_for('crm.view_opportunities_list', title='Opportunités'))
 
 
 
@@ -97,7 +100,7 @@ def add_company():
 	except:
 		db.session.rollback()
 		flash("Une erreur s'est produite, veuillez réessayer. Si l'erreur persiste, merci de contacter le support.")
-		return redirect(url_for('crm.view_companies_list'))
+	return redirect(url_for('crm.view_companies_list'))
 
 
 

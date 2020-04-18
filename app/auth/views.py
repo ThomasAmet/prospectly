@@ -137,9 +137,13 @@ def signup():
 	# POST method part
 # try:
 	if request.method=='POST':
+		
 		print(dict(request.form))
+		requested_email = request.form.get('email').lower().strip()
+		
 		plan = Plan.query.filter_by(stripe_id=request.form.get('plan_stripe_id')).first() #
-		user = User.query.filter_by(email=request.form.get('email')).first()
+		# user = User.query.filter_by(email=request.form.get('email')).first()
+		user = User.query.filter_by(email=requested_email).first()
 		print('Plan: {}'.format(plan.__dict__.copy()))
 		# Case to handle custome who enter email but didn't pay
 		if user:
@@ -170,7 +174,7 @@ def signup():
 			)
 			user = User(first_name=form.first_name.data.capitalize(),
 						last_name=form.last_name.data.capitalize(),
-						email=form.email.data.lower(), stripe_customer_id=customer.id)
+						email=requested_email, stripe_customer_id=customer.id)
 			db.session.add(user)
 
 		db.session.commit()
@@ -228,7 +232,6 @@ def webhooks():
 			event_type = request_data['type']
 
 
-
 	# Create a subscription and automatically set the next_payment_date based on the type of plan
 	if event_type=='customer.subscription.created':
 		print('Subscription Created Webhook')
@@ -251,13 +254,13 @@ def webhooks():
 		else:
 			return Response('No user found from stripe_customer_id', 400)
 
+
 	# Update 'next_payment' in subscription when the payment succeeded
 	if event_type=='invoice.payment_succeeded':
 		print('Invoice Payment Succeeded Webhook')
 		# stripe object with multiple informations		
 		data_object = data['object']
 		print('Data object:{}'.format(data_object))
-
 		
 		# Retrieve user in database from stripe_user_id
 		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first_or_404()
@@ -272,6 +275,7 @@ def webhooks():
 		else:
 			print('No subscription found for customer with id:{}'.format(user.id))
 			return Response('Error', 400)
+
 
 	# Send the password validation email when the Checkout session is completed			
 	if event_type == 'checkout.session.completed':
@@ -347,7 +351,9 @@ def request_new_password():
 
 	form = RequestNewPasswordForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(email=form.email.data).first_or_404()
+		# user = User.query.filter_by(email=form.email.data).first_or_404()
+		requested_email = request.form.get('email').lower().strip()
+		user = User.query.filter_by(email=requested_email).first_or_404()
 		if user is None:
 			flash("Un email de réinitialisation vient d'être envoyé à l'addresse indiquée.")
 			return redirect(url_for('auth.login'))
@@ -417,7 +423,9 @@ def login():
 	form = LoginForm()
 	
 	if form.validate_on_submit():
-		user = User.query.filter_by(email=form.email.data.lower()).first()
+		requested_email = request.form.get('email').lower().strip()
+		user = User.query.filter_by(email=requested_email).first()
+		# user = User.query.filter_by(email=form.email.data.lower()).first()
 		password_hash = user.password_hash if user else None
 		if password_hash is not None and user.verify_password(form.password.data):
 			login_user(user, request.form.get('remember-me'))
@@ -437,6 +445,17 @@ def logout():
 	logout_user()
 	flash('Vous êtes maintenant déconnecté.')
 	return redirect(url_for('main.home'))
+
+
+
+@auth.route('/edition-abonnement', methods=['POST','GET'])
+@admin_login_required
+def edit_subscription():
+	if request.method == 'POST':
+		None
+	if request.method == 'GET':
+		users_list = User.query.all()	
+	return render_template('subscription-edition.html', users_list=users_list)
 
 
 

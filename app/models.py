@@ -103,6 +103,7 @@ class User(db.Model, UserMixin):
 	last_name = db.Column(db.String(30))
 	username = db.Column(db.String(60), index=True)
 	email = db.Column(db.String(120), index=True, unique=True)
+	contact_email = db.Column(db.String(120))
 	phone = db.Column(db.String(60), nullable=True)
 	address = db.Column(db.String(120), nullable=True)
 	postal_code = db.Column(db.String(120), nullable=True)
@@ -145,6 +146,7 @@ class User(db.Model, UserMixin):
 	def __init__(self, **kwargs):
 		super(User, self).__init__(**kwargs)
 		self.set_username()
+		self.contact_email = self.email
 		# self.set_avatar()
 
 	def __repr__(self):

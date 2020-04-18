@@ -19,7 +19,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 from datetime import datetime
-from flask import render_template, redirect, url_for, flash, request, session, make_response
+from flask import render_template, redirect, url_for, flash, session, make_response, request
 from flask_login import current_user, login_required
 from app.auth.views import admin_login_required, pro_plan_required, valid_subscription_required
 from werkzeug.utils import secure_filename
@@ -36,15 +36,18 @@ from ..models import User, Subscription, Company, Contact, CompanyLead, ContactL
 @leads.route('/generator', methods=['POST', 'GET'])
 # @leads.route('/prospectly-generator', methods=['POST', 'GET'])
 @login_required
-@pro_plan_required
+@admin_login_required
 @valid_subscription_required
 def view_leads():
 	comp_lead_form = CompaniesQueryForm()
 	
-	# The following chunk is to handle when there is multiple pages to display 
+	# The following chunk is to handle when there is multiple pages to display, the ids are store in session so we can navigate through pages 
 	leads_ids = session.get('leads_ids') if session.get('leads_ids') else None
 	leads_type = request.args.get('leads_type') if request.args.get('leads_type') else None
 	token = int(request.args.get('page_token')) if request.args.get('page_token') else 0
+	# store the page token in session  for the user to be redirected back to it after importing leads
+	session['leads_token'] = token
+	
 
 	if request.method=='POST':
 		data = request.form.to_dict(flat=True)
@@ -52,20 +55,24 @@ def view_leads():
 		session.pop('leads_ids') if session.get('leads_ids') else None
 		session['leads_ids'] = leads_ids
 		# print('session (POST): {}'.format(session.get('leads_ids')))
-		 
+	
+	all_leads_len = len(leads_ids) if leads_type  else 0	 
 	leads_to_show, next_page_token, previous_page_token = get_displayed_leads(leads_ids, leads_type, token, limit=2) 
 	# print('leads to display: {}'.format(leads_to_show))
-	return render_template('generator.html', comp_lead_form=comp_lead_form, leads=leads_to_show, lead_type=leads_type, next_page_token=next_page_token, previous_page_token=previous_page_token)
+	return render_template('generator.html', comp_lead_form=comp_lead_form, leads=leads_to_show, lead_type=leads_type, 
+		next_page_token=next_page_token, previous_page_token=previous_page_token, current_page_token=token, all_leads_len=all_leads_len)
 
 
 
 
 @leads.route('/import-entreprises', methods=['POST'])
 @login_required
-@pro_plan_required
-@valid_subscription_required
+# @pro_plan_required
+# @admin_login_required
+# @valid_subscription_required
 def upload_company_leads():
-	data = request.get_json()
+
+	data = request.get_json(silent=True)
 	print('data: {}'.format(data))
 
 	if not data.get('leads_ids'):
@@ -73,16 +80,24 @@ def upload_company_leads():
 
 	for lead_id in data.get('leads_ids'):
 		lead = from_sql(CompanyLead.query.get(lead_id))
+		print("lead dict: {}".format(lead))
+		# Drop attribute that we wont use if we update an exisiting Company
+		lead.pop('id')
 
-		# Check if the queried company_lead already exists in user's Company's table (then update values) or if we have to create it
-		query1 = db.session.query(LeadRequest.company_id).filter_by(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==lead.id) # checking if the user already requested a contact from that company. If yes we use the same Company's id
-		query2 = db.session.query(CompanyLead.id).filter_by(Company.user_id==current_user.id, Company.name==company_lead.name)
+		# It is possible that the user already imported a contact_lead from this company, hence this company should exists in user's companies table
+		# Check if the company_lead to  uploqd already exists in user's Company's table (then update values) or if we have to create it
+		# q1 retrieves the company_id (user side) if a former lead_request contains the same company_lead_id
+		query1 = db.session.query(LeadRequest.company_id).filter(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==lead_id) # checking if the user already requested a contact from that company. If yes we use the same Company's id
+		# It is also possible that the user already has the company in its companies tables,
+		# q2 checks whether there is a a company in user's table that has the same name as the company_leads one 
+		query2 = db.session.query(Company.id).filter(Company.user_id==current_user.id, Company.name==lead.get('name'))
 		
 		if query1.first():
 			company = Company.query.get(query1.first())
 			for k,v in lead.items():
 				setattr(company, k, v)
 		elif query2.first():
+			# We update the existing one but we should first throw a warning to the user
 			company = Company.query.get(query2.first())
 			for k,v in lead.items():
 				setattr(company, k, v)
@@ -101,15 +116,21 @@ def upload_company_leads():
 			
 			company = Company(**lead)
 			db.session.add(company)
-	
-	db.session.commit()	
+			db.session.flush()
 		
-	return make_response(url_for('leads.view_leads'), 400)
+		# Record the query
+		lead_request = LeadRequest(user_id=current_user.id, company_lead_id=lead_id, company_id=company.id)
+		db.session.add(lead_request)
+
+	db.session.commit()	
+	flash('Les leads ont été importés')
+	return make_response(url_for('leads.view_leads', token=session.get('leads_token')), 400)
 
 
 
 @leads.route('/import-contacts', methods=['POST'])
-@pro_plan_required
+# @pro_plan_required
+@admin_login_required
 @valid_subscription_required
 def upload_contact_leads():
 	data = request.get_json()
@@ -127,9 +148,9 @@ def upload_contact_leads():
 		else:
 			company_lead['activity_field'] = company_lead['activity_field1']
 
-		# Look for the contact's associated company in user's companies 
+		# Look for the contact's associated company in user's companies table
 		query1 = db.session.query(LeadRequest.company_id).filter_by(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==company_lead.id) # checking if the user already requested a contact from that company. If yes we use the same Company's id
-		query2 = db.session.query(CompanyLead.id).filter_by(Company.user_id==current_user.id, Company.name==company_lead.name)
+		query2 = db.session.query(Company.id).filter_by(Company.user_id==current_user.id, Company.name==company_lead.name)
 		
 		if query1.first():
 			contact_lead['company_id'] = query1.first()
@@ -144,11 +165,17 @@ def upload_contact_leads():
 			contact_lead['company_id'] = company.id 
 		
 		contact = Contact(**contact_lead) 
+		db.session.add(contact)
+		db.session.flush()
+
+		lead_request = LeadRequest(user_id=current_user.id, contact_lead_id=lead_id, contact_id=contact.id)
+		db.session.add(lead_request)
 
 		print('contact_lead: {}'.format(contact_lead))
 		print('company_lead: {}'.format(company_lead))
+		db.session.commit()
 
-	return ''
+	return make_response(url_for('leads.view_leads', token=session.get('leads_token')), 400)
 
 
 
@@ -360,8 +387,8 @@ def get_leads_ids(data):
 	remaining_exports = min(max_exports, max_exports-len(today_requests))
 	# Set a random seed to assure the same results if request is launched again
 	random.seed(int(datetime.utcnow().strftime('%Y%m%d'))*current_user.id)	
-	results_len = list(np.random.randint(low=6, high=14, size=1))[0]*10 # number of pages to be displayed (random) * number of results per page
-	results_len = 3
+	results_len = list(np.random.randint(low=4, high=14, size=1))[0]*10 # number of results to be displayed (random nb of page) * (number of results per page)
+	# results_len = 3
 
 	# Neet to create a list from activity_field input as it will be passed in a "in_" filter which only supports list
 	activity_filter = [data.get('company_activity_field')] if data.get('company_activity_field') else get_list_companies_activities()
@@ -401,8 +428,8 @@ def get_leads_ids(data):
 			print("position: {}".format(position_filter))
 			leads_query = leads_query.filter(ContactLead.position.like(position_filter))
 	
+	# Return a random list of the requested leads whom size is the mini btw all the results size and the number of results to be displayed (random nb of page) * (number of results per page)
 	requested_leads_id = [elt.id for elt in leads_query.all() ] 
-	# print('all_ids: {}'.format(requested_leads_id))
 	random_leads_id = random.sample(requested_leads_id, min(len(requested_leads_id), results_len))
 	# print('random_ids: {}'.format(random_leads_id))
 	return (random_leads_id, data.get('leads_type'))

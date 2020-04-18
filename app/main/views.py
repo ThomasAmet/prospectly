@@ -55,7 +55,7 @@ def contact():
 		email = request.form.get('email')
 		message_content = request.form.get('message')
 
-		receiver_email= 'contact@prospectly.fr'
+		receiver_email= 'support@prospectly.fr'
 		subject = "Question de la part de {} {}".format(first_name, last_name)
 		html_text=render_template('email/question-request.html', 
 								  first_name=first_name,

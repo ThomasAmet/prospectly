@@ -1,0 +1,40 @@
+<!-- {#% for movie in movie_list|sort(attribute='rating', reverse=True) %#} -->
+{% extends app_base.html %}
+
+{% block header_content %}
+  <!-- Beginning Card Header -->
+  <div class="row align-items-center py-5 mb-4">
+    <div class="col-lg-6 col-4">
+      <!-- <h6 class="h2 text-white d-inline-block mb-0">Défaut</h6> -->
+      <i class="ni ni-planet text-white"></i></a></li>
+      <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4 mr-md-6">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+          <!-- <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li> -->
+          <li class="breadcrumb-item"><a href="#">Abonnement</a></li>
+          <li class="breadcrumb-item active" aria-current="page">édition (Vue Admin)</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-lg-6 col-8 text-right">
+      <!-- <a href="#" class="btn btn-sm btn-neutral">Actions</a> -->
+        {% if lead_type is none %}
+        <button class="btn btn-neutral" type="button" data-toggle="collapse" data-target="#collapseSettings" aria-expanded='true'>
+        {% else %}
+    	<button class="btn btn-neutral" type="button" data-toggle="collapse" data-target="#collapseSettings" aria-expanded='false'>
+    	{% endif %}
+          <span class="btn-inner--icon"><i class="ni ni-settings-gear-65"></i></span>
+          <span class="btn-inner--text">Paramètres</span>
+        </button>
+        <!-- <div class="dropdown-menu">
+          <a class="dropdown-item" href="" id='deleteAllOpportunities'>Supprimer la sélection</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">
+            <span class='text-capitalize'>éditer</span> les étapes
+          </a>
+          <a class="dropdown-item" href="#">
+            <span class='text-capitalize'>éditer</span> les status
+          </a>
+        </div> -->  
+    </div>
+  </div>
+{% endblock header_content %}

@@ -36,7 +36,8 @@ from ..models import User, Subscription, Company, Contact, CompanyLead, ContactL
 @leads.route('/generator', methods=['POST', 'GET'])
 # @leads.route('/prospectly-generator', methods=['POST', 'GET'])
 @login_required
-@admin_login_required
+# @admin_login_required
+@pro_plan_required
 @valid_subscription_required
 def view_leads():
 	comp_lead_form = CompaniesQueryForm()
@@ -67,8 +68,8 @@ def view_leads():
 
 @leads.route('/import-entreprises', methods=['POST'])
 @login_required
-# @pro_plan_required
-# @admin_login_required
+@pro_plan_required
+@admin_login_required
 # @valid_subscription_required
 def upload_company_leads():
 
@@ -129,7 +130,7 @@ def upload_company_leads():
 
 
 @leads.route('/import-contacts', methods=['POST'])
-# @pro_plan_required
+@pro_plan_required
 @admin_login_required
 @valid_subscription_required
 def upload_contact_leads():

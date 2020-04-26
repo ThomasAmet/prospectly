@@ -1,11 +1,15 @@
 from . import db, login_manager
-from flask_login import UserMixin
+from flask_login import UserMixin, current_user
 from datetime import datetime
 from operator import itemgetter
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
 from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
+
+import pandas as pd
+import numpy as np
+import random
 # from db import Column, String, Integer, Boolean, DateTime, ForeignKey, relationship, backref
 
 
@@ -67,7 +71,6 @@ class Plan(db.Model):
 	lead_generator = db.Column(db.Boolean, default=False)
 	yearly = db.Column(db.Boolean, default=False)
 	stripe_id = db.Column(db.String(120))
-
 	subscriptions = db.relationship('Subscription', foreign_keys=[Subscription.plan_id], backref=db.backref('plan', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')# many side
 
 	def __repr__(self):
@@ -156,15 +159,15 @@ class User(db.Model, UserMixin):
 class ContactLead(db.Model):
 	__tablename__ = 'contact_leads'
 	id = db.Column(db.Integer, primary_key=True)
-	firstname = db.Column(db.String(120), index=False, unique=False, nullable=False)
-	lastname = db.Column(db.String(120), index=False, unique=False, nullable=False)
+	firstname = db.Column(db.String(60), index=False, unique=False, nullable=False)
+	lastname = db.Column(db.String(60), index=False, unique=False, nullable=False)
 	company_id = db.Column(db.Integer, db.ForeignKey('company_leads.id'), nullable=True)
-	position = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	position = db.Column(db.String(60), index=False, unique=False, nullable=True)
 	email = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	phone = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	linkedin = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	instagram = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	facebook = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	linkedin = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	instagram = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	facebook = db.Column(db.String(240), index=False, unique=False, nullable=True)
 	requests = db.relationship('LeadRequest', foreign_keys=[LeadRequest.contact_lead_id], backref='contact_lead', lazy='dynamic')# many side
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -181,18 +184,18 @@ class CompanyLead(db.Model):
 	postal_code = db.Column(db.String(30), index=False, unique=False, nullable=True)
 	city = db.Column(db.String(60), index=True, unique=False, nullable=True)
 	country = db.Column(db.String(60), index=True, nullable=True)
-	email = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	email = db.Column(db.String(60), index=False, unique=False, nullable=True)
 	phone = db.Column(db.String(60), index=False, unique=False, nullable=True)
-	website = db.Column(db.String(60), index=False, unique=False, nullable=True)
-	facebook = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	instagram = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	linkedin = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	website = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	facebook = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	instagram = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	linkedin = db.Column(db.String(240), index=False, unique=False, nullable=True)
 	activity_field1 = db.Column(db.String(60), index=True, unique=False, nullable=False)
 	activity_field2 = db.Column(db.String(60), index=True, unique=False, default=None)
 	activity_field3 = db.Column(db.String(60), index=True, unique=False, default=None)
 	contacts = db.relationship('ContactLead', backref='firm', lazy='dynamic')
-	requests = db.relationship('LeadRequest', foreign_keys=[LeadRequest.company_lead_id], backref='company_lead', lazy='dynamic')# many side
-
+	requests = db.relationship('LeadRequest', foreign_keys=[LeadRequest.company_lead_id], backref='company_lead', lazy='dynamic', cascade='all, delete-orphan')# many side
+	
 	# def exists(self):
 	# 	lead = Lead.query.filter(Lead.company_name==self.company_name, Lead.company_postal_code==self.company_postal_code).first()
 	# 	if not lead:
@@ -216,7 +219,7 @@ class OpportunityStep(db.Model):
 	last_update = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def __repr__(self):
-		return "<Opp. {} on stage {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stages.name, self.status.name, self.creation_date)
+		return "<Opp. {} on stage {} with status {} created on {}>".format(self.opportunity.name, self.commercial_stage.name, self.status.name, self.creation_date)
 
 
 
@@ -228,9 +231,9 @@ class Contact(db.Model):
 	last_name = db.Column(db.String(120), index=True, unique=False, nullable=True)
 	company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), default=None) 
 	position = db.Column(db.String(120), index=True, unique=False, nullable=True)
-	linkedin = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	instagram = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	facebook = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	linkedin = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	instagram = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	facebook = db.Column(db.String(240), index=False, unique=False, nullable=True)
 	phone = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	emails = db.relationship('ContactsEmail', backref='contact', lazy='dynamic') # many-side of a one-to-many relationship with ContactsEmail
 	notes = db.relationship('Note', backref='contact', lazy='dynamic', cascade='all, delete-orphan')# many-side of a one-to-many relationship with Notes
@@ -254,15 +257,16 @@ class Company(db.Model):
 	email = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	phone = db.Column(db.String(60), index=False, unique=False, nullable=True)
 	activity_field = db.Column(db.String(60), index=True, unique=False, nullable=False)
-	website = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	facebook = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	instagram = db.Column(db.String(120), index=False, unique=False, nullable=True)
-	linkedin = db.Column(db.String(120), index=False, unique=False, nullable=True)
+	website = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	facebook = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	instagram = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	linkedin = db.Column(db.String(240), index=False, unique=False, nullable=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id')) # one-side of a many-to-one with User 
 	# contacts = db.relationship('Contact', backref='company', lazy='dynamic', cascade='all, delete-orphan')
 	contacts = db.relationship('Contact', foreign_keys=[Contact.company_id], backref=db.backref('firm', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
 	opportunities = db.relationship('Opportunity', backref='company', lazy='dynamic', cascade='all, delete-orphan') # one-to-many with Opportunity table (many side)
 	notes = db.relationship('Note', backref='company', lazy='dynamic')
+	request = db.relationship('LeadRequest', foreign_keys=[LeadRequest.company_id], backref='company', lazy='dynamic')# many side
 	
 	def __repr__(self):
 		return  "{} situé à {}".format(self.name, self.city if self.city else '<information manquante>')
@@ -349,7 +353,7 @@ class Note(db.Model):
 	opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunities.id'), default=None)
 	contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'), default=None)
 	company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), default=None)
-	content = db.Column(db.String(240), default='')
+	content = db.Column(db.String(2000), default='')
 	creation_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def __repr__(self):
@@ -495,3 +499,97 @@ def get_list_opportunities(user_id, limit, cursor):
 	next_page = cursor + limit if len(opportunities)>limit else None 
 	previous_page = cursor - limit if cursor > 0 else None
 	return (opportunities[:limit], next_page, previous_page)
+
+
+
+def get_leads_ids(data):
+	"""
+	"""	
+	# To keep but not used in the way we operate now
+	# max_exports = current_user.subscriptions.order_by(Subscription.subscription_date.desc()).first().plan.limit_daily_query
+	# today_requests = [elt.id for elt in current_user.requested_leads.all() if elt.query_date.date()==datetime.utcnow().date()]
+	# remaining_exports = min(max_exports, max_exports-len(today_requests))
+
+
+	# Set a random seed to assure the same results if request is launched again
+	random.seed(int(datetime.utcnow().strftime('%Y%m%d'))*current_user.id)	
+	results_len = list(np.random.randint(low=4, high=14, size=1))[0]*10 # number of results to be displayed (random nb of page) * (number of results per page)
+	# results_len = 3
+
+	# Create a list from the value selected by the user in the activity_field.
+	# We need to do that as the activities chosen will be passed in a "in_" filter which only supports list
+	# Return a list of all activities if no specific acitvity is chosen
+	activity_filter = [data.get('company_activity_field')] if data.get('company_activity_field') else get_list_companies_activities()
+	print("activity: {}".format(activity_filter))
+
+	# User requested company leads
+	if data.get('leads_type') == 'company':
+		# Ids from companies that already have been queried
+		requested_companies_ids = [elt.company_lead_id for elt in current_user.requested_leads.all() if not elt.company_lead_id is None]
+		# Query by filter on activity_field and removing previous query results
+		leads_query = db.session.query(CompanyLead).filter((CompanyLead.activity_field1.in_(activity_filter) | 
+												   CompanyLead.activity_field2.in_(activity_filter) |
+												   CompanyLead.activity_field3.in_(activity_filter) ),
+												   ~CompanyLead.id.in_(requested_companies_ids))
+		# If exists, add location filter
+		if data.get('company_location'):
+			location_filter = "{}%".format(data.get('company_location'))
+			print("location: {}".format(location_filter))
+			leads_query = leads_query.filter(CompanyLead.postal_code.like(location_filter))			
+	
+	# User requested contact leads	
+	else:
+		requested_contacts_ids = [elt.contact_lead_id for elt in current_user.requested_leads.all() if not elt.contact_lead_id is None]
+		# Get company with required filed of activity
+		sub_query  = db.session.query(CompanyLead).filter(CompanyLead.activity_field1.in_(activity_filter) | 
+											   			  CompanyLead.activity_field2.in_(activity_filter) |
+											   			  CompanyLead.activity_field3.in_(activity_filter) ).subquery()
+		if data.get('location'):
+			location_filter = "{}%".format(data.get('location'))
+			print("location: {}".format(location_filter))
+			sub_query = sub_query.filter(CompanyLead.postal_code.like(location_filter))
+
+		leads_query = db.session.query(ContactLead).filter(~ContactLead.id.in_(requested_contacts_ids))
+		leads_query = leads_query.join(sub_query, ContactLead.company_id==sub_query.c.id)
+
+		if data.get('position'):
+			position_filter = "%{}%".format(data.get('position'))
+			print("position: {}".format(position_filter))
+			leads_query = leads_query.filter(ContactLead.position.like(position_filter))
+	
+	# Return a random list of the requested leads whom size is the mini btw all the results size and the number of results to be displayed (random nb of page) * (number of results per page)
+	requested_leads_id = [elt.id for elt in list(leads_query.all())] 
+	random_leads_id = random.sample(requested_leads_id, min(len(requested_leads_id), results_len))
+	# print('random_ids: {}'.format(random_leads_id))
+	return (random_leads_id, data.get('leads_type'))
+
+
+
+def get_displayed_leads(leads_ids, leads_type, cursor, limit):
+	"""
+	"""	
+	print('ids: {}'.format(leads_ids))
+	print('type: {}'.format(leads_type))
+	print('cursor: {}'.format(cursor))
+	print('limit: {}'.format(limit))
+	if leads_type is None:
+		leads_to_show = []
+	else:
+		if leads_type=='company':
+			leads_to_show = db.session.query(CompanyLead).filter(CompanyLead.id.in_(leads_ids)).offset(cursor).limit(limit+1).all()
+		else:
+			leads_to_show = db.session.query(ContactLead).filter(ContactLead.id.in_(leads_ids)).offset(cursor).limit(limit+1).all()
+
+	next_page_token = cursor + limit if len(leads_to_show) > limit else None
+	previous_page_token = cursor - limit if cursor >= limit else None	
+	print('next_page_token: {}'.format(next_page_token))
+	print('previous_page_token: {}'.format(previous_page_token))
+	return (leads_to_show[:limit], next_page_token, previous_page_token)
+
+
+def compute_remaining_leads():
+	user = current_user
+	todays_leads = [record.id for record in user.requested_leads.all() if datetime.strftime(record.creation_date, '%Y-%m-%d')==datetime.strftime(datetime.utcnow, '%Y-%m-%d')]
+	latest_sub = db.session.query(Subscription).filter(Subscription.user_id==user.id).order_by(Subscription.subscription_date.desc()).first()
+	max_requests = latest_sub.plan.limit_daily_query
+	return max_requests-len(todays_leads)

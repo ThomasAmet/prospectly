@@ -26,15 +26,14 @@ from werkzeug.utils import secure_filename
 from . import leads
 from .forms import CompaniesQueryForm, ContactsQueryForm, LeadsQueryForm
 from .. import app, db
-from ..models import User, Subscription, Company, Contact, CompanyLead, ContactLead, LeadRequest, from_sql, get_list_companies_activities
+from ..models import User, Subscription, Company, Contact, CompanyLead, ContactLead, LeadRequest
+from ..models import get_list_companies_activities, get_leads_ids, get_displayed_leads, compute_remaining_leads, from_sql
 
 # from ...bin import all_utils
 
 
 
-
 @leads.route('/generator', methods=['POST', 'GET'])
-# @leads.route('/prospectly-generator', methods=['POST', 'GET'])
 @login_required
 # @admin_login_required
 @pro_plan_required
@@ -59,17 +58,17 @@ def view_leads():
 	
 	all_leads_len = len(leads_ids) if leads_type  else 0	 
 	leads_to_show, next_page_token, previous_page_token = get_displayed_leads(leads_ids, leads_type, token, limit=2) 
+	remaining_leads = compute_remaining_leads()
+	
 	# print('leads to display: {}'.format(leads_to_show))
-	return render_template('generator.html', comp_lead_form=comp_lead_form, leads=leads_to_show, lead_type=leads_type, 
+	return render_template('generator.html', comp_lead_form=comp_lead_form, leads=leads_to_show, lead_type=leads_type,  leads_left=remaining_leads,
 		next_page_token=next_page_token, previous_page_token=previous_page_token, current_page_token=token, all_leads_len=all_leads_len)
 
 
 
-
-@leads.route('/import-entreprises', methods=['POST'])
+@leads.route('/export-entreprises', methods=['POST'])
 @login_required
 @pro_plan_required
-@admin_login_required
 # @valid_subscription_required
 def upload_company_leads():
 
@@ -79,48 +78,68 @@ def upload_company_leads():
 	if not data.get('leads_ids'):
 		return make_response(url_for('leads.view_leads'), 400)
 
-	for lead_id in data.get('leads_ids'):
-		lead = from_sql(CompanyLead.query.get(lead_id))
-		print("lead dict: {}".format(lead))
-		# Drop attribute that we wont use if we update an exisiting Company
-		lead.pop('id')
+	for company_lead_id in data.get('leads_ids'):
+		company_lead = from_sql(CompanyLead.query.get(lead_id))
+		print("company_lead dict: {}".format(company_lead))
+		contact_lead = from_sql(CompanyLead.query.get(lead_id).contacts.all()[0])
+		contact_lead_id = conact_lead.get('id')
+		print("contact_lead dict {}".format(contact_lead))
 
+		# Drop attribute that we wont use if we update an exisiting Company
+		company_lead.pop('id')
+		company_lead.pop('creation_date')
+		contact_lead.pop('id')
+		contact_lead.pop('creation_date')
+		
 		# It is possible that the user already imported a contact_lead from this company, hence this company should exists in user's companies table
 		# Check if the company_lead to  uploqd already exists in user's Company's table (then update values) or if we have to create it
 		# q1 retrieves the company_id (user side) if a former lead_request contains the same company_lead_id
-		query1 = db.session.query(LeadRequest.company_id).filter(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==lead_id) # checking if the user already requested a contact from that company. If yes we use the same Company's id
-		# It is also possible that the user already has the company in its companies tables,
+		# query1 = db.session.query(LeadRequest.company_id).filter(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==lead_id) # checking if the user already requested a contact from that company. If yes we use the same Company's id
+
+		# if query1.first():
+		# 	company = Company.query.get(query1.first())
+		# 	for k,v in lead.items():
+		# 		setattr(company, k, v)
+
+
+		# Maybe for later
+		# It is  possible that the user already has the company in its companies tables,
 		# q2 checks whether there is a a company in user's table that has the same name as the company_leads one 
-		query2 = db.session.query(Company.id).filter(Company.user_id==current_user.id, Company.name==lead.get('name'))
+		# query2 = db.session.query(Company.id).filter(Company.user_id==current_user.id, Company.name==lead.get('name'))
+		# elif query2.first():
+		# 	# We update the existing one but we should first throw a warning to the user
+		# 	company = Company.query.get(query2.first())
+		# 	for k,v in lead.items():
+		# 		setattr(company, k, v)
 		
-		if query1.first():
-			company = Company.query.get(query1.first())
-			for k,v in lead.items():
-				setattr(company, k, v)
-		elif query2.first():
-			# We update the existing one but we should first throw a warning to the user
-			company = Company.query.get(query2.first())
-			for k,v in lead.items():
-				setattr(company, k, v)
+		
+		# Add user_id attribut, as we will need to to create the company obejct
+		company_lead['user_id'] = current_user.id
+
+		# Set the activity field for the company as the field selected by the user or the first field of the lead if no field is chosen
+		if data['activity_field']:
+			company_lead['activity_field'] = data.get('activity_field')
 		else:
-			lead.pop('creation_date')
-			lead['user_id'] = current_user.id
+			company_lead['activity_field'] = company_lead['activity_field1']
 
-			if data['activity_field']:
-				lead['activity_field'] = data.get('activity_field')
-			else:
-				lead['activity_field'] = lead['activity_field1']
-
-			lead.pop('activity_field1')
-			lead.pop('activity_field2')
-			lead.pop('activity_field3')
-			
-			company = Company(**lead)
-			db.session.add(company)
-			db.session.flush()
+		# Remove activity_fields attributes	
+		company_lead.pop('activity_field1')
+		company_lead.pop('activity_field2')
+		company_lead.pop('activity_field3')
 		
+		company = Company(**company_lead)
+		db.session.add(company)
+		db.session.flush()
+
+		contact_lead['company_id'] = company_id
+		contact = Contact(**contact_lead)
+		db.session.add(contact)
+		db.session.flush()
+		
+
 		# Record the query
-		lead_request = LeadRequest(user_id=current_user.id, company_lead_id=lead_id, company_id=company.id)
+		lead_request = LeadRequest(user_id=current_user.id, company_lead_id=company_lead_id, company_id=company.id, 
+								   contact_lead_id=contact_lead_id, contact_id=contact.id )
 		db.session.add(lead_request)
 
 	db.session.commit()	
@@ -129,38 +148,49 @@ def upload_company_leads():
 
 
 
-@leads.route('/import-contacts', methods=['POST'])
+@leads.route('/export-contacts', methods=['POST'])
 @pro_plan_required
-@admin_login_required
 @valid_subscription_required
 def upload_contact_leads():
 	data = request.get_json()
 	print('Upload Contact data: {}'.format(data))
 
-	for lead_id in data.get('leads_ids'):
-		contact_lead = from_sql(ContactLead.query.get(lead_id))
-		contact_lead.pop('creation_date')
+	for contact_lead_id in data.get('leads_ids'):
+		contact_lead = from_sql(ContactLead.query.get(contact_lead_id))
+		# Retrieve company_lead from company_id attribute in contact_lead
 		company_lead = from_sql(CompanyLead.query.get(contact_lead.get('company_id')))
+		
 		contact_lead.pop('company_id')
+		contact_lead.pop('creation_date')
+		contact_lead.pop('id')
 		company_lead.pop('creation_date')
 
 		if data['activity_field']:
 			company_lead['activity_field'] = data.get('activity_field')
 		else:
 			company_lead['activity_field'] = company_lead['activity_field1']
+		company_lead.pop('activity_field1', 'activity_field2', 'activity_field3')
 
-		# Look for the contact's associated company in user's companies table
-		query1 = db.session.query(LeadRequest.company_id).filter_by(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==company_lead.id) # checking if the user already requested a contact from that company. If yes we use the same Company's id
-		query2 = db.session.query(Company.id).filter_by(Company.user_id==current_user.id, Company.name==company_lead.name)
+		# Checking if the user already requested a contact from that company. If yes we use the same Company's id
+		query1 = db.session.query(LeadRequest.company_id).filter_by(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==company_lead.id) 
+		
+		# Maybe for later 
+		# Check if contact's firm already exists in user's companies table
+		# query2 = db.session.query(Company.id).filter_by(Company.user_id==current_user.id, Company.name==company_lead.name)
 		
 		if query1.first():
 			contact_lead['company_id'] = query1.first()
-		elif query2.first():
-			contact_lead['company_id'] = query2.first()
-		# create the company if doesnt found in Company table (but limit the information that we provide to 'name, activity, postal_code, city')
+		# maybe for later			
+		# elif query2.first():
+		# 	contact_lead['company_id'] = query2.first()
+		
+		# Create the company if doesnt found in Company table (but limit the information that we provide to 'name, activity, postal_code, city')
 		else:
-			company = Company(name=company_lead.get('name'), activity_field=company_lead.get('activity_field'),
-							  city=company_lead.get('city'), postal_code=company_lead.get('postal_code'))
+			#  Company creation with limited information
+			# company = Company(name=company_lead.get('name'), activity_field=company_lead.get('activity_field'),
+			# 				  city=company_lead.get('city'), postal_code=company_lead.get('postal_code'))
+			# Company creation with all information available
+			company = Company(**company_lead)
 			db.session.add(company)
 			db.session.flush()
 			contact_lead['company_id'] = company.id 
@@ -169,7 +199,14 @@ def upload_contact_leads():
 		db.session.add(contact)
 		db.session.flush()
 
-		lead_request = LeadRequest(user_id=current_user.id, contact_lead_id=lead_id, contact_id=contact.id)
+		# Lead request  creation, in the case where we dont fully create the company.
+		# We dont provide the Company_Lead id in order for the user to query it later
+		# lead_request = LeadRequest(user_id=current_user.id, contact_lead_id=contact_lead_id, contact_id=contact.id)
+		
+		# Lead request creation when we fully provide the company 
+		lead_request = LeadRequest(user_id=current_user.id, contact_lead_id=contact_lead_id, company_lead_id=company_lead.id,
+								   contact_id=contact.id, company_id=contact.company_id)
+		
 		db.session.add(lead_request)
 
 		print('contact_lead: {}'.format(contact_lead))
@@ -177,6 +214,7 @@ def upload_contact_leads():
 		db.session.commit()
 
 	return make_response(url_for('leads.view_leads', token=session.get('leads_token')), 400)
+
 
 
 
@@ -354,88 +392,6 @@ def import_csv():
 		return redirect(url_for('main.home'))
 
 	return render_template('leads/upload.html', uploaded=session['uploaded'])
-
-
-
-def get_displayed_leads(leads_ids, leads_type, cursor, limit):
-	"""
-	"""	
-	print('ids: {}'.format(leads_ids))
-	print('type: {}'.format(leads_type))
-	print('cursor: {}'.format(cursor))
-	print('limit: {}'.format(limit))
-	if leads_type is None:
-		leads_to_show = []
-	else:
-		if leads_type=='company':
-			leads_to_show = db.session.query(CompanyLead).filter(CompanyLead.id.in_(leads_ids)).offset(cursor).limit(limit+1).all()
-		else:
-			leads_to_show = db.session.query(ContactLead).filter(ContactLead.id.in_(leads_ids)).offset(cursor).limit(limit+1).all()
-
-	next_page_token = cursor + limit if len(leads_to_show) > limit else None
-	previous_page_token = cursor - limit if cursor >= limit else None	
-	print('next_page_token: {}'.format(next_page_token))
-	print('previous_page_token: {}'.format(previous_page_token))
-	return (leads_to_show[:limit], next_page_token, previous_page_token)
-
-
-
-def get_leads_ids(data):
-	"""
-	"""	
-	max_exports = current_user.subscriptions.order_by(Subscription.subscription_date.desc()).first().plan.limit_daily_query
-	today_requests = [elt.id for elt in current_user.requested_leads.all() if elt.query_date.date()==datetime.utcnow().date()]
-	remaining_exports = min(max_exports, max_exports-len(today_requests))
-	# Set a random seed to assure the same results if request is launched again
-	random.seed(int(datetime.utcnow().strftime('%Y%m%d'))*current_user.id)	
-	results_len = list(np.random.randint(low=4, high=14, size=1))[0]*10 # number of results to be displayed (random nb of page) * (number of results per page)
-	# results_len = 3
-
-	# Neet to create a list from activity_field input as it will be passed in a "in_" filter which only supports list
-	activity_filter = [data.get('company_activity_field')] if data.get('company_activity_field') else get_list_companies_activities()
-	print("activity: {}".format(activity_filter))
-
-	# User requested company leads
-	if data.get('leads_type') == 'company':
-		requested_companies_ids = [elt.company_lead_id for elt in current_user.requested_leads.all() if not elt.company_lead_id is None]
-		# Query by filter on activity_field and removing previous query results
-		leads_query = db.session.query(CompanyLead).filter((CompanyLead.activity_field1.in_(activity_filter) | 
-												   CompanyLead.activity_field2.in_(activity_filter) |
-												   CompanyLead.activity_field3.in_(activity_filter) ),
-												   ~CompanyLead.id.in_(requested_companies_ids))
-		# If exists, add location filter
-		if data.get('company_location'):
-			location_filter = "{}%".format(data.get('company_location'))
-			print("location: {}".format(location_filter))
-			leads_query = leads_query.filter(CompanyLead.postal_code.like(location_filter))			
-	
-	# User requested contact leads	
-	else:
-		requested_contacts_ids = [elt.contact_lead_id for elt in current_user.requested_leads.all() if not elt.contact_lead_id is None]
-		# Get company with required filed of activity
-		sub_query  = db.session.query(CompanyLead).filter(CompanyLead.activity_field1.in_(activity_filter) | 
-											   			  CompanyLead.activity_field2.in_(activity_filter) |
-											   			  CompanyLead.activity_field3.in_(activity_filter) ).subquery()
-		if data.get('location'):
-			location_filter = "{}%".format(data.get('location'))
-			print("location: {}".format(location_filter))
-			sub_query = sub_query.filter(CompanyLead.postal_code.like(location_filter))
-
-		leads_query = db.session.query(ContactLead).filter(~ContactLead.id.in_(requested_contacts_ids))
-		leads_query = leads_query.join(sub_query, ContactLead.company_id==sub_query.c.id)
-
-		if data.get('position'):
-			position_filter = "%{}%".format(data.get('position'))
-			print("position: {}".format(position_filter))
-			leads_query = leads_query.filter(ContactLead.position.like(position_filter))
-	
-	# Return a random list of the requested leads whom size is the mini btw all the results size and the number of results to be displayed (random nb of page) * (number of results per page)
-	requested_leads_id = [elt.id for elt in leads_query.all() ] 
-	random_leads_id = random.sample(requested_leads_id, min(len(requested_leads_id), results_len))
-	# print('random_ids: {}'.format(random_leads_id))
-	return (random_leads_id, data.get('leads_type'))
-
-
 
 
 # To be placed within utils

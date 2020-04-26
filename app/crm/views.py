@@ -65,7 +65,7 @@ def view_companies_list():
 	token = int(token.encode('utf-8')) if token else 0 # used to compute the number of item displayed 
 
 	companies, next_page_token, previous_page_token, size = get_list_companies(user_id=current_user.id, limit=15, cursor=token)
-	print(next_page_token, previous_page_token)
+	# print('Next token {}, Previous token {}'.format(next_page_token, previous_page_token))
 
 	return render_template('companies-list.html', companies=companies, size=size, next_page_token=next_page_token, 
 		previous_page_token=previous_page_token, add_form=add_form, edit_form=edit_form, page_token=token)
@@ -289,16 +289,18 @@ def view_opportunities_list():
 		token = token.encode('utf-8')
 	
 	opportunities, next_page, previous_page = get_list_opportunities(user_id=current_user.id, limit=15, cursor=token)
-	latest_steps = [OpportunityStep.query.filter_by(opportunity_id=opportunity.id).order_by(OpportunityStep.creation_date.desc()).first() for opportunity in opportunities]
+	latest_steps = [OpportunityStep.query.filter_by(opportunity_id=opportunity.id).order_by(OpportunityStep.last_update.desc()).first() for opportunity in opportunities]
 	# ids = [opp.id for opp in opportunities]
 	# opportunities = dict(zip(ids,list(zip(opportunities, latest_steps)))) #dict of list: key is an integer, value is a list. Each list is compose of an opportunity and its latest stage. 
 	opportunities = dict(zip(range(len(opportunities)),list(zip(opportunities, latest_steps)))) #dict of list: key is an integer, value is a list. Each list is compose of an opportunity and its latest stage. 
+	# List of company ids to display or not the message when adding a company
+	company_ids = [company.id for company in current_user.companies.all()]
 	# print('Opportunies dict: {}'.format(opportunities))
 	# status_choices = db.session.query(Status.name).distinct().order_by(Status.name.desc()).all()
 	# stages_choices = db.session.query(CommercialStage.name).distinct().order_by(CommercialStage.name).all()
 
 	return render_template('opportunities-list.html', opportunities=opportunities, add_form=add_form, edit_form= edit_form,			
-							next_page_token=next_page, previous_page_token=previous_page)
+							next_page_token=next_page, previous_page_token=previous_page, company_ids=company_ids)
 
 
 
@@ -350,10 +352,10 @@ def add_opportunity():
 						done=task_done)
 			db.session.add(task)
 			
-		else:
-			note = Note(content=request.form.get('note_content'),
-						opportunity_id	=opportunity.id)
-			db.session.add(note)
+		# Create a Note associated with the Opportunity that even though its empty
+		note = Note(content=request.form.get('note_content'),
+					opportunity_id	=opportunity.id)
+		db.session.add(note)
 			
 
 		db.session.commit()
@@ -403,11 +405,11 @@ def edit_opportunity(id):
 # try:
 	# Query some object from the form's input
 	company = Company.query.get(data.get('company_id'))
-	initial_step = OpportunityStep.query.get(int(data.get('initial_step_id')))
+	# initial_step = OpportunityStep.query.get(int(data.get('initial_step_id')))
 	new_stage_id = CommercialStage.query.filter_by(name=data.get('stage')).first().id
 	new_status_id = Status.query.filter_by(name=data.get('status')).first().id
 
-	# Parse some input
+	# Parse date and task done inputs
 	due_date = request.form.get('task_due_date')
 	due_date = datetime(year=int(due_date[-4:]), month=int(due_date[:2].replace('0','')), day=int(due_date[3:-5].replace('0',''))) if due_date else None # Parse the task's due-date from mm/dd/yyyy to dd/mm/yyyy if exists
 	task_done = True if request.form.get('task_done') else False
@@ -416,14 +418,19 @@ def edit_opportunity(id):
 	if not opportunity.user_id == current_user.id:
 		return redirect(url_for('crm.view_opportunities_list'))
 
-	# No change in step status nor commercial stage so we only edit Note or Task
-	if data.get('initial_stage') == data.get('stage') and data.get('initial_status') == data.get('status'):
-		print('Inital step id: {}'.format(data.get('initial_step_id')))
-		latest_note = Note.query.filter_by(opportunity_id=int(data.get('opportunity_id'))).first()
-		latest_task = Task.query.filter_by(opportunity_step_id=int(data.get('initial_step_id'))).first()
+	# Check if an opportunity'step with the required stage and status already exists	
+	print('Checking exisitng step')
+	existing_step = OpportunityStep.query.filter_by(opportunity_id=data.get('opportunity_id'),
+													stage_id=new_stage_id,
+													status_id=new_status_id).first()
+	if existing_step:
+
+		print('Step exists: {}'.format(existing_step))
+		# Update the last_update attribute of the step
+		existing_step.last_update = datetime.utcnow()		
 		# If true, update the task associated to the step
 		if data.get('status') == 'A faire':
-
+			latest_task = Task.query.filter_by(opportunity_step_id=int(data.get('initial_step_id'))).first()
 			latest_task.title = data.get('task_title')
 			latest_task.priority = data.get('task_priority')
 			latest_task.content = data.get('task_content')
@@ -431,30 +438,29 @@ def edit_opportunity(id):
 			latest_task.done = task_done
 		# Else update the note associated to the step 
 		else:
+			latest_note = Note.query.filter_by(opportunity_id=int(data.get('opportunity_id'))).first()
 			latest_note.content = data.get('note_content') if data['note_content'] else ''
 	# Else check if an opportunity'step with the required stage and status already exists		
 	else:
-		new_latest_step = OpportunityStep.query.filter_by(opportunity_id=data.get('opportunity_id'),
-										  stage_id=new_stage_id,
-										  status_id=new_status_id).first()
 		# If not, create a new step
-		if not new_latest_step:
-			new_latest_step = OpportunityStep(opportunity_id=data.get('opportunity_id'),
-											  stage_id=new_stage_id,
-											  status_id=new_status_id)
-			db.session.add(new_latest_step)
-			db.session.flush() # get new_opp id
+		new_step = OpportunityStep(opportunity_id=data.get('opportunity_id'),
+								   stage_id=new_stage_id,
+								   status_id=new_status_id)
+		db.session.add(new_step)
+		db.session.flush() # get new_opp id
 		
-		# Then create a task or note
+		# If status is 'to do', create a task associated to the new step
 		if data.get('status') == 'A faire':
-			new_task = Task(opportunity_step_id=new_latest_step.id,
+			new_task = Task(opportunity_step_id=new_step.id,
 							title=data.get('task_title'),
 							content=data.get('task_content'),
 							priority=data.get('task_priority'),
 							due_date=due_date,
 							done=task_done)
 		else:
-			new_note = Note(opportunity_id=new_latest_step.id,
+			# Else update the content of the note associated to the opportunity
+			latest_note = Note.query.filter_by(opportunity_id=int(data.get('opportunity_id'))).first()
+			new_note = Note(opportunity_id=new_step.id,
 							content=data.get('note_content'))
 
 	# Edit the company associated to that opportunity if the customer clicked on the pencil in the form

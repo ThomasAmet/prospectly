@@ -1,4 +1,4 @@
-{% macro render_add_modal(add_opportunity_form) %}
+{% macro render_add_modal(add_opportunity_form, company_ids) %}
 
   {% from 'macros/task-and-note.html' import render_task_and_note %}
 
@@ -13,7 +13,7 @@
           <div class="row align-items-center">
             <div class="col-9">
               <h3 class="mb-0">Nouvelle Opportunité</h3>
-              {% if add_opportunity_form.company.data is none %}
+              {% if company_ids|length==0 %}
               </br><h5 style="color:##525f7f";>Vous n'avez pas encore d'entreprise dans votre CRM. 
                 Ajoutez votre première entreprise<a href="{{url_for('crm.view_companies_list')}}" style="color:#5e72e4;"><em> dès mainteant.</em></a></h5>
               {% endif %}

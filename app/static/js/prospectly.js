@@ -13,7 +13,7 @@ $(document).ready(function(){
   });
 
   // #####################
-  // Script to toogle state of input fields in both form when clicking on CompanySettings toggle button
+  // Script to toogle enable/disable fields on both SearchSettings Formswhen clicking on CompanySettings toggle button
   $('#checkboxCompanySettings').click(function(){
     if($(this).prop("checked")){
       // Enable all input + select field + button in the CompanyForm.
@@ -60,7 +60,6 @@ $(document).ready(function(){
       $('#checkboxContactSettings').prop('checked', true);
     }
   })
-
 
 
 
@@ -153,7 +152,7 @@ $(document).ready(function(){
     // alert(data);
     $.ajax({
       type: 'POST',
-      url: '/app/leads/import-contacts',
+      url: '/app/leads/export-contacts',
       data: data,
       dataType: 'json',
       contentType: 'application/json',
@@ -183,7 +182,7 @@ $(document).ready(function(){
     // alert(data);
     $.ajax({
       type: 'POST',
-      url: '/app/leads/import-entreprises',
+      url: '/app/leads/export-entreprises',
       data: data,
       dataType: 'json',
       contentType: 'application/json',
@@ -452,7 +451,7 @@ $(document).ready(function(){
     
 
 
-  // JQuery for displaying task module or note moduel within AddOppportunityForm 
+  // JQuery for displaying task module or note module within AddOppportunityForm 
   var loadAddTaskAndNote = function(){
     if ($("#status-field-add-form").val()=='A faire'){
         $("[class*='note-form-group']").hide();
@@ -497,7 +496,7 @@ $(document).ready(function(){
     window.location = $(this).data("href");
   });
 
-  // 
+  
   // Jquery for Toggle Pricing
   let monthlyChoice = $('#monthly-choice');
   let yearlyChoice = $('#yearly-choice');

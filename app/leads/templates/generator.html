@@ -19,18 +19,18 @@
       <span class="badge badge-primary mr-md-6 ml-2">{{displayed_leads}}/{{all_leads_len}}</span>
       <button type="button" class="btn btn-sm btn-default">
 	    <span class="text-capitalize">Restant </span><span>à exporter</span>
-	    <span class="badge badge-primary">24</span>
+	    <span class="badge badge-primary">{{leads_left}}</span>
 	  </button>
     </div>
     <div class="col-lg-6 col-8 text-right">
       <!-- <a href="#" class="btn btn-sm btn-neutral">Actions</a> -->
-        {% if lead_type is none %}
+        {% if leads is none %}
         <button class="btn btn-neutral" type="button" data-toggle="collapse" data-target="#collapseSettings" aria-expanded='true'>
         {% else %}
     	<button class="btn btn-neutral" type="button" data-toggle="collapse" data-target="#collapseSettings" aria-expanded='false'>
     	{% endif %}
           <span class="btn-inner--icon"><i class="ni ni-settings-gear-65"></i></span>
-          <span class="btn-inner--text">Paramètres</span>
+          <span class="btn-inner--text">Paramètre de recherche</span>
         </button>
         <!-- <div class="dropdown-menu">
           <a class="dropdown-item" href="" id='deleteAllOpportunities'>Supprimer la sélection</a>
@@ -49,13 +49,8 @@
 {% block main_content %}
 
 	<!-- Cards Settings -->
-	{% if lead_type is none %}
     <div class="collapse show" id="collapseSettings">
-    {% else %}
-    <div class="collapse" id="collapseSettings">
-    {% endif %}
       <div class="row">
-
       	<!-- Company Settings  -->
         <div class="col-lg-6">
           <div class="card-wrapper">
@@ -65,16 +60,24 @@
 	          	  <div class='col-10'>
 	          		<div class="row  align-items-center">
 	          	      <i class="ni ni-settings-gear-65"></i>
-	            	  <h3 class="mb-0 mx-2">Recherche d'entreprises</h3>
+	            	  <h3 class="mb-0 mx-2">Entreprises</h3>
 	            	  <input type='hidden' name='leads_type' value='company'>
+	            	  {% if not lead_type == 'contact' %}
 	            	  <button class="btn btn-sm btn-icon btn-3 btn-primary" type="submit" id='searchCompanyLeads'>
+	            	  {% else %}
+	            	  <button class="btn btn-sm btn-icon btn-3 btn-primary" type="submit" id='searchCompanyLeads' disabled>
+	            	  {% endif %}
 		        	  	<span class="btn-inner--icon"><i class="fa fa-search"></i></span>
 		      		  </button>
 	          		</div>
 	          	  </div>
 	           	  <div class='col-2 px-0 text-right'>
 	            	<label class="custom-toggle custom-toggle-default">
+	            	  {% if not lead_type == 'contact' %}
 	              	  <input type="checkbox" checked id='checkboxCompanySettings'>
+	              	  {% else %}
+	              	  <input type="checkbox" unchecked id='checkboxCompanySettings'>
+	              	  {% endif %}
 	                	<span class="custom-toggle-slider rounded-circle" data-label-off="Non" data-label-on="Oui"></span>
 	              	</label>
 	              </div>
@@ -84,29 +87,47 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
+                      <div class='form-control-label pb-2'>
+                      	Critères de recherche:
+                      </div>
                       <div class="input-group input-group-merge">
-                      	 <div class="input-group-prepend">
-              	 			<button class="btn btn-outline-primary" type="button" id="button-addon1"><i class="ni ni-pin-3"></i></button>
-                          <!-- <span class="input-group-text"><i class="ni ni-pin-3"></i></span> -->
-                        </div>
-                        <input class="form-control company-settings-form-group pl-2" name="company_location" placeholder="CP (ex: 75 ou 75001)">
+                        <div class="input-group-prepend">
+                        	{% if not lead_type == 'contact' %}
+                        	<button class="btn btn-outline-primary" type="button" id="button-addon1">
+                        	{% else %}
+                        	<button class='btn btn-outline-primary' type='button' id='button-addon1'>
+                        	{% endif %}
+                        		<i class="ni ni-shop"></i>
+                        	</button>
+                        <!-- <span class="input-group-text"><i class="ni ni-shop"></i></span> -->
+                      	</div>
+                      	{% if not lead_type == 'contact' %}
+                        {{ comp_lead_form.company_activity_field(placeholder="Secteur d'activité", class="form-control company-settings-form-group form-group-list pl-2") }}
+                        {% else %}
+                        {{ comp_lead_form.company_activity_field(placeholder="Secteur d'activité", class="form-control company-settings-form-group form-group-list pl-2", disabled=True) }}
+                        {% endif %}
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <div class="input-group input-group-merge">
-                        <div class="input-group-prepend">
-                          <button class="btn btn-outline-primary" type="button" id="button-addon1"><i class="ni ni-shop"></i></button>
-                          <!-- <span class="input-group-text"><i class="ni ni-shop"></i></span> -->
+                {% if leads is not none and lead_type=='company'%}
+    			<div class="collapse col-md-6 show" id="collapseSubSettings">
+    			{% else %}
+    		    <div class="collapse col-md-6" id="collapseSubSettings">
+    			{% endif %}
+                  <div class="form-group">
+                    <div class='form-control-label pb-2'>
+                  	  Affiner la recherche:
+                    </div>
+                    <div class="input-group input-group-merge">
+                      <div class="input-group-prepend">
+          	 			  <button class="btn btn-outline-primary" type="button" id="button-addon1"><i class="ni ni-pin-3"></i></button>
                         </div>                      	
-                        <!-- <input class="form-control company-settings-form-group" placeholder="Secteur d'activité" 
-                        name="company_activity_field"> -->
-                        {{ comp_lead_form.company_activity_field(placeholder="Secteur d'activité", class="form-control company-settings-form-group form-group-list pl-2") }}
-                      </div>
+                      <input class="form-control company-settings-form-group pl-2" name="company_location" placeholder="Ex: 75 ou 75001">
                     </div>
                   </div>
                 </div>
+              </div>
+                <!-- end of sub settings collapse -->
               </div>
             </form>
           </div>
@@ -121,16 +142,26 @@
               	  <div class='col-10'>
               	    <div class="row  align-items-center">
       				  <i class="ni ni-settings-gear-65"></i>
-        			  <h3 class="mb-0 mx-2">Recherche de contacts</h3>
+        			  <h3 class="mb-0 mx-2">Contacts</h3>
         			  <input type='hidden' name='leads_type' value='contact'>
-        			  <button class="btn btn-sm btn-icon btn-3 btn-primary" type="sumbit" id='searchContactLeads' disabled>
+        			  <!-- button -->
+        			  {% if lead_type=='contact' %}
+        			  <button class="btn btn-sm btn-icon btn-3 btn-primary" type="sumbit" id='searchContactLeads'>
+        			  {% else %}
+        			  <button class='btn btn-sm btn-icon btn-3 btn-primary' type='sumbit' id='searchContactLeads' disabled>
+        			  {% endif %}
 		        		<span class="btn-inner--icon"><i class="fa fa-search"></i></span>
 		      		  </button>
               		</div>
               	  </div>
                   <div class='col-2 px-0 text-right'>
                 	<label class="custom-toggle custom-toggle-default">
+                	  <!-- toggle -->
+                	  {% if lead_type=='contact' %}
+                	  <input type='checkbox' checked id='checkboxContactSettings'>
+                	  {% else %}
                       <input type="checkbox" unchecked id='checkboxContactSettings'>
+                      {% endif %}
                       <span class="custom-toggle-slider rounded-circle" data-label-off="Non" data-label-on="Oui"></span>
                   	</label>
                   </div>
@@ -140,48 +171,71 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
+                      <div class='form-control-label pb-2'>
+                      	Critères de recherche:
+                      </div>
+	                  <div class="input-group input-group-merge">
+	                    <div class="input-group-prepend">
+	                      <!-- icon on field  -->
+	                      {% if lead_type=='contact'%}
+	                      <button class='btn btn-outline-primary' type='button' id='button-addon1'>
+	                      {% else %}
+	                      <button class="btn btn-outline-primary" type="button" id="button-addon1" disabled>
+	                      {% endif %}
+	                        <i class="ni ni-shop"></i>
+	                      </button>
+	                    </div>      
+	                     <!-- field  --> 
+	                    {% if lead_type=='contact'%}               	
+	                    {{ comp_lead_form.company_activity_field(placeholder="Secteur d'activité", class="form-control company-settings-form-group form-group-list") }}
+	                    {% else %}
+                        {{ comp_lead_form.company_activity_field(placeholder="Secteur d'activité", class="form-control company-settings-form-group form-group-list", disabled=True) }}
+                        {% endif %}
+	                  </div>
+	                </div>
+                  </div>
+                </div>
+                {% if lead_type=='contact' %}
+                <div class='row collapse show'>
+                {% else %}
+                <div class='row collapse'>
+                {% endif %}
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <div class='form-control-label pb-2'>
+                      	Affiner la recherche:
+                      </div>	
                       <div class="input-group input-group-merge">
                       	<div class="input-group-prepend">
-                      	  <button class="btn btn-outline-primary" type="button" id="button-addon1" disabled><i class="ni ni-badge"></i></button>	
+                      		<button class="btn btn-outline-primary" type="button" id="button-addon2"><i class="ni ni-pin-3"></i></button>
+                          <!-- <span class="input-group-text"><i class="ni ni-pin-3"></i></span> -->
+                        </div>
+                        <input class="form-control company-settings-form-group pl-2" placeholder="Ex: 75 ou 75001" name='contact_location'>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <div class='form-control-label pb-2'>
+                      	&nbsp
+                      </div>	
+                      <div class="input-group input-group-merge">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-outline-primary" type="button" id="button-addon1">
+                            <i class="ni ni-badge"></i>
+                          </button>	
                           <!-- <span class="input-group-text"><i class="ni ni-badge"></i></span> -->
                         </div>
                         <input class="form-control company-settings-form-group pl-2" placeholder="Position/Poste" 
-                        name="contact_position" disabled>
+                        name="contact_position">
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <div class="input-group input-group-merge">
-                      	<div class="input-group-prepend">
-                      		<button class="btn btn-outline-primary" type="button" id="button-addon2" disabled><i class="ni ni-pin-3"></i></button>
-                          <!-- <span class="input-group-text"><i class="ni ni-pin-3"></i></span> -->
-                        </div>
-                        <input class="form-control company-settings-form-group pl-2" placeholder="CP (ex: 75 ou 75001)" name='contact_location' disabled>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-               	<div class='row'>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <div class="input-group input-group-merge">
-                        <div class="input-group-prepend">
-                          <button class="btn btn-outline-primary" type="button" id="button-addon1" disabled><i class="ni ni-shop"></i></button>
-                          <!-- <span class="input-group-text"><i class="ni ni-shop"></i></span> -->
-                        </div>                      	
-                        <!-- <input class="form-control company-settings-form-group" placeholder="Secteur d'activité" 
-                        name="company_activity_field"> -->
-                        {{ comp_lead_form.company_activity_field(placeholder="Secteur d'activité", class="form-control company-settings-form-group form-group-list", disabled=True) }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              	</div>
               </div>
             </form>
           </div>
         </div>
-
 	  </div>
 	</div>
   	<!-- end collapsible settings -->
@@ -203,9 +257,14 @@
 					<!-- <a class="btn btn-sm btn-3 btn-primary" role="button" id='refreshCompanyLeads' href="">
 			        	<span class="btn-inner--icon"><i class="fa fa-redo"></i></span>
 			      	</a> -->
-	        	  	<a class="btn btn-sm btn-3 btn-primary" role="button" id='uploadCompanyLeads' href="">
+              {% if leads_left==0 %}
+	        	  <button class="btn btn-sm btn-3 btn-primary" role="button" id='uploadCompanyLeads' href="" disabled>
+              {% else %}
+              <button class="btn btn-sm btn-3 btn-primary" role="button" id='uploadCompanyLeads' href="">
+              {% endif %}
+                <span class='btn-inner--text'>Exporter</span>
 			        	<span class="btn-inner--icon"><i class="ni ni-cloud-upload-96"></i></span>
-			      	</a>
+			      	</button>
 		      		</div>
 		    	</div>
 	        </div>
@@ -225,6 +284,8 @@
 		              <th scope="col" data-sort='company_name'>Entreprise</th>
 		              <th scope="col" data-sort='company_city'>Ville</th>
 		              <th scope="col" data-sort='company_email'>Email</th>
+                  <th scope="col" data-sort='contact_firstname'>Prénom Contact</th>
+                  <th scope="col" data-sort='contact_lastname'>Nom Contact</th>
 		              <th scope="col" data-sort='company_website'>Site web</th>
 		            </tr>
 	              </thead>
@@ -241,21 +302,75 @@
 		              </td>
 		              <td>
 		                <div class="media align-items-center">
-		                  <div class="media-body">
-		                    <span class="mb-0 text-sm company_name">{{company.name}}</span>
+		                  <div class="media-body"> 
+		                    <span class="mb-0 text-sm company_name">
+                          {{ hash_value(company.name, 6, 10) }}
+                      </span>
 		                  </div>
 		                </div>
 		              </td>
 		              <td>
-		                <span class="company_city">{{ company.city }}</span>
+                    <span class="company_city">
+                    {% if company.city is none %}
+                    {% else %}
+		                  {{ company.city }}
+                    {% endif%}
+                    </span>
 		              </td>
 		              <td>
 		                <!-- span is used to retrieve value with jquery and hide if val == None -->
-		                <span class="company_email">{{ company.email }}</span>
+		                <span class="company_email">
+                      {{ hash_value(company.website, 15, 20) }}
+                  </span>
 		              </td>
+                  <td>
+                    <!-- span is used to retrieve value with jquery and hide if val == None -->
+                    <span class="contact_firstname">
+                    {% if company.contacts.first() is none %}
+
+                      {{ '*' * range(4, 12)|random }}
+
+                    {% else %}
+                      
+                      {% set start = company.contacts.first().firstname|length//3 %}
+                      {% set replacement = '*' * range(start*2, start*3)|random %}
+
+                      {{ company.contacts.first().firstname | replace(company.contacts.first().firstname[start:], replacement) }}   
+
+                    {% endif %}
+                    </span>
+                  </td>
+                  <td>
+                    <!-- span is used to retrieve value with jquery and hide if val == None -->
+                    <span class="contact_lastname">
+                    {% if company.contacts.first() is none %}
+
+                      {{ '*' * range(4, 12)|random }}
+
+                    {% else %}
+
+                      {% set start = company.contacts.first().firstname|length//3 %}
+                      {% set replacement = '*' * range(start*2, start*3)|random %}
+
+                      {{ company.contacts.first().lastname | replace(company.contacts.first().lastname[start:], replacement) }}
+
+                    {% endif %}
+                    </span>
+                  </td>
 		              <td>
 		                <!-- email -->
-		                <span class="company_website">{{ company.website }}</span>
+		                <span class="company_website">
+                    {% if company.website is none %}
+                      {{ '*' * range(15 , 20)|random }}
+                    {% else %}
+
+                      {% set start = company.website|length//3 %}
+                      {% set replacement = '*' * range(start*2, start*3)|random %}
+
+                      {{ company.website|replace(company.website[start:], repalcement) }}
+                      
+                    {% endif %}
+                    </span>
 		              </td>
 		            </tr>
 		       	  {% endfor %}
@@ -327,9 +442,14 @@
 					<!-- <a class="btn btn-sm btn-3 btn-primary" role="button" id='refreshContactLeads' href=""> 
 			        	<span class="btn-inner--icon"><i class="fa fa-redo"></i></span>
 			      	</a> -->
-	        	  	<a class="btn btn-sm btn-3 btn-primary" role="button" id='uploadContactLeads' href="">
+              {% if leads_left==0 %}
+	        	  <button class="btn btn-sm btn-3 btn-primary" role="button" id='uploadContactLeads' disabled>
+              {% else %}
+              <button class="btn btn-sm btn-3 btn-primary" role="button" id='uploadContactLeads'>
+              {% endif %}
+                <span class='btn-inner--text'>Exporter</span>
 			        	<span class="btn-inner--icon"><i class="ni ni-cloud-upload-96"></i></span>
-			      	</a>
+			      	</button>
 		      		</div>
 		    	</div>
 	        </div>
@@ -349,6 +469,7 @@
 		              <th scope="col" data-sort='contact_firstname'>Prénom</th>
 		              <th scope="col" data-sort='contact_lastname'>Nom</th>
 		              <th scope="col" data-sort='contact_company'>Entreprise</th>
+                  <th scope="col" data-sort='contact_position'>Poste</th>
 		              <th scope="col" data-sort='contact_email'>Email</th>
 		              <th scope="col"></th>
 		            </tr>
@@ -368,10 +489,10 @@
 		                <div class="media align-items-center">
 		                  <div class="media-body">
 		                    <span class="mb-0 text-sm contact_firstname">
+                          {% set start = contact,%}
 		                    	{{ contact.firstname[:2] }}
-		                    	{% for char in contact.firstname[2:] %}
-		                    	*
-		                    	{% endfor %}
+                          }
+
 		                	</span>
 		                  </div>
 		                </div>
@@ -452,5 +573,22 @@
           </div>
       </footer>
     {% endblock footer %}
+
+{% macro hash_value(value, min, max) %}
+
+   {% if value is none %}
+
+    {{ '*' * range(min, max)|random }}
+
+  {% else %}
+
+    {% set start = value|length//[2,3]|random %}
+    {% set replacement = '*' * range(start*1, start*2)|random %}
+                          
+    {{ value|replace(value[start:], replacement) }}
+
+  {% endif %}
+
+{% endmacro %}
   
 

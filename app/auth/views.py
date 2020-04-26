@@ -65,16 +65,33 @@ def valid_subscription_required(func):
 
 
 
-@auth.route('/profil')
+@auth.route('/profil', methods=['GET', 'POST'])
 @login_required
 def profile():
-
 	latest_sub_query = Subscription.query.filter_by(user_id=current_user.id).order_by(Subscription.subscription_date.desc())
 	latest_sub = latest_sub_query.first()
 
 	monthly_cost = 0
 	yearly_cost = 0
 
+	if request.method=='POST':
+		data = request.form.to_dict(flat=True)
+		print('form data: {}'.format(data))
+
+		user = User.query.get(current_user.id)
+		for k,v in data.items():
+			print('{}:{}'.format(k,v))
+			setattr(user, k, v)
+
+		# try:
+		db.session.commit()
+		flash('Vos informations ont été mises à jour.')
+		# except:
+			# flash('Une erreur est survenue.')
+		return redirect(url_for('auth.profile'))
+
+
+	# Compute the proration amount should a user switch to a Pro plan
 	if current_user.stripe_customer_id and latest_sub.plan.category=='Basic':
 		# Set proration date to this moment:
 		proration_date = int(time())
@@ -451,10 +468,30 @@ def logout():
 @auth.route('/edition-abonnement', methods=['POST','GET'])
 @admin_login_required
 def edit_subscription():
+
 	if request.method == 'POST':
-		None
+		data = request.form.to_dict(flat=True)
+		print('Requested form data: {}'.format(data))
+		
+		# Retrieve user first
+		user = User.query.filter_by(email=data.get('email'))
+		if not user:
+			flash('No user found with this email')
+			return redirect(url_for('auth.edit_subscription'))
+		if data.get('action')=='cancel_trial':
+			try:
+				latest_sub = db.session.query(Subscription).filter(Subscription.user_id==current_user.id).order_by(Subscription.subscription_date.desc()).first()
+				stripe_sub = stripe.Subscription.modify(latest_sub.stripe_id,
+					trial_end='now',
+				)
+				flash('Trial period for {} has been stoped'.format(user))
+			except e:
+				flash('Error: {}'.format(e))
+			return redirect(url_for('auth.edit_subscription'))
+
 	if request.method == 'GET':
-		users_list = User.query.all()	
+		None
+	users_list = User.query.all()
 	return render_template('subscription-edition.html', users_list=users_list)
 
 
@@ -681,3 +718,4 @@ def from_stripe_plan_id(stripe_plan_id):
 # token = jwt.encode({'user_id':1, 'exp':time()+600}, 'secret', algorithm='HS256')
 # jwt.deconde(token)
 # secret = User.query.get(jwt.decode(token, verify=False)['user_id']).password_hash
+

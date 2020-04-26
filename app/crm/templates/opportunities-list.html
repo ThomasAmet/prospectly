@@ -120,7 +120,7 @@
                 <th scope="col" data-sort='email'>Montant</th>
                 <th scope="col" data-sort='phone'>étape</th>
                 <th scope="col" data-sort='position'>status</th>
-                <th scope="col" data-sort='creation_date'>Dernière modification</th>
+                <th scope="col" data-sort='latest_update'>Dernière modification</th>
                 <th scope="col"></th>
               </tr>
             </thead>
@@ -236,7 +236,7 @@
   <!-- End Table -->
 
   <!--  Modal addContact -->
-  {{ render_add_modal(add_form) }}
+  {{ render_add_modal(add_form, company_ids) }}
   <!-- End Modal addContact -->
 
   <!--  Modal editContact -->

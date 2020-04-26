@@ -310,6 +310,16 @@ for city in cities_to_search:
         'Club_Contact_FirstName': contacts_firstname_list,
         'Club_Contact_LastName': contacts_lastname_list,
         'Club_Contact_Position': contacts_position_list,
+        'Club_Contact_Linkedin': contacts_linkedin_list,'Club_Name': club_names,
+        'Club_Address': club_addresses,
+        'Club_Postal': [re.sub('"', '', postal) for postal in club_postals],
+        'Club_City': [re.sub('"', '', city) for city in club_cities],
+        'Club_Phone': club_phones,
+        'Club_Email_Main': club_mainEmails,
+        'Club_Email_Bcc': club_bccEmails,
+        'Club_Contact_FirstName': contacts_firstname_list,
+        'Club_Contact_LastName': contacts_lastname_list,
+        'Club_Contact_Position': contacts_position_list,
         'Club_Contact_Linkedin': contacts_linkedin_list,
         })
 

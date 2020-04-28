@@ -164,7 +164,9 @@ $(document).ready(function(){
       location.href = '/app/leads/generator';
     })
     .fail(function(jqXHR, textStatus, errorThrown){
-      location.href = '/leads/erreur/upload';
+      // location.href = '/leads/erreur/upload';
+      location.href = '/app/leads/generator';
+      // location.href=jqXHR.responseText;
     });
   });
 
@@ -194,7 +196,9 @@ $(document).ready(function(){
       location.href = '/app/leads/generator';
     })
     .fail(function(jqXHR, textStatus, errorThrown){
-      location.href = '/leads/erreur/upload';
+      // location.href = '/leads/erreur/upload';
+      location.href = '/app/leads/generator';
+      // location.href=jqXHR.responseText;
     });
   });
 

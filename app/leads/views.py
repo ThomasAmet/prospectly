@@ -26,7 +26,7 @@ from werkzeug.utils import secure_filename
 from . import leads
 from .forms import CompaniesQueryForm, ContactsQueryForm, LeadsQueryForm
 from .. import app, db
-from ..models import User, Subscription, Company, Contact, CompanyLead, ContactLead, LeadRequest
+from ..models import User, Subscription, Company, Contact, CompanyLead, ContactLead, LeadRequest, ContactsEmail
 from ..models import get_list_companies_activities, get_leads_ids, get_displayed_leads, compute_remaining_leads, from_sql
 
 # from ...bin import all_utils
@@ -52,17 +52,24 @@ def view_leads():
 	if request.method=='POST':
 		data = request.form.to_dict(flat=True)
 		leads_ids, leads_type = get_leads_ids(data)
+		# Replace the leads_ids from the session with the one from the new query
 		session.pop('leads_ids') if session.get('leads_ids') else None
 		session['leads_ids'] = leads_ids
-		# print('session (POST): {}'.format(session.get('leads_ids')))
-	
+		# Display a message when the result is empty
+		flash("Aucun nouveau lead ne correspond à votre requête.") if len(leads_ids)==0 else None
+		
+	# Length of the leads search 
 	all_leads_len = len(leads_ids) if leads_type  else 0	 
-	leads_to_show, next_page_token, previous_page_token = get_displayed_leads(leads_ids, leads_type, token, limit=2) 
+	# Function to display the leads page by page
+	leads_to_show, next_page_token, previous_page_token = get_displayed_leads(leads_ids, leads_type, token, limit=10) 
+	# Compute the number of leads left to be queried
 	remaining_leads = compute_remaining_leads()
-	
+	flash("Revenez demain pour de nouveaux leads.") if remaining_leads<=0 else None
+
 	# print('leads to display: {}'.format(leads_to_show))
 	return render_template('generator.html', comp_lead_form=comp_lead_form, leads=leads_to_show, lead_type=leads_type,  leads_left=remaining_leads,
 		next_page_token=next_page_token, previous_page_token=previous_page_token, current_page_token=token, all_leads_len=all_leads_len)
+
 
 
 
@@ -75,14 +82,18 @@ def upload_company_leads():
 	data = request.get_json(silent=True)
 	print('data: {}'.format(data))
 
-	if not data.get('leads_ids'):
+	if not data.get('leads_ids') or compute_remaining_leads()<=0:
 		return make_response(url_for('leads.view_leads'), 400)
 
 	for company_lead_id in data.get('leads_ids'):
-		company_lead = from_sql(CompanyLead.query.get(lead_id))
+		company_lead = from_sql(CompanyLead.query.get(company_lead_id))
 		print("company_lead dict: {}".format(company_lead))
-		contact_lead = from_sql(CompanyLead.query.get(lead_id).contacts.all()[0])
-		contact_lead_id = conact_lead.get('id')
+		
+		contact_lead = from_sql(CompanyLead.query.get(company_lead_id).contacts.all()[0])
+		contact_lead_id = contact_lead.get('id')
+		email = contact_lead.get('email')
+		contact_lead['first_name'] = contact_lead['firstname']
+		contact_lead['last_name'] = contact_lead['lastname']
 		print("contact_lead dict {}".format(contact_lead))
 
 		# Drop attribute that we wont use if we update an exisiting Company
@@ -90,7 +101,9 @@ def upload_company_leads():
 		company_lead.pop('creation_date')
 		contact_lead.pop('id')
 		contact_lead.pop('creation_date')
-		
+		contact_lead.pop('firstname')
+		contact_lead.pop('lastname')
+		contact_lead.pop('email')
 		# It is possible that the user already imported a contact_lead from this company, hence this company should exists in user's companies table
 		# Check if the company_lead to  uploqd already exists in user's Company's table (then update values) or if we have to create it
 		# q1 retrieves the company_id (user side) if a former lead_request contains the same company_lead_id
@@ -131,11 +144,15 @@ def upload_company_leads():
 		db.session.add(company)
 		db.session.flush()
 
-		contact_lead['company_id'] = company_id
+		contact_lead['company_id'] = company.id
 		contact = Contact(**contact_lead)
 		db.session.add(contact)
 		db.session.flush()
 		
+
+		# Create an email relationship
+		email = ContactsEmail(contact_id=contact.id, email=email)
+		db.session.add(email)
 
 		# Record the query
 		lead_request = LeadRequest(user_id=current_user.id, company_lead_id=company_lead_id, company_id=company.id, 
@@ -144,8 +161,9 @@ def upload_company_leads():
 
 	db.session.commit()	
 	flash('Les leads ont été importés')
-	return make_response(url_for('leads.view_leads', token=session.get('leads_token')), 400)
 
+	return make_response(url_for('leads.view_leads', token=session.get('leads_token')), 200)
+	
 
 
 @leads.route('/export-contacts', methods=['POST'])
@@ -155,24 +173,44 @@ def upload_contact_leads():
 	data = request.get_json()
 	print('Upload Contact data: {}'.format(data))
 
+	if not data.get('leads_ids') or compute_remaining_leads()<=0:
+		return make_response(url_for('leads.view_leads'), 400)
+
 	for contact_lead_id in data.get('leads_ids'):
 		contact_lead = from_sql(ContactLead.query.get(contact_lead_id))
+
+		# Add new attribute to match Contact model
+		contact_lead['first_name'] = contact_lead['firstname']
+		contact_lead['last_name'] = contact_lead['lastname']
+		email = contact_lead['email']
+		
 		# Retrieve company_lead from company_id attribute in contact_lead
-		company_lead = from_sql(CompanyLead.query.get(contact_lead.get('company_id')))
+		company_lead_id = contact_lead.get('company_id')
+		company_lead = from_sql(CompanyLead.query.get(company_lead_id))
+		# print('company_lead: {}'.format(company_lead))
 		
 		contact_lead.pop('company_id')
 		contact_lead.pop('creation_date')
 		contact_lead.pop('id')
+		contact_lead.pop('firstname')
+		contact_lead.pop('lastname')
+		contact_lead.pop('email')
 		company_lead.pop('creation_date')
+		company_lead.pop('id')
 
+
+		# Either return the activty field chosen (which is a list of all field avaialble - when turn on)
 		if data['activity_field']:
 			company_lead['activity_field'] = data.get('activity_field')
+		# Or return the 1st activity field from the company
 		else:
 			company_lead['activity_field'] = company_lead['activity_field1']
-		company_lead.pop('activity_field1', 'activity_field2', 'activity_field3')
+		company_lead.pop('activity_field1')
+		company_lead.pop('activity_field2')
+		company_lead.pop('activity_field3')
 
 		# Checking if the user already requested a contact from that company. If yes we use the same Company's id
-		query1 = db.session.query(LeadRequest.company_id).filter_by(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==company_lead.id) 
+		query1 = db.session.query(LeadRequest.company_id).filter(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==company_lead_id) 
 		
 		# Maybe for later 
 		# Check if contact's firm already exists in user's companies table
@@ -194,7 +232,7 @@ def upload_contact_leads():
 			db.session.add(company)
 			db.session.flush()
 			contact_lead['company_id'] = company.id 
-		
+
 		contact = Contact(**contact_lead) 
 		db.session.add(contact)
 		db.session.flush()
@@ -203,17 +241,19 @@ def upload_contact_leads():
 		# We dont provide the Company_Lead id in order for the user to query it later
 		# lead_request = LeadRequest(user_id=current_user.id, contact_lead_id=contact_lead_id, contact_id=contact.id)
 		
+		# Create an email relationship
+		email = ContactsEmail(contact_id=contact.id, email=email)
+		db.session.add(email)
+
 		# Lead request creation when we fully provide the company 
-		lead_request = LeadRequest(user_id=current_user.id, contact_lead_id=contact_lead_id, company_lead_id=company_lead.id,
+		lead_request = LeadRequest(user_id=current_user.id, contact_lead_id=contact_lead_id, company_lead_id=company_lead_id,
 								   contact_id=contact.id, company_id=contact.company_id)
-		
 		db.session.add(lead_request)
-
-		print('contact_lead: {}'.format(contact_lead))
-		print('company_lead: {}'.format(company_lead))
+		
 		db.session.commit()
+		flash('Les leads ont été importés')
 
-	return make_response(url_for('leads.view_leads', token=session.get('leads_token')), 400)
+	return make_response(url_for('leads.view_leads', token=session.get('leads_token')), 200)
 
 
 
@@ -291,6 +331,67 @@ def query():
 	return render_template('generator.html', comp_lead_form=form, request_output=session['todays_output'])
 
 
+
+
+@leads.route('/import-leads', methods=['POST'])
+@login_required
+@admin_login_required
+def import_lead():
+	file = request.files.get('input_file')
+
+	if request.method=='POST' and file:
+
+		# Read csv into dataFrame
+		df = pd.read_csv(file, encoding='utf-8', sep=';', header=0)
+		df = df.fillna('')
+		df = df.astype(str)
+		print('df shape: {}'.format(df.shape))
+
+		# Subset the df into 2 df (1 for company, 1 for contact)
+		df_company = df[df.columns[:-8]]
+		df_contact = df[df.columns[-8:]]
+
+		# Rename the contact df by removing the contact part in the colnames
+		newcols = df.columns[-8:].str.replace('contact_', '')
+		df_contact.columns = newcols
+
+		for i in df.index:
+		# for i in range(1):
+			# Parse company serie to dict and create a leadcompany
+			company_dict = df_company.iloc[i].to_dict()
+			# Check if the company already exisits (based on name and address
+			company_lead = CompanyLead.query.filter_by(name=company_dict.get('name'), address=company_dict.get('address')).first()
+
+			# Create a new company
+			if not company_lead:
+				company_lead = CompanyLead(**company_dict)
+				db.session.add(company_lead)
+				db.session.flush()
+
+			# Parse contact serie into a dict, add a 'company_id' attribute and create a contactlead
+			contact_dict = df_contact.iloc[i].to_dict()
+			if contact_dict.get('firstname') and contact_dict.get('lastname'):
+				contact_dict['company_id'] = company_lead.id
+				print('Contact: {}'.format(contact_dict))
+				contact_lead = ContactLead(**contact_dict)
+				db.session.add(contact_lead)
+
+		try:				
+			db.session.commit()
+			flash('Leads importés avec succès')
+		except:
+			db.session.rollback()
+			flash("Echec lors de l'importation")
+
+	return redirect(url_for('auth.admin_support'))
+
+
+# #########################################################
+# #########################################################
+# #########################################################
+# #########################################################
+# #########################################################
+# #########################################################
 
 @leads.route('/telechargement')
 @admin_login_required

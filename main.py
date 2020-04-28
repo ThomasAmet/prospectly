@@ -2,6 +2,7 @@ from app import app
 from app.models import *
 
 
+# Dont forget to run $export FLASK_APP=main.py
 @app.shell_context_processor
 def configure_shell_context():
 	return {'db': db, 'User': User, 'Subscription': Subscription, 'Plan':Plan, 'CompanyLead': CompanyLead, 'ContactLead': ContactLead, 'LeadRequest':LeadRequest, 'Note':Note, 'Company':Company,

@@ -38,7 +38,7 @@ class BaseConfig():
 
 	SECRET_KEY = os.getenv('SECRET_KEY')
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
-	MAX_CONTENT_LENGTH = 0.2 * 1024 * 1024 # limit size of uploaded file to 200kb
+	MAX_CONTENT_LENGTH = 2 * 1024 * 1024 # limit size of uploaded file to 2mb
 	UPLOAD_FOLDER = 'csv/uploads/'
 	CSP = {
     # Fonts from fonts.google.com

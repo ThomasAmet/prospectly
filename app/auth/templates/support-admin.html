@@ -42,7 +42,7 @@
 <div class='row justify-content-center '>
   <div class='col-lg-8 card-wrapper'>
     <div class='card'>
-      <form method='POST' action="{{url_for('auth.edit_subscription')}}">
+      <form method='POST' action="{{url_for('auth.admin_support')}}">
         <div class='card-header'> 
           <div class='row align-items-center'>    
             <div class='col-8'>
@@ -61,12 +61,44 @@
               <select class='form-control' name='action'>
                 <option value=''>Select an action...</option>
                 <option value='cancel_trial'>Cancel trial period</option>
-                <option>Other action</option>
+                <option value='send_confirmation_email'>Send confirmation email</option>
               </select>
             </div>
             <div class='col-6'>
               <input class='form-control' type='email' name='email' placeholder="Account's email">
             </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class='row justify-content-center mt-4'>
+  <div class='col-lg-8 card-wrapper'>
+    <div class='card'>
+      <form method='POST' action="{{url_for('leads.import_lead')}}" enctype="multipart/form-data">
+        <div class='card-header'> 
+          <div class='row align-items-center'>    
+            <div class='col-8'>
+              <h3>Import Leads {{shape}}</h3>
+            </div>
+            <div class='col-4 text-right'>
+              <button type='submit' class='btn btn-sm btn-success'>
+                Importer
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class='card-body'>
+          <div class='row row-example'>
+            <div class='col-12'>
+              <div class="custom-file">
+                <!-- <input type="file" name="input_file" class="custom-file-input" id="customFileLang" lang="en">
+                <label class="custom-file-label" for="customFileLang">Select file</label> -->
+                <input type="file" name="input_file" />
+                    
+              </div>
           </div>
         </div>
       </form>

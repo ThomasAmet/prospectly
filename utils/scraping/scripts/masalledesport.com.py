@@ -1,6 +1,8 @@
 import os
 import re
 import pandas as pd
+import glob
+from functools import partial
 import numpy as np
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -340,6 +342,28 @@ for city in cities_to_search:
     club_infos.to_csv(output_path, sep=';', index=False, encoding='utf-8')
 
 
+
+
+#######################################
+#
+# FUNCTION TO GET MERGE ALL THE DATASET
+# THAT WE CREATE FROM PREVIOUS STEP AND
+# SAVE THEM INTO ONE CSV FILE
+#
+#######################################
+
+filename_pattern = "*.csv"
+abspath = os.path.abspath(__file__)
+dir_name = os.path.dirname(abspath)
+input_dir = os.path.join(os.path.dirname(dir_name), 'output', 'fitness')
+files_path = os.path.join(input_dir, filename_pattern)
+all_gyms = pd.concat(map(partial(pd.read_csv, sep=';', encoding='utf-8', header=0), glob.glob(files_path)))
+all_gyms['country'] = 'France'
+all_gyms = all_gyms.reset_index(drop=True)
+
+output_name = str(pd.datetime.today())[:10]  + '_all_fitness.csv'
+output_path = os.path.join(input_dir, output_name)
+all_gyms.to_csv(output_path, encoding='utf-8', sep=';', index=False)
 
 # Remove accent method
 # import unicodedata

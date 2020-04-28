@@ -26,7 +26,7 @@ from werkzeug.utils import secure_filename
 from . import leads
 from .forms import CompaniesQueryForm, ContactsQueryForm, LeadsQueryForm
 from .. import app, db
-from ..models import User, Subscription, Company, Contact, CompanyLead, ContactLead, LeadRequest, ContactsEmail
+from ..models import User, Subscription, Company, Contact, CompanyLead, ContactLead, ContactsEmail, LeadRequest
 from ..models import get_list_companies_activities, get_leads_ids, get_displayed_leads, compute_remaining_leads, from_sql
 
 # from ...bin import all_utils
@@ -126,8 +126,9 @@ def upload_company_leads():
 		# 		setattr(company, k, v)
 		
 		
-		# Add user_id attribut, as we will need to to create the company obejct
+		# Add user_id attribute, as we will need to to create the company obejct
 		company_lead['user_id'] = current_user.id
+		contact_lead['user_id'] = current_user.id
 
 		# Set the activity field for the company as the field selected by the user or the first field of the lead if no field is chosen
 		if data['activity_field']:
@@ -158,11 +159,11 @@ def upload_company_leads():
 		lead_request = LeadRequest(user_id=current_user.id, company_lead_id=company_lead_id, company_id=company.id, 
 								   contact_lead_id=contact_lead_id, contact_id=contact.id )
 		db.session.add(lead_request)
-
+		# db.session.flush()
 	db.session.commit()	
 	flash('Les leads ont été importés')
 
-	return make_response(url_for('leads.view_leads', token=session.get('leads_token')), 200)
+	return make_response(url_for('leads.view_leads', token=session.get('leads_token'), type='company'), 200)
 	
 
 
@@ -209,6 +210,11 @@ def upload_contact_leads():
 		company_lead.pop('activity_field2')
 		company_lead.pop('activity_field3')
 
+
+		# Add user_id attribute, as we will need to to create the company obejct
+		company_lead['user_id'] = current_user.id
+		contact_lead['user_id'] = current_user.id
+
 		# Checking if the user already requested a contact from that company. If yes we use the same Company's id
 		query1 = db.session.query(LeadRequest.company_id).filter(LeadRequest.user_id==current_user.id, LeadRequest.company_lead_id==company_lead_id) 
 		
@@ -233,6 +239,7 @@ def upload_contact_leads():
 			db.session.flush()
 			contact_lead['company_id'] = company.id 
 
+		# Create the contact 
 		contact = Contact(**contact_lead) 
 		db.session.add(contact)
 		db.session.flush()

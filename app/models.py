@@ -244,6 +244,7 @@ class Contact(db.Model):
 	emails = db.relationship('ContactsEmail', backref='contact', lazy='dynamic') # many-side of a one-to-many relationship with ContactsEmail
 	notes = db.relationship('Note', backref='contact', lazy='dynamic', cascade='all, delete-orphan')# many-side of a one-to-many relationship with Notes
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id')) # one-side of a many-to-one with User 
+	request = db.relationship('LeadRequest', foreign_keys=[LeadRequest.contact_id], backref='contact', lazy='dynamic')# many side
 	# opportunities = db.relationship('Opportunity', backref='contact', lazy='dynamic') # one-to-many (many side)
 
 	def __repr__(self):
@@ -268,7 +269,6 @@ class Company(db.Model):
 	instagram = db.Column(db.String(240), index=False, unique=False, nullable=True)
 	linkedin = db.Column(db.String(240), index=False, unique=False, nullable=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id')) # one-side of a many-to-one with User 
-	# contacts = db.relationship('Contact', backref='company', lazy='dynamic', cascade='all, delete-orphan')
 	contacts = db.relationship('Contact', foreign_keys=[Contact.company_id], backref=db.backref('firm', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
 	opportunities = db.relationship('Opportunity', backref='company', lazy='dynamic', cascade='all, delete-orphan') # one-to-many with Opportunity table (many side)
 	notes = db.relationship('Note', backref='company', lazy='dynamic')

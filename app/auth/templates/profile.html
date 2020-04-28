@@ -28,6 +28,7 @@
   
 {% from 'macros/upgrade-account.html' import render_upgrade_choices with context %} 
 {% from 'macros/downgrade-account.html' import render_downgrade_choices with context %} 
+{% from 'macros/choose-picture.html' import render_picture_choices %}
 
 {% if latest_sub.plan.category=='Basic'%}
 {{ render_upgrade_choices(monthly_cost, yearly_cost) }} 
@@ -152,7 +153,7 @@
               <div class="row justify-content-center">
                 <div class="col-lg-3 order-lg-2">
                   <div class="card-profile-image">
-                    <a href="#">
+                    <a href="#" class="" data-toggle='modal' data-target='#choosePictureModal'>
                       <img src="{{url_for('static', filename='images/theme/team-5.png')}}" class="rounded-circle">
                     </a>
                   </div>

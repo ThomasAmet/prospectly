@@ -11,16 +11,17 @@ from flask_admin.contrib.sqla import ModelView
 
 from app import db, app
 from . import auth
-from .forms import LoginForm, RegistrationForm, SetPasswordForm, RequestNewPasswordForm, EmailSupportForm
-from ..models import User, Subscription, Plan
+from .forms import LoginForm, RegistrationForm, SetPasswordForm, RequestNewPasswordForm
+from ..models import User, Subscription, Plan, CompanyLead, ContactLead
 
 import stripe
 import jwt
 import json
 import math
-
-
+import csv
+import io
 import email, smtplib, ssl
+import pandas as pd
 
 from email import encoders
 from email.mime.base import MIMEBase
@@ -56,7 +57,7 @@ def valid_subscription_required(func):
 	@wraps(func)
 	def decorated_view(*args, **kwargs):
 		latest_sub = db.session.query(Subscription).filter(Subscription.user_id==current_user.id).first()
-		if datetime.utcnow() > latest_sub.next_payment + timedelta(days=2):
+		if not latest_sub.is_valid():
 			message = Markup("Votre paiement n'est pas à jour, nous vous invitons à mettre à jour vos informations de paiement ou à contacter le support.")
 			flash(message)
 			return redirect(url_for('auth.profile'))
@@ -83,11 +84,12 @@ def profile():
 			print('{}:{}'.format(k,v))
 			setattr(user, k, v)
 
-		# try:
-		db.session.commit()
-		flash('Vos informations ont été mises à jour.')
-		# except:
-			# flash('Une erreur est survenue.')
+		try:
+			db.session.commit()
+			flash('Vos informations ont été mises à jour.')
+		except:
+			db.session.rollback()
+			flash('Une erreur est survenue.')
 		return redirect(url_for('auth.profile'))
 
 
@@ -139,7 +141,7 @@ def profile():
 
 @auth.route('/stripe-public-key', methods=['GET'])
 def get_publishable_key():
-    return jsonify({'publicKey': app.config.get('STRIPE_PUBLISHABLE_KEY')})
+	return jsonify({'publicKey': app.config.get('STRIPE_PUBLISHABLE_KEY')})
 
 
 
@@ -152,7 +154,6 @@ def signup():
 	form = RegistrationForm()
 
 	# POST method part
-# try:
 	if request.method=='POST':
 		
 		print(dict(request.form))
@@ -193,39 +194,41 @@ def signup():
 						last_name=form.last_name.data.capitalize(),
 						email=requested_email, stripe_customer_id=customer.id)
 			db.session.add(user)
-
-		db.session.commit()
-		print('Customer succesfully created!')
-		stripe_session = stripe.checkout.Session.create(
-			customer = customer.id,
-			# customer_email = customer.email,
-			payment_method_types=['card'],
-			subscription_data={
-				'items': [{
-					'plan':plan.stripe_id,
-				}],
-				# 'trial_period_days':int(plan.free_trial), #use a variable that will depend on plan_id and will be return by from_plan_name()
-				'trial_from_plan':True, # tell the subscription to pull the trial from the plan! https://stripe.com/docs/api/subscriptions/create#create_subscription-trial_from_plan	
-			}, 
-			success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
-			cancel_url='%sauth/paiement-echec' %request.host_url,
-			locale='fr'
-		)
-		# session['stripe_session_id'] = stripe_session.id #load stripe session in cookie to allow only one time success message
-		return Response(stripe_session.id, status=200)
-# except:
-# 	flash('Une erreur est survenue. Merci de contacter le support.')
-# 	print('User creation failed!')
-# 	db.session.rollback()
-# 	return Response(url_for('main.home'), status=404)
 		
+		try:	
+			db.session.commit()
+			print('Customer succesfully created!')
+			stripe_session = stripe.checkout.Session.create(
+				customer = customer.id,
+				# customer_email = customer.email,
+				payment_method_types=['card'],
+				subscription_data={
+					'items': [{
+						'plan':plan.stripe_id,
+					}],
+					# 'trial_period_days':int(plan.free_trial), #use a variable that will depend on plan_id and will be return by from_plan_name()
+					'trial_from_plan':True, # tell the subscription to pull the trial from the plan! https://stripe.com/docs/api/subscriptions/create#create_subscription-trial_from_plan	
+				}, 
+				success_url='%sauth/paiement-reussi?session_id={CHECKOUT_SESSION_ID}&msg=Vous+allez+recevoir+un+email+contenant+un+lien+pour+activer+votre+compte' % request.host_url,
+				cancel_url='%sauth/paiement-echec' %request.host_url,
+				locale='fr'
+			)
+			# session['stripe_session_id'] = stripe_session.id #load stripe session in cookie to allow only one time success message
+			return Response(stripe_session.id, status=200)
+		except:
+			flash('Une erreur est survenue. Merci de contacter le support.')
+			print('User creation failed!')
+			db.session.rollback()
+			return Response(url_for('main.home'), status=404)
+				
 	# GET method part (needs to be below POST method to make stripe work)
 	if request.method == 'GET' :
 		if not request.args.get('plan_stripe_id'):
 			return redirect(url_for('main.pricing'))
-	message = Markup("<strong>Pour votre sécurité</strong>, vous serez invité à renseigner vos informations de paiement après cette page.<br>Cette étape permet de vérfier votre identité. <strong>Aucun prélévement ne sera effectué.</strong>")
-	flash(message)
-	return render_template('register.html', form=form, plan_stripe_id=request.args.get('plan_stripe_id'))
+		message = Markup("<strong>Pour votre sécurité</strong>, vous serez invité à renseigner vos informations de paiement après cette page.<br>Cette étape permet de vérfier votre identité. <strong>Aucun prélévement ne sera effectué pour les périodes d'essai.</strong>")
+		flash(message)
+		return render_template('register.html', form=form, plan_stripe_id=request.args.get('plan_stripe_id'))
+
 
 
 
@@ -273,11 +276,13 @@ def webhooks():
 
 
 	# Update 'next_payment' in subscription when the payment succeeded
-	if event_type=='invoice.payment_succeeded':
-		print('Invoice Payment Succeeded Webhook')
+	# if event_type=='invoice.payment_succeeded':
+	if event_type=='payment_intent.succeeded':
+		# print('Invoice Payment Succeeded Webhook')
+		print('Payment intent success')
 		# stripe object with multiple informations		
 		data_object = data['object']
-		print('Data object:{}'.format(data_object))
+		print('Data object: {}'.format(data_object))
 		
 		# Retrieve user in database from stripe_user_id
 		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first_or_404()
@@ -287,7 +292,9 @@ def webhooks():
 		latest_sub = Subscription.query.filter_by(user_id=user.id, stripe_id=stripe_sub_id).order_by(Subscription.subscription_date.desc()).first()
 		# If there is an exisiting subscription update the next_payment_date
 		if latest_sub:
+			print('Latest sub: {}'.format(latest_sub))
 			latest_sub.set_next_payment()
+			db.session.commit()
 			return Response('Success', 200)
 		else:
 			print('No subscription found for customer with id:{}'.format(user.id))
@@ -300,10 +307,13 @@ def webhooks():
 		# stripe object with multiple informations		
 		data_object = data['object']
 		print('Data object:{}'.format(data_object)) 
+		
 		# Retrieve stripe_user_id from the Stripe webhook
 		stripe_customer = stripe.Customer.retrieve(data_object['customer'])
+		
 		# Retrieve user in database from stripe_user_id
 		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first_or_404()
+		
 		# Retrieve Stripes' subscription_id 
 		stripe_sub_id = stripe_customer.subscriptions.data[0].id
 		print('Webhook Stripe Subscription id: {}'.format(stripe_sub_id))
@@ -319,9 +329,50 @@ def webhooks():
 		subject = "Prospectly - Valider votre inscription"
 		html_text=render_template('email/welcome-validation.html', user=user, token=token)
 		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
+		
 		user.last_token = stripe_customer.id		
 		
-		return Response('Success', 200)
+		try:
+			db.session.commit()
+			return Response('Success', 200)
+		except:
+			db.session.rollback()
+			return Response('Error', 400)
+
+
+
+	if event_type == 'customer.subscription.updated':
+		print('Customer Subscription Updated Webhook')
+		data_object = data['object']
+		print('Data object:{}'.format(data_object)) 
+
+		# Retrieve user in database from stripe_user_id
+		user = User.query.filter_by(stripe_customer_id=data_object['customer']).first_or_404()
+		
+		# Get stripe_subscription_id and stripe_plan_id from stripe webhook data
+		stripe_sub_id = data_object['items']['data'][0]['subscription']
+		stripe_plan_id = data_object['items']['data'][0]['plan']['id']
+
+		# Parse cancellation date if any
+		cancel_at = datetime.fromtimestamp(data_object['cancel_at']) if data_object['cancel_at'] else None
+		print('Cancellation date: {}'.format(cancel_at))
+		# Retrieve the lateste active subscription in our databased filtered by user_id and subsription_stripe_id
+		latest_sub = Subscription.query.filter_by(user_id=user.id, stripe_id=stripe_sub_id).order_by(Subscription.subscription_date.desc()).first()
+		
+		# If there is an exisiting subscription update the plan_id
+		if latest_sub:
+			latest_sub.cancellation_date = cancel_at
+			plan = Plan.query.filter_by(stripe_id=stripe_plan_id).first()
+			if plan:
+				latest_sub.plan_id = plan.id
+		try:
+			db.session.commit()
+			return Response('Success', 200)
+		except:
+			db.session.rollback()
+			return Response('Error', 400)
+
+
 
 	print('Other web hook')
 	return jsonify({'status': 'success'})
@@ -465,36 +516,6 @@ def logout():
 
 
 
-@auth.route('/edition-abonnement', methods=['POST','GET'])
-@admin_login_required
-def edit_subscription():
-
-	if request.method == 'POST':
-		data = request.form.to_dict(flat=True)
-		print('Requested form data: {}'.format(data))
-		
-		# Retrieve user first
-		user = User.query.filter_by(email=data.get('email'))
-		if not user:
-			flash('No user found with this email')
-			return redirect(url_for('auth.edit_subscription'))
-		if data.get('action')=='cancel_trial':
-			try:
-				latest_sub = db.session.query(Subscription).filter(Subscription.user_id==current_user.id).order_by(Subscription.subscription_date.desc()).first()
-				stripe_sub = stripe.Subscription.modify(latest_sub.stripe_id,
-					trial_end='now',
-				)
-				flash('Trial period for {} has been stoped'.format(user))
-			except e:
-				flash('Error: {}'.format(e))
-			return redirect(url_for('auth.edit_subscription'))
-
-	if request.method == 'GET':
-		None
-	users_list = User.query.all()
-	return render_template('subscription-edition.html', users_list=users_list)
-
-
 
 @auth.route('/account-upgrade')
 @login_required
@@ -506,45 +527,50 @@ def upgrade_account():
 	if not latest_sub.stripe_id or latest_sub.plan.category in ['Pro','Beta']:
 		return redirect(url_for('auth.profile'))
 
+	# Retrieve latest sub from stripe
 	stripe_subscription = stripe.Subscription.retrieve(latest_sub.stripe_id)
 
+	
+	#  Retrieve the plan assoicated in database  
 	if request.args.get('type') == 'monthly':
-		# Change the subscription in stripe
-		new_subscription = stripe.Subscription.modify(
-		  stripe_subscription.id,
-		  cancel_at_period_end=False,
-		  items=[{
-		    'id': stripe_subscription['items']['data'][0].id,
-		    'plan': app.config.get('PLAN_MONTHLY_PRO'),
-		  }],
-		  proration_behavior='always_invoice',#ensure that the proration is computed and invoiced straight away
-		  trial_end='now',
-		)
-		# Retrieve the plan assoicated in database
 		new_plan = Plan.query.filter_by(stripe_id=app.config.get('PLAN_MONTHLY_PRO')).first()
+
 	else:
-		new_subscription = stripe.Subscription.modify(
-		  stripe_subscription.id,
-		  cancel_at_period_end=False,
-		  items=[{
-		    'id': stripe_subscription['items']['data'][0].id,
-		    'plan': app.config.get('PLAN_YEARLY_PRO'),
-		  }],
-		  proration_behavior='always_invoice',
-		  trial_end='now',
-		)
-		# Retrieve the plan assoicated in database
 		new_plan = Plan.query.filter_by(stripe_id=app.config.get('PLAN_YEARLY_PRO')).first()
 
-	# Create a new subscription in database
-	new_sub = Subscription(stripe_id=new_subscription.id, user_id=current_user.id, plan_id=new_plan.id)
+
+	# Create and commit a new Subscripiton before calling stripe to make sure that the webhook call will update that subscription		
+	new_sub = Subscription(stripe_id=stripe_subscription.id, user_id=current_user.id, plan_id=new_plan.id)
 	db.session.add(new_sub)
+	new_sub.set_next_payment() # initiate payment
 	try:
 		db.session.commit()
 		message = Markup('Félicitations! Vous faites désormais parti des membres Prospeclty<sup><strong> +</strong></sup>. Votre nouvel abonnement est disponible dès maintenant.')
-		
 	except:
 		message="Une erreur est survenue. Merci de contacter le support. Pensez à détailler l'opération que vous souhaitez effectuer"
+	
+	# Retrieve the plan assoicated in database (not mandatory as webhook subscription.updated will update the plan)
+	# new_plan = Plan.query.filter_by(stripe_id=app.config.get('PLAN_YEARLY_PRO')).first()
+	
+	# Create a new subscription in database
+	# Create and commit a new Subscripiton before calling stripe to make sure that the webhook call will update that subscription
+	# new_sub = Subscription(stripe_id=new_subscription.id, user_id=current_user.id, plan_id=new_plan.id)
+	# new_sub = Subscription(stripe_id=new_subscription.id, user_id=current_user.id)
+	# db.session.add(new_sub)
+	# db.session.commit()
+
+	# Change the subscription in stripe
+	stripe.Subscription.modify(
+	  stripe_subscription.id,
+	  cancel_at_period_end=False,
+	  items=[{
+	    'id': stripe_subscription['items']['data'][0].id,
+	    'plan': new_plan.stripe_id,
+	  }],
+	  proration_behavior='always_invoice',#ensure that the proration is computed and invoiced straight away
+	  trial_end='now',
+	)	
+		
 	flash(message)
 	return redirect(url_for('auth.profile'))
 
@@ -582,7 +608,7 @@ def downgrade_plan():
 								        {'plan': app.config.get('PLAN_MONTHLY_BASIC'),
 								         'quantity': 1},
 								      ],
-								      'iterations': 12,
+								      'iterations': 1,
 								    },
 								  ],
 								)
@@ -594,16 +620,16 @@ def downgrade_plan():
 						  phases=[
 						    {
 						      'plans': [
-						        {'plan': app.config.get('PLAN_MONTHLY_BASIC'),
+						        {'plan': app.config.get('PLAN_YEARLY_BASIC'),
 						         'quantity': 1},
 						      ],
-						      'iterations': 12,
+						      'iterations': 1,
 						    },
 						  ],
 						)
 
 	try:
-		message = Markup("Nous sommes navrés d'apprendre que Prospeclty<sup><strong> +</strong></sup> ne correspond pas à vos attends.<br>Vous aurez  toutefois encore accès à toutes les fonctionnalités jusqu'au {}.".format(sub_end_date))
+		message = Markup("Nous sommes navrés d'apprendre que Prospeclty<sup><strong> +</strong></sup> ne correspond pas à vos attentes.<br>Vous aurez  toutefois encore accès à toutes les fonctionnalités jusqu'au {}.".format(sub_end_date))
 		flash(message)
 	except:
 		flash("Une erreur est survenue. Merci de contacter le support. Pensez à détailler l'opération que vous souhaitez effectuer.")
@@ -613,28 +639,55 @@ def downgrade_plan():
 
 
 
-@auth.route('email-support', methods=['POST', 'GET'])
+@auth.route('/admin-support', methods=['POST','GET'])
 @login_required
 @admin_login_required
-def email_support():
-	form = EmailSupportForm()
-
-	if form.validate_on_submit():
-		email = form.email.data
-		user = User.query.filter_by(email=email).first_or_404()
+def admin_support():
+	shape=None
+	if request.method == 'POST':
+		data = request.form.to_dict(flat=True)
+		print('Requested form data: {}'.format(data))
 		
-		data = {
-			'user_id': user.id,
-			'exp': time() + 7200			
-		}
-		token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256')
-		receiver_email = user.email
-		subject = "Prospectly - Valider votre inscription"
-		html_text = render_template('email/welcome-validation.html', user=user, token=token)
-		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
-		flash('Password validation email has been sent.')
 
-	return render_template('email-support.html', form=form)
+		# Retrieve user first
+		email = request.form.get('email')
+		user = User.query.filter_by(email=email).first()
+		if not user:
+			flash('No user found with this email')
+			# return redirect(url_for('auth.admin_support'))
+		
+		# Stop trial period
+		if data.get('action')==str('cancel_trial'):
+			
+			latest_sub = db.session.query(Subscription).filter(Subscription.user_id==user.id).order_by(Subscription.subscription_date.desc()).first()
+			stripe.Subscription.modify(
+				latest_sub.stripe_id,
+				trial_end='now',
+			)
+			flash('Trial period for {} has been stoped'.format(user))
+			# return redirect(url_for('auth.admin_support'))
+
+		# Send confirmation email
+		if data.get('action')=='send_confirmation_email':
+				
+			data = {'user_id': user.id,
+					'exp': time() + 7200
+					}
+			token = jwt.encode(data, app.config['SECRET_KEY'], algorithm='HS256')
+			receiver_email = user.email
+			subject = "Prospectly - Valider votre inscription"
+			html_text = render_template('email/welcome-validation.html', user=user, token=token)
+			Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
+			flash('Password validation email has been sent.')
+			# return redirect(url_for('auth.admin_support'))
+
+	if request.method == 'GET':
+		None
+
+	return render_template('support-admin.html')
+
+
+
 
 
 class AdminMyIndexView(AdminIndexView):

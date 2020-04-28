@@ -21,15 +21,19 @@ class Subscription(db.Model):
 	stripe_id = db.Column(db.String(60), nullable=True)
 	subscription_date = db.Column(db.DateTime, default=datetime.utcnow)
 	next_payment = db.Column(db.DateTime)
+	cancellation_date = db.Column(db.DateTime, nullable=True)
 
 	def is_valid(self):
-		if Plan.query.get(self.plan_id).plan_name == 'Beta':
+		if Plan.query.get(self.plan_id).name == 'Beta':
 			return True
 		else:
-			return self.next_payment >= datetime.utcnow()
+			return self.next_payment > datetime.utcnow()
 
 	def set_next_payment(self):
-		print('Set up subscription: {}'.format(self.plan_id))
+		'''
+		Calling next payment shoud also set the cancelation date to None to remove the cancellation whenever a new payment is accepted
+		'''
+		self.cancelation_date = None
 		plan = Plan.query.get(self.plan_id)
 
 		if plan.name == 'beta':
@@ -47,12 +51,14 @@ class Subscription(db.Model):
 				self.next_payment = datetime.utcnow()  + relativedelta(years=1) # utcnow + 1 month or 1 year instead of next_payment + 1month or 1 year to handle when the user moves from yeary to monthly
 			else:
 				self.next_payment = datetime.utcnow()  + relativedelta(months=1) 
+		print('Subscription {} next payment is set to: {}'.format(self.id, self.next_payment))		
+		return 0
 
 
 	def __init__(self, **kwargs):
 		super(Subscription, self).__init__(**kwargs)
 		# Create a next payment date when a new subscription is created 
-		self.set_next_payment()
+		# self.set_next_payment()
 
 	def __repr__(self):
 		return "[On {}, user {} subscribed to a {} plan]".format(self.subscription_date, self.user_id, self.plan.name )
@@ -257,7 +263,7 @@ class Company(db.Model):
 	email = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	phone = db.Column(db.String(60), index=False, unique=False, nullable=True)
 	activity_field = db.Column(db.String(60), index=True, unique=False, nullable=False)
-	website = db.Column(db.String(240), index=False, unique=False, nullable=True)
+	website = db.Column(db.String(120), index=False, unique=False, nullable=True)
 	facebook = db.Column(db.String(240), index=False, unique=False, nullable=True)
 	instagram = db.Column(db.String(240), index=False, unique=False, nullable=True)
 	linkedin = db.Column(db.String(240), index=False, unique=False, nullable=True)
@@ -414,9 +420,10 @@ def get_list_contacts_positions():
 
 def get_list_companies_activities():
 	q1 = db.session.query(CompanyLead.activity_field1.distinct().label("field"))
-	q2 = db.session.query(CompanyLead.activity_field2.distinct().label("field"))
-	q3 = db.session.query(CompanyLead.activity_field3.distinct().label("field"))
-	list_distinct_activities = [elt.field for elt in q1.union(q2).union(q3).all() if elt.field] # removing None as activty is a required field in db
+	# q2 = db.session.query(CompanyLead.activity_field2.distinct().label("field"))
+	# q3 = db.session.query(CompanyLead.activity_field3.distinct().label("field"))
+	# list_distinct_activities = [elt.field for elt in q1.union(q2).union(q3).all() if elt.field] # removing None as activty is a required field in db
+	list_distinct_activities = [elt.field for elt in q1.all() if elt.field] 
 	return list_distinct_activities
 
 
@@ -565,7 +572,8 @@ def get_leads_ids(data):
 
 
 
-def get_displayed_leads(leads_ids, leads_type, cursor, limit):
+
+def get_displayed_leads(leads_ids, leads_type, cursor, limit=10):
 	"""
 	"""	
 	print('ids: {}'.format(leads_ids))
@@ -588,8 +596,9 @@ def get_displayed_leads(leads_ids, leads_type, cursor, limit):
 
 
 def compute_remaining_leads():
+	'''	Compute the number of leads left to be queried'''
 	user = current_user
-	todays_leads = [record.id for record in user.requested_leads.all() if datetime.strftime(record.creation_date, '%Y-%m-%d')==datetime.strftime(datetime.utcnow, '%Y-%m-%d')]
+	todays_leads = [record.id for record in user.requested_leads.all() if datetime.strftime(record.query_date, '%Y-%m-%d')==datetime.strftime(datetime.utcnow(), '%Y-%m-%d')]
 	latest_sub = db.session.query(Subscription).filter(Subscription.user_id==user.id).order_by(Subscription.subscription_date.desc()).first()
 	max_requests = latest_sub.plan.limit_daily_query
 	return max_requests-len(todays_leads)

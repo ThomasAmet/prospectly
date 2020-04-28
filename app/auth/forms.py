@@ -15,11 +15,6 @@ class RequestNewPasswordForm(FlaskForm):
 	submit = SubmitField('Se connecter')
 
 
-class EmailSupportForm(FlaskForm):
-	email = StringField('Email:',
-						validators=[DataRequired(message="Il faut un email pour se connecter."),
-									Email(message="Oups... Ce n'est pas un format valide.")])
-	submit = SubmitField()
 
 class SetPasswordForm(FlaskForm):
 	password = PasswordField('Mot de passe:', validators=[DataRequired()])

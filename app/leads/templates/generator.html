@@ -5,7 +5,7 @@
 {% block header_content %}
   <!-- Beginning Card Header -->
   <div class="row align-items-center py-5 mb-4">
-    <div class="col-lg-6 col-4">
+    <div class="col-lg-8 col-6">
       <!-- <h6 class="h2 text-white d-inline-block mb-0">Défaut</h6> -->
       <i class="ni ni-planet text-white"></i></a></li>
       <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
@@ -16,13 +16,13 @@
         </ol>
       </nav>
       {% set displayed_leads = leads|length + current_page_token %}
-      <span class="badge badge-primary mr-md-6 ml-2">{{displayed_leads}}/{{all_leads_len}}</span>
+      <span class="badge badge-primary mr-md-4 ml-2">{{displayed_leads}}/{{all_leads_len}}</span>
       <button type="button" class="btn btn-sm btn-default">
 	    <span class="text-capitalize">Restant </span><span>à exporter</span>
 	    <span class="badge badge-primary">{{leads_left}}</span>
 	  </button>
     </div>
-    <div class="col-lg-6 col-8 text-right">
+    <div class="col-lg-4 col-6 text-right">
       <!-- <a href="#" class="btn btn-sm btn-neutral">Actions</a> -->
         {% if leads is none %}
         <button class="btn btn-neutral" type="button" data-toggle="collapse" data-target="#collapseSettings" aria-expanded='true'>
@@ -257,7 +257,7 @@
 					<!-- <a class="btn btn-sm btn-3 btn-primary" role="button" id='refreshCompanyLeads' href="">
 			        	<span class="btn-inner--icon"><i class="fa fa-redo"></i></span>
 			      	</a> -->
-              {% if leads_left==0 %}
+              {% if leads_left<=0 %}
 	        	  <button class="btn btn-sm btn-3 btn-primary" role="button" id='uploadCompanyLeads' href="" disabled>
               {% else %}
               <button class="btn btn-sm btn-3 btn-primary" role="button" id='uploadCompanyLeads' href="">
@@ -304,72 +304,48 @@
 		                <div class="media align-items-center">
 		                  <div class="media-body"> 
 		                    <span class="mb-0 text-sm company_name">
-                          {{ hash_value(company.name, 6, 10) }}
-                      </span>
+                          {{ hide(company.name)}}
+                        </span>
 		                  </div>
 		                </div>
 		              </td>
 		              <td>
-                    <span class="company_city">
-                    {% if company.city is none %}
-                    {% else %}
-		                  {{ company.city }}
-                    {% endif%}
+                    <span class="company_city">                  
+		                  {{ company.city }}                    
                     </span>
 		              </td>
 		              <td>
 		                <!-- span is used to retrieve value with jquery and hide if val == None -->
 		                <span class="company_email">
-                      {{ hash_value(company.website, 15, 20) }}
+                      {{ hide(company.email) }}
                   </span>
 		              </td>
                   <td>
                     <!-- span is used to retrieve value with jquery and hide if val == None -->
                     <span class="contact_firstname">
-                    {% if company.contacts.first() is none %}
-
-                      {{ '*' * range(4, 12)|random }}
-
-                    {% else %}
-                      
-                      {% set start = company.contacts.first().firstname|length//3 %}
-                      {% set replacement = '*' * range(start*2, start*3)|random %}
-
-                      {{ company.contacts.first().firstname | replace(company.contacts.first().firstname[start:], replacement) }}   
-
-                    {% endif %}
+                      {% if company.contacts.first() is not none %}
+                      {{ hide(company.contacts.first().firstname) }}   
+                      {% else %}
+                        {{'*' * range(5,10)|random}}
+                      {% endif %}
                     </span>
                   </td>
                   <td>
                     <!-- span is used to retrieve value with jquery and hide if val == None -->
                     <span class="contact_lastname">
-                    {% if company.contacts.first() is none %}
-
-                      {{ '*' * range(4, 12)|random }}
-
-                    {% else %}
-
-                      {% set start = company.contacts.first().firstname|length//3 %}
-                      {% set replacement = '*' * range(start*2, start*3)|random %}
-
-                      {{ company.contacts.first().lastname | replace(company.contacts.first().lastname[start:], replacement) }}
-
-                    {% endif %}
+                      {% if company.contacts.first() is not none %}
+                      {{ hide(company.contacts.first().lastname) }}   
+                      {% else %}
+                        {{'*' * range(5,10)|random}}
+                      {% endif %}
                     </span>
                   </td>
 		              <td>
 		                <!-- email -->
 		                <span class="company_website">
-                    {% if company.website is none %}
-                      {{ '*' * range(15 , 20)|random }}
-                    {% else %}
-
-                      {% set start = company.website|length//3 %}
-                      {% set replacement = '*' * range(start*2, start*3)|random %}
-
-                      {{ company.website|replace(company.website[start:], repalcement) }}
+                    
+                      {{ hide(company.website) }}
                       
-                    {% endif %}
                     </span>
 		              </td>
 		            </tr>
@@ -442,7 +418,7 @@
 					<!-- <a class="btn btn-sm btn-3 btn-primary" role="button" id='refreshContactLeads' href=""> 
 			        	<span class="btn-inner--icon"><i class="fa fa-redo"></i></span>
 			      	</a> -->
-              {% if leads_left==0 %}
+              {% if leads_left<=0 %}
 	        	  <button class="btn btn-sm btn-3 btn-primary" role="button" id='uploadContactLeads' disabled>
               {% else %}
               <button class="btn btn-sm btn-3 btn-primary" role="button" id='uploadContactLeads'>
@@ -489,24 +465,24 @@
 		                <div class="media align-items-center">
 		                  <div class="media-body">
 		                    <span class="mb-0 text-sm contact_firstname">
-                          {% set start = contact,%}
-		                    	{{ contact.firstname[:2] }}
-                          }
-
+		                    	{{ hide(contact.firstname) }}
 		                	</span>
 		                  </div>
 		                </div>
 		              </td>
 		              <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
-		                {{ contact.lastname }}
+		                {{ hide(contact.lastname) }}
 		              </td>
+                  <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
+                    {{ hide(contact.firm.name) }}
+                  </td>
 		              <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
 		                <!-- span is used to retrieve value with jquery and hide if val == None -->
-		                <span class="entreprise-cell">{{ contact.firm.name}}</span>
+		                <span class="entreprise-cell">{{ hide(contact.position) }}</span>
 		              </td>
 		              <td data-toggle="modal" data-target='#editContactModal_{{contact.id}}'>
 		                <!-- email -->
-		                {{ contact.email }}
+		                {{ hide(contact.email) }}
 		              </td>
 		            </tr>
 		       	  {% endfor %}
@@ -576,9 +552,9 @@
 
 {% macro hash_value(value, min, max) %}
 
-   {% if value is none %}
+   {% if value is none or value=='' %}
 
-    {{ '*' * range(min, max)|random }}
+    {{ '*' * range(5, 10)|random }}
 
   {% else %}
 
@@ -586,6 +562,22 @@
     {% set replacement = '*' * range(start*1, start*2)|random %}
                           
     {{ value|replace(value[start:], replacement) }}
+
+  {% endif %}
+
+{% endmacro %}
+
+{% macro hide(value, min, max) %}
+
+   {% if value is none or value=='' %}
+
+    {{ '*' * range(5, 10)|random }}
+
+  {% else %}
+    {% set nb = value[3:]|length // 2%}
+    {% set replacement = '*' * nb %}
+                          
+    {{ value|replace(value[3:], replacement) }}
 
   {% endif %}
 

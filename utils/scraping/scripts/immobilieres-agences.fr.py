@@ -3,7 +3,7 @@ import re
 import glob
 from functools import partial
 import pandas as pd
-from tools.scraper import Scraper, Options
+from utils_scraper import Scraper, Options
 from selenium.webdriver.chrome.options import Options
 # from bs4 import BeautifulSoup
 
@@ -11,7 +11,7 @@ from selenium.webdriver.chrome.options import Options
 abspath = os.path.abspath(__file__)
 dirname = os.path.dirname(abspath)
 # os.chdir(dirname)
-output_dir = os.path.join('..', 'output', 'real_estate')
+output_dir = os.path.join('scraping', 'output', 'real_estate')
 
 
 ###############################################################
@@ -156,39 +156,59 @@ company_field = '(IMMOBILIER OR "REAL ESTATE")'
 # Comment to avoid resetting df when running the code again
 agencies_df = pd.DataFrame()
 
-# Merging file if necessary
-# file_name = '2020-04-23_all_agency247_immobilier.csv'
+# Load existing file if necessary
+# file_name = '2020-04-26_all_agency897_immobilier.csv'
 # output_path = os.path.join(output_dir, 'results', file_name)
 # df = pd.read_csv(output_path, sep=';', encoding='utf-8')
 # agencies_df = df.append(agencies_df)
 
 
-    options = Options()
-    options.add_argument('--incognito')
-    options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    driver_path = os.path.join('..', 'drivers', 'chromedriver')
-    scraper = Scraper(driver_path=driver_path, driver_options=options)
+options = Options()
+options.add_argument('--incognito')
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+driver_path = os.path.join('scraping', 'drivers', 'chromedriver')
+scraper = Scraper(driver_path=driver_path, driver_options=options)
 
 
-    # Start loop
-    # Bug on 27, 42, 70, 93, 100, 101, 102, 110, 127, 164, 196, 349, 355, 424, 443, 455, 561, 565, 566, 582, 583, 584, 611, 621, 647, 674, 685, 689, 690, 739, 805
-    k = 872
-    agency_range = range(k, len(agency_names))
-    for k in agency_range:
-        print(k)
-        agency_df = scraper.parse_website(url=agency_websites[k], company_name=agency_names[k], company_field=company_field, company_city=agency_cities[k])
-        agencies_df = agencies_df.append(agency_df, ignore_index=True)
-    # End loop
-    # scraper.driver.switch_to.window(scraper.driver.window_handles[-1])
-
-
-
-# Save agencies dataframe by categories and by page in csv format
-file_name = str(pd.datetime.today())[:10] + '_all_agency' + str(k-1) + '_immobilier.csv'
-output_path = os.path.join(output_dir, file_name)
-agencies_df.to_csv(output_path, sep=';', index=False, encoding='utf-8')
+# Start loop
+# Bug on 27, 42, 70, 93, 100, 101, 102, 110, 127, 164, 196, 349, 355, 424, 443, 455, 561, 565, 566, 582, 583, 584, 611, 621, 647, 674, 685, 689, 690, 739, 805, 898, 899, 934
+k = 938
+agency_range = range(k, len(agency_names))
+for k in agency_range:
+    print(k)
+    agency_df = scraper.parse_website(url=agency_websites[k], company_name=agency_names[k], company_field=company_field, company_city=agency_cities[k])
+    agencies_df = agencies_df.append(agency_df, ignore_index=True)
+# End loop
+# scraper.driver.switch_to.window(scraper.driver.window_handles[-1])
 
 
 
-# test_df = scraper.parse_website('https://www.actibel.be/contact/', company_name='actibel', company_field=company_field, company_city='belgique')
+
+# Merge companys details we got from the main website and infos collected with the scraper and save
+left = agencies_df.drop(agencies_df.columns[1:4], axis=1)
+
+right = all_agencies.drop(all_agencies.columns[-7:-1], axis=1)
+right = right.drop(right.columns[2], axis=1)
+
+result = pd.merge(left, right, on=['company_name', 'company_website'])
+
+file_name = str(pd.datetime.today())[:10] + '_all_agency951_final_immobilier.csv'
+output_path = os.path.join(output_dir, 'results', file_name)
+result.to_csv(output_path, sep=';', index=False, encoding='utf-8')
+
+
+
+
+# Remove duplicates
+# file_name = str(pd.datetime.today())[:10] + '_all_immo_937.tsv'
+# file_path = os.path.join(output_dir, 'results', file_name)
+# df = pd.read_csv(file_path, encoding='utf-8', sep='\t', header=0)
+#
+# df = df.sort_values(by=['contact_firstname', 'contact_lastname', 'contact_email', 'company_name', 'company_address'])
+#
+# df = df.drop_duplicates(subset=['company_name', 'company_address', 'contact_firstname', 'contact_lastname'], keep='first')
+#
+# file_name = str(pd.datetime.today())[:10] + '_all_immo_937.csv'
+# file_path = os.path.join(output_dir, 'results', file_name)
+# df.to_csv(file_path, encoding='utf-8', sep=';', index=False)

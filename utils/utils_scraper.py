@@ -23,7 +23,7 @@ abspath = os.path.abspath(__file__)
 dirname = os.path.dirname(abspath)
 os.chdir(dirname)
 
-input_path = os.path.join('..', 'input')
+input_path = os.path.join('scraping', 'input')
 driver_path = os.path.join('drivers', 'chromedriver')
 
 firstnames_df = pd.read_csv(os.path.join(input_path, 'nat2018.csv'), sep=';', header=0)

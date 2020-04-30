@@ -53,6 +53,7 @@ def pro_plan_required(func):
 	return decorated_view
 
 
+
 def valid_subscription_required(func):
 	@wraps(func)
 	def decorated_view(*args, **kwargs):
@@ -145,37 +146,36 @@ def get_publishable_key():
 
 
 
+
 @auth.route('/inscription', methods=['GET', 'POST']) 
 def signup():
 	if current_user.is_authenticated:
-			if not current_user.is_admin:
-				return redirect(url_for('app.home'))
+		if not current_user.is_admin:
+			return redirect(url_for('app.home'))
 
 	form = RegistrationForm()
 
 	# POST method part
 	if request.method=='POST':
-		
+		# Get email from the form, lower it and remove whitespaces
 		print(dict(request.form))
-		requested_email = request.form.get('email').lower().strip()
+		email = request.form.get('email').lower().strip()
 		
+		# Retrieve plan and user (if any) from the form info
 		plan = Plan.query.filter_by(stripe_id=request.form.get('plan_stripe_id')).first() #
-		# user = User.query.filter_by(email=request.form.get('email')).first()
-		user = User.query.filter_by(email=requested_email).first()
-		print('Plan: {}'.format(plan.__dict__.copy()))
-		# Case to handle custome who enter email but didn't pay
+		user = User.query.filter_by(email=email).first()
+
+		# Handle customers who exisit but did not pay
 		if user:
 			print('Exisiting user!')
-			print(user.__dict__.copy())
-			# If a subscription is associated with a user, it means customer paid so we redirect to login
+			
+			# If a subscription is associated with that user, it means customer exists and paid 
 			if Subscription.query.filter_by(user_id=user.id).first():
 				print('User with subscription')
-				# print(Subscription.query.filter_by(user_id=user.id).first().__dict__.copy())
-			# # If user password exists, it means customer paid so we redirect to login
-			# if user.last_token:
 				flash('Oups... Cet email est utilisé. Connectez-vous ou choisissez un autre email.')
 				return Response(url_for('auth.signup', plan_stripe_id=request.form.get('plan_stripe_id')), status=404) # use 404 to throw an error in ajax call and not redirect to stripe session
-			# Else retrieve user and update infos in both database and stripe
+			
+			# Else, we retrieve the user and update its info in both database and stripe
 			else:
 				print('Updating user infos')
 				user.first_name = request.form.get('first_name').capitalize()
@@ -183,7 +183,8 @@ def signup():
 				user.set_username()
 				customer = stripe.Customer.retrieve(user.stripe_customer_id)
 				customer.name = request.form.get('first_name').capitalize() + ' ' + request.form.get('last_name').capitalize()		
-		# If User is none, create a new one		
+		
+		# If no user, we create a new one both in stripe and database		
 		else:
 			print('New user!')
 			customer = stripe.Customer.create(
@@ -195,6 +196,7 @@ def signup():
 						email=requested_email, stripe_customer_id=customer.id)
 			db.session.add(user)
 		
+		# Create a stripe checkout session with the stripe user id and requested plan id
 		try:	
 			db.session.commit()
 			print('Customer succesfully created!')
@@ -213,8 +215,8 @@ def signup():
 				cancel_url='%sauth/paiement-echec' %request.host_url,
 				locale='fr'
 			)
-			# session['stripe_session_id'] = stripe_session.id #load stripe session in cookie to allow only one time success message
 			return Response(stripe_session.id, status=200)
+
 		except:
 			flash('Une erreur est survenue. Merci de contacter le support.')
 			print('User creation failed!')
@@ -227,6 +229,7 @@ def signup():
 			return redirect(url_for('main.pricing'))
 		message = Markup("<strong>Pour votre sécurité</strong>, vous serez invité à renseigner vos informations de paiement après cette page.<br>Cette étape permet de vérfier votre identité. <strong>Aucun prélévement ne sera effectué pour les périodes d'essai.</strong>")
 		flash(message)
+		
 		return render_template('register.html', form=form, plan_stripe_id=request.args.get('plan_stripe_id'))
 
 
@@ -276,10 +279,8 @@ def webhooks():
 
 
 	# Update 'next_payment' in subscription when the payment succeeded
-	# if event_type=='invoice.payment_succeeded':
-	if event_type=='payment_intent.succeeded':
-		# print('Invoice Payment Succeeded Webhook')
-		print('Payment intent success')
+	if event_type=='invoice.payment_succeeded':
+		print('Invoice Payment Succeeded Webhook')	
 		# stripe object with multiple informations		
 		data_object = data['object']
 		print('Data object: {}'.format(data_object))

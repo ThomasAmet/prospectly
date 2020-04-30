@@ -81,14 +81,25 @@ def upload_company_leads():
 
 	data = request.get_json(silent=True)
 	print('data: {}'.format(data))
+	
+	company_lead_ids = data.get('leads_ids')
+	remaining_leads = compute_remaining_leads()
 
-	if not data.get('leads_ids') or compute_remaining_leads()<=0:
+	if not company_lead_ids:
 		return make_response(url_for('leads.view_leads'), 400)
 
-	for company_lead_id in data.get('leads_ids'):
+	# Slices ids if the import request is longer than the remaining leads	
+	if len(company_lead_ids) > remaining_leads:
+		company_lead_ids = company_lead_ids[:remaining_leads]
+
+	for company_lead_id in company_lead_ids:
+				
 		company_lead = from_sql(CompanyLead.query.get(company_lead_id))
 		print("company_lead dict: {}".format(company_lead))
 		
+		# Check that the lead id has not been imported yet (happends when spamming the export button)
+
+
 		contact_lead = from_sql(CompanyLead.query.get(company_lead_id).contacts.all()[0])
 		contact_lead_id = contact_lead.get('id')
 		email = contact_lead.get('email')
@@ -174,10 +185,17 @@ def upload_contact_leads():
 	data = request.get_json()
 	print('Upload Contact data: {}'.format(data))
 
-	if not data.get('leads_ids') or compute_remaining_leads()<=0:
+	contact_lead_ids = data.get('leads_ids')
+	remaining_leads = compute_remaining_leads()
+
+	if not contact_lead_ids:
 		return make_response(url_for('leads.view_leads'), 400)
 
-	for contact_lead_id in data.get('leads_ids'):
+	# Slices ids if the import request is longer than the remaining leads	
+	if len(contact_lead_ids) > remaining_leads:
+		company_lead_ids = company_lead_ids[:remaining_leads]
+
+	for contact_lead_id in contact_lead_ids:
 		contact_lead = from_sql(ContactLead.query.get(contact_lead_id))
 
 		# Add new attribute to match Contact model

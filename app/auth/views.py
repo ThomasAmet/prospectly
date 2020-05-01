@@ -193,7 +193,7 @@ def signup():
 			)
 			user = User(first_name=form.first_name.data.capitalize(),
 						last_name=form.last_name.data.capitalize(),
-						email=requested_email, stripe_customer_id=customer.id)
+						email=email, stripe_customer_id=customer.id)
 			db.session.add(user)
 		
 		# Create a stripe checkout session with the stripe user id and requested plan id
@@ -331,7 +331,7 @@ def webhooks():
 		html_text=render_template('email/welcome-validation.html', user=user, token=token)
 		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
 		
-		user.last_token = stripe_customer.id		
+		# user.last_token = stripe_customer.id		
 		
 		try:
 			db.session.commit()
@@ -397,11 +397,12 @@ def confirm_account():
 		try:
 			token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
 			user = User.query.filter_by(id=token_data['user_id']).first_or_404()
-			if token == user.last_token:
+			# if token == user.last_token:
+			if user.password_hash is not None:
 				flash('Ce lien a déjà été utilisé pour définir un mot de passe.')
 				return redirect(url_for('auth.login', email=user.email))
 			user.set_password(form.password.data)
-			user.last_token = token
+			# user.last_token = token
 			db.session.commit()
 			flash('Votre mot de passe est enregistré.')
 			return redirect(url_for('auth.login', email=user.email))
@@ -422,17 +423,17 @@ def request_new_password():
 	if form.validate_on_submit():
 		# user = User.query.filter_by(email=form.email.data).first_or_404()
 		requested_email = request.form.get('email').lower().strip()
-		user = User.query.filter_by(email=requested_email).first_or_404()
-		if user is None:
-			flash("Un email de réinitialisation vient d'être envoyé à l'addresse indiquée.")
-			return redirect(url_for('auth.login'))
-		data = {'user_id':user.id,
-				'exp':time() + 600}
-		token = jwt.encode(data, user.password_hash, algorithm='HS256') if user.password_hash else None# use of password hash as secret key to encode to ensure single use password
-		receiver_email = user.email
-		subject = "Prospectly - Réinitialiser votre mot de passe"
-		html_text=render_template('email/reset-password.html', user=user, token=token)
-		Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
+		user = User.query.filter_by(email=requested_email).first()
+
+		if user:
+			data = {'user_id':user.id,
+					'exp':time() + 600} # 10 hours
+			# Use of current password hash as secret key to encode the token, to make sure the link is not used twice to change the password
+			token = jwt.encode(data, user.password_hash, algorithm='HS256') if user.password_hash else None
+			receiver_email = user.email
+			subject = "Prospectly - Réinitialiser votre mot de passe"
+			html_text=render_template('email/reset-password.html', user=user, token=token)
+			Thread(target=send_async_email, args=(receiver_email, subject, html_text)).start()
 		
 		flash("Un email de réinitialisation vient d'être envoyé à l'adresse indiquée.")
 		return redirect(url_for('auth.login'))
@@ -456,7 +457,9 @@ def reset_password():
 	
 	if form.validate_on_submit():
 		try:
-			secret = User.query.get(jwt.decode(token, verify=False)['user_id']).password_hash
+			# Retrieve the user from user_id attribute to find the secret key that was used to encode the token
+			secret = User.query.get(jwt.decode(token, verify=False)['user_id']).password_hash 
+			# Decode token, the secret key is dependent from the user, hence preventing changing the password for another user 
 			token_data = jwt.decode(token, secret, algorithms=['HS256'])
 			user = User.query.filter_by(id=token_data['user_id']).first_or_404()
 			user.set_password(form.password.data)
@@ -468,6 +471,7 @@ def reset_password():
 			flash("Ce lien n'est plus valide. Si l'erreur persiste, merci de contacter le support.")
 			return redirect( url_for('main.home'))
 	return render_template('password-set.html', form=form)
+
 
 
 # Routes for stripe checkout session

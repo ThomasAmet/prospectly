@@ -418,6 +418,9 @@ def edit_opportunity(id):
 	if not opportunity.user_id == current_user.id:
 		return redirect(url_for('crm.view_opportunities_list'))
 
+	# Set the euros_value of the opportunity with the value from the form (whether its updates or not)
+	opportunity.euros_value = data.get('euros_value')
+
 	# Check if an opportunity'step with the required stage and status already exists	
 	print('Checking exisitng step')
 	existing_step = OpportunityStep.query.filter_by(opportunity_id=data.get('opportunity_id'),

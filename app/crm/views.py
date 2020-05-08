@@ -135,6 +135,7 @@ def delete_company():
 def edit_company(id):			
 	company = Company.query.get(id)
 	data = request.form.to_dict(flat=True)
+	print(data)
 
 	# Return to list if the user attempt to edit an opportunity that doesnt belong to hin or if request is GET
 	if not company.user_id == current_user.id or request.method=='GET':

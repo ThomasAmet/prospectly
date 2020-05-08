@@ -36,16 +36,16 @@ class Subscription(db.Model):
 		self.cancelation_date = None
 		plan = Plan.query.get(self.plan_id)
 
-		if plan.name == 'beta':
+		if plan.name == 'Beta':
 			self.next_payment = datetime.utcnow() + relativedelta(years=+4) # relativedelta accepts months and years
 
-		# Case when we initiate the subscription
-		if self.next_payment is None:
+		# Case when to initiate the free trial period
+		if self.next_payment is None and plan.name=='Basic':
 			# try:
 			self.next_payment = datetime.utcnow() + relativedelta(days=+plan.free_trial)# timedelta only accepts days
 			# except ValueError:
 			# 	self.next_payment = datetime.utcnow() + timedelta(days=+15)
-		# Cases for subscriptions renewal 
+		# Cases for subscriptions renewal or new Pro subscritpion
 		else:
 			if plan.yearly:
 				self.next_payment = datetime.utcnow()  + relativedelta(years=1) # utcnow + 1 month or 1 year instead of next_payment + 1month or 1 year to handle when the user moves from yeary to monthly

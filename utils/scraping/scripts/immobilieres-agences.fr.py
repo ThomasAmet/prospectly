@@ -125,8 +125,8 @@ for k in range(0, len(categories)):
 
 #######################################
 #
-# FUNCTION TO GET MERGE ALL THE DATASET
-# THAT WE CREATE FROM PREVIOUS STEP
+# FUNCTION TO MERGE ALL THE DATASETS
+# THAT WE CREATE FROM THE PREVIOUS STEP
 #
 #######################################
 
@@ -172,13 +172,17 @@ scraper = Scraper(driver_path=driver_path, driver_options=options)
 
 
 # Start loop
-# Bug on 27, 42, 70, 93, 100, 101, 102, 110, 127, 164, 196, 349, 355, 424, 443, 455, 561, 565, 566, 582, 583, 584, 611, 621, 647, 674, 685, 689, 690, 739, 805, 898, 899, 934, 938, 952
-k = 953
+exceptions = [27, 42, 70, 93, 100, 101, 102, 110, 127, 164, 196, 349, 355, 424, 443, 455, 561, 565, 566, 582, 583, 584, 611, 621, 647, 674, 685, 689, 690, 739, 805, 898, 899, 934, 938, 952, 996, 997, 1023, 1042]
+
+k = 1049
 agency_range = range(k, len(agency_names))
+
 for k in agency_range:
     print(k)
+    print(agency_websites[k])
     agency_df = scraper.parse_website(url=agency_websites[k], company_name=agency_names[k], company_field=company_field, company_city=agency_cities[k])
     agencies_df = agencies_df.append(agency_df, ignore_index=True)
+
 # End loop
 # scraper.driver.switch_to.window(scraper.driver.window_handles[-1])
 

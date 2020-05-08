@@ -26,7 +26,7 @@ from werkzeug.utils import secure_filename
 from . import leads
 from .forms import CompaniesQueryForm, ContactsQueryForm, LeadsQueryForm
 from .. import app, db
-from ..models import User, Subscription, Company, Contact, CompanyLead, ContactLead, ContactsEmail, LeadRequest
+from ..models import User, Subscription, Company, Contact, CompanyLead, ContactLead, ContactsEmail, LeadRequest, Note
 from ..models import get_list_companies_activities, get_leads_ids, get_displayed_leads, compute_remaining_leads, from_sql
 
 # from ...bin import all_utils
@@ -162,8 +162,12 @@ def upload_company_leads():
 		db.session.flush()
 		
 
-		# Create an email relationship
+		# Create an email relationship as well as Notes
+		company_note = Note(company_id=company.id, content='')		
+		contact_note = Note(contact_id=contact.id, content='')
 		email = ContactsEmail(contact_id=contact.id, email=email)
+		db.session.add(company_note)
+		db.session.add(contact_note)
 		db.session.add(email)
 
 		# Record the query
@@ -267,7 +271,11 @@ def upload_contact_leads():
 		# lead_request = LeadRequest(user_id=current_user.id, contact_lead_id=contact_lead_id, contact_id=contact.id)
 		
 		# Create an email relationship
+		company_note = Note(company_id=company.id, content='')		
+		contact_note = Note(contact_id=contact.id, content='')
 		email = ContactsEmail(contact_id=contact.id, email=email)
+		db.session.add(company_note)
+		db.session.add(contact_note)
 		db.session.add(email)
 
 		# Lead request creation when we fully provide the company 

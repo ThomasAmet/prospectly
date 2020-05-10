@@ -174,7 +174,7 @@ scraper = Scraper(driver_path=driver_path, driver_options=options)
 # Start loop
 exceptions = [27, 42, 70, 93, 100, 101, 102, 110, 127, 164, 196, 349, 355, 424, 443, 455, 561, 565, 566, 582, 583, 584, 611, 621, 647, 674, 685, 689, 690, 739, 805, 898, 899, 934, 938, 952, 996, 997, 1023, 1042]
 
-k = 1080
+k = 1049
 agency_range = range(k, len(agency_names))
 
 for k in agency_range:
@@ -197,8 +197,8 @@ right = right.drop(right.columns[2], axis=1)
 
 result = pd.merge(left, right, on=['company_name', 'company_website'])
 
-file_name = str(pd.datetime.today())[:10] + '_agencies_' + str(k) +'.csv'
-output_path = os.path.join(output_dir, file_name)
+file_name = str(pd.datetime.today())[:10] + '_all_agency951_final_immobilier.csv'
+output_path = os.path.join(output_dir, 'results', file_name)
 result.to_csv(output_path, sep=';', index=False, encoding='utf-8')
 
 

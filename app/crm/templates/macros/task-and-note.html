@@ -51,9 +51,10 @@
             <label class="form-control-label" for="input-city">Priorité</label>
             <!-- <input type="text" id="input-city" class="form-control form-control-alternative" placeholder="Importance" value="Haute"> -->
             {% if latest_step %}
-            {{form.task_priority(class="form-control  form-control-alternative task-form-group", value=latest_step.tasks.first().priority, placeholder="Niveau de priorite")}}
+              {% set f = form.task_priority.process_data(latest_step.tasks.first().priority) %}
+              {{form.task_priority(class="form-control  form-control-alternative task-form-group",  placeholder="Niveau de priorite")}}
             {% else %}
-            {{form.task_priority(class="form-control form-control-alternative task-form-group", placeholder="Niveau de priorite")}}
+              {{form.task_priority(class="form-control form-control-alternative task-form-group", placeholder="Niveau de priorite")}}
             {% endif %}
         </div>
         </div>

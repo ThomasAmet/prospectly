@@ -321,13 +321,15 @@ def add_opportunity():
 		return redirect(url_for('crm.view_opportunities_list'))
 	
 	try:
+		# Create the opportunity
 		opportunity = Opportunity(user_id=current_user.id,
 							 	  company_id=form.company.data.id,
 							  	  name=form.name.data,
 							  	  euros_value=form.euros_value.data)
 		db.session.add(opportunity)
 		db.session.flush()	
-		print(request.form)
+		
+		# Create the opportunity step
 		stage = CommercialStage.query.filter_by(name=request.form.get('stage')).first_or_404()
 		status = Status.query.filter_by(name=request.form.get('status')).first_or_404()
 		opportunity_step = OpportunityStep(opportunity_id=opportunity.id,
@@ -336,8 +338,8 @@ def add_opportunity():
 		db.session.add(opportunity_step)
 		db.session.flush()
 
-		# Add a note or a task no matter what (while form fields are required for tasks, they are not for notes)
-		if form.status.data=='A faire':
+		# Add a task if status is 'a faire' (while form fields are required for tasks, they are not for notes)
+		if request.form.get('status')=='A faire':
 			task_done = True if request.form.get('task_done') else False
 			due_date = request.form.get('task_due_date')
 			print('due_date before process: {}'.format(due_date))
@@ -434,7 +436,7 @@ def edit_opportunity(id):
 		existing_step.last_update = datetime.utcnow()		
 		# If true, update the task associated to the step
 		if data.get('status') == 'A faire':
-			latest_task = Task.query.filter_by(opportunity_step_id=int(data.get('initial_step_id'))).first()
+			latest_task = existing_step.tasks.first()
 			latest_task.title = data.get('task_title')
 			latest_task.priority = data.get('task_priority')
 			latest_task.content = data.get('task_content')

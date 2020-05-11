@@ -57,7 +57,7 @@ def pro_plan_required(func):
 def valid_subscription_required(func):
 	@wraps(func)
 	def decorated_view(*args, **kwargs):
-		latest_sub = db.session.query(Subscription).filter(Subscription.user_id==current_user.id).first()
+		latest_sub = db.session.query(Subscription).filter(Subscription.user_id==current_user.id).order_by(Subscription.subscription_date.desc()).first()
 		if not latest_sub.is_valid():
 			message = Markup("Votre paiement n'est pas à jour, nous vous invitons à mettre à jour vos informations de paiement ou à contacter le support.")
 			flash(message)

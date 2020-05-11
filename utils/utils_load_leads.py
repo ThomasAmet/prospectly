@@ -50,7 +50,7 @@ logging.info(' app root is: ' + str(dirname))
 # Part that will read the csv and reformat it  from csv to scsv or tsv to scsv (manual)
 # filename = '2020-04-27_all_immo_937'
 # filename = '2020-04-26_all_fitness'
-filename = 'immobilier_0805'
+filename = 'ecomm_1105'
 filepath = os.path.join(dirname, 'scraping', 'output', 'import', filename)
 df = pd.read_csv(filepath+'.tsv', encoding='utf-8', sep='\t', header=0)
 df.to_csv(filepath+'.csv', encoding='utf-8', sep=';', index=False)

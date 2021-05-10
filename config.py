@@ -94,13 +94,13 @@ class DevelopmentConfig(BaseConfig):
 	TESTING = False
 
 	# Stripe config
-	STRIPE_SECRET_KEY = 'sk_test_jezU1v6w8mAaxIQMvWOs2JxD00Ps2BSFcQ'
-	STRIPE_PUBLISHABLE_KEY = 'pk_test_jFlcRaZnz7655oSCFSvTSEMV00cvQbSli5'
+	STRIPE_SECRET_KEY = ''
+	STRIPE_PUBLISHABLE_KEY = ''
 	PLAN_MONTHLY_BASIC = 'plan_GggQmCKZATWq0c'
 	PLAN_YEARLY_BASIC = 'plan_GggP03CwhdtuYk'
 	PLAN_MONTHLY_PRO = 'plan_H2mMV68SC3LiFJ'
 	PLAN_YEARLY_PRO = 'plan_H2mNrqykrSR9Bf'
-	STRIPE_WEBHOOK_SECRET = 'whsec_jouz3Ee2M3Mqzc7xKj8ViZDhy8Zfr10E'
+	STRIPE_WEBHOOK_SECRET = ''
 
 	
 	# CloudSQL & SQLAlchemy configuration
@@ -169,69 +169,3 @@ class ProductionConfig(BaseConfig):
 		SQLALCHEMY_DATABASE_URI = LOCAL_SQLALCHEMY_DATABASE_URI
 		DEBUG = True
 		
-# class DevelopmentConfig(BaseConfig):
-# 	DEBUG = True
-
-# 	# CloudSQL & SQLAlchemy configuration
-# 	# Replace the following values the respective values of your Cloud SQL
-# 	# instance.
-# 	CLOUDSQL_DATABASE = 'prospectly_development_database'
-# 	# The CloudSQL proxy is used locally to connect to the cloudsql instance.
-# 	# To start the proxy, use:
-# 	#
-# 	#   $ cloud_sql_proxy -instances=your-connection-name=tcp:3306
-# 	#
-# 	# Port 3306 is the standard MySQL port. If you need to use a different port,
-# 	# change the 3306 to a different port number.
-# 	# Alternatively, you could use a local MySQL instance for testing.
-
-# 	LOCAL_SQLALCHEMY_DATABASE_URI = ('mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}').format(
-# 		'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}').format()
-# 	# When running on App Engine a unix socket is used to connect to the cloudsql
-# 	# instance.
-# 	LIVE_SQLALCHEMY_DATABASE_URI = ('mysql+pymysql://{user}:{password}@localhost/{database}'
-# 		'?unix_socket=/cloudsql/{connection_name}').format(
-# 		user=gcp_config['CLOUDSQL_USER'], password=gcp_config['CLOUDSQL_PASSWORD'],
-# 		database=gcp_config['CLOUDSQL_DATABASE'], connection_name=CLOUDSQL_CONNECTION_NAME)
-
-# 	if os.environ.get('GAE_INSTANCE'):
-# 		SQLALCHEMY_DATABASE_URI = LIVE_SQLALCHEMY_DATABASE_URI
-# 	else:
-# 		SQLALCHEMY_DATABASE_URI = LOCAL_SQLALCHEMY_DATABASE_URI
-
-# class ProductionConfig(BaseConfig):
-#     # CloudSQL & SQLAlchemy configuration
-# 	# Replace the following values the respective values of your Cloud SQL
-# 	# instance.
-
-# 	CLOUDSQL_USER ='thomas_admin',
-# 	CLOUDSQL_PASSWORD = 'difficult-password-to-guess',
-# 	CLOUDSQL_DATABASE = 'prospectly_database'
-
-
-#     # The CloudSQL proxy is used locally to connect to the cloudsql instance.
-# 	# To start the proxy, use:
-# 	#
-# 	#   $ cloud_sql_proxy -instances=your-connection-name=tcp:3306
-# 	#
-# 	# Port 3306 is the standard MySQL port. If you need to use a different port,
-# 	# change the 3306 to a different port number.
-
-# 	# Alternatively, you could use a local MySQL instance for testing.
-# 	LOCAL_SQLALCHEMY_DATABASE_URI = (
-# 	    'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}').format(
-# 	        user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD,
-# 	        database=CLOUDSQL_DATABASE)
-
-#     # When running on App Engine a unix socket is used to connect to the cloudsql
-# 	# instance.
-# 	LIVE_SQLALCHEMY_DATABASE_URI = (
-# 	    'mysql+pymysql://{user}:{password}@localhost/{database}'
-# 	    '?unix_socket=/cloudsql/{connection_name}').format(
-# 	        user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD,
-# 	        database=CLOUDSQL_DATABASE, connection_name=CLOUDSQL_CONNECTION_NAME)
-
-#     if os.environ.get('GAE_INSTANCE'):
-#         SQLALCHEMY_DATABASE_URI = LIVE_SQLALCHEMY_DATABASE_URI
-#     else:
-#         SQLALCHEMY_DATABASE_URI = LOCAL_SQLALCHEMY_DATABASE_URI
